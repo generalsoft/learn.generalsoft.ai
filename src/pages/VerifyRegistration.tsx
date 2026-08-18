@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
   CheckCircle2, AlertTriangle, AlertCircle, Loader2, ArrowRight,
-  Calendar, Clock, Globe, ShieldAlert, Sparkles, Mail
+  Calendar, Clock, Globe, ShieldAlert, Sparkles
 } from 'lucide-react';
 import { verifyEmailToken, resendVerificationEmail } from '../services/api';
 import { analytics } from '../services/analytics';

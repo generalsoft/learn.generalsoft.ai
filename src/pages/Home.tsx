@@ -1,12 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, Globe, ArrowRight, ShieldCheck, Sparkles, Zap, Users } from 'lucide-react';
 import { analytics } from '../services/analytics';
-import { courses } from '../courses/courseData';
 
 export default function Home() {
-  const nextCourse = courses[0]; // AI Soup to Nuts
-
   useEffect(() => {
     // Track page view
     analytics.trackCourseView('home');

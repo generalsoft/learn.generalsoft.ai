@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Globe, ArrowRight, BookOpen, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, Globe, ArrowRight, CheckCircle } from 'lucide-react';
 import { courses } from '../courses/courseData';
 import { analytics } from '../services/analytics';
 
