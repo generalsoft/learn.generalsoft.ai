@@ -9,7 +9,7 @@ export default function Privacy() {
         </p>
 
         <p>
-          At GeneralSoft Learning Platform (accessible via <a href="https://learn.generalsoft.ai" className="text-primary-600 hover:underline">learn.generalsoft.ai</a>), we respect your privacy and are committed to protecting the personal information you share with us during course registration and communication.
+          At Generalsoft Learning Platform (accessible via <a href="https://learn.generalsoft.ai" className="text-primary-600 hover:underline">learn.generalsoft.ai</a>), we respect your privacy and are committed to protecting the personal information you share with us during course registration and communication.
         </p>
 
         <hr className="border-slate-200" />
@@ -50,7 +50,7 @@ export default function Privacy() {
 
         <h2 className="text-xl font-bold text-slate-900 mt-8">6. Correction, Deletion & User Rights</h2>
         <p>
-          You have the right to request access to the personal data we hold about you, request corrections to incorrect data, or request complete deletion of your records. To do so, please contact us at <a href="mailto:info@generalsoft.ai" className="text-primary-600 hover:underline">info@generalsoft.ai</a>, and we will address your request within 5 business days.
+          You have the right to request access to the personal data we hold about you, request corrections to incorrect data, or request complete deletion of your records. To do so, please contact us at <a href="mailto:info@generalsoft.ae" className="text-primary-600 hover:underline">info@generalsoft.ae</a>, and we will address your request within 5 business days.
         </p>
       </div>
     </div>

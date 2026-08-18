@@ -9,7 +9,7 @@ export default function Terms() {
         </p>
 
         <p>
-          By registering for any training course, workshop, or educational program offered by GeneralSoft Learning Platform (<a href="https://learn.generalsoft.ai" className="text-primary-600 hover:underline">learn.generalsoft.ai</a>), you agree to comply with and be bound by the following terms and conditions.
+          By registering for any training course, workshop, or educational program offered by Generalsoft Learning Platform (<a href="https://learn.generalsoft.ai" className="text-primary-600 hover:underline">learn.generalsoft.ai</a>), you agree to comply with and be bound by the following terms and conditions.
         </p>
 
         <hr className="border-slate-200" />
@@ -28,22 +28,22 @@ export default function Terms() {
 
         <h2 className="text-xl font-bold text-slate-900 mt-8">3. Invoicing and Payments</h2>
         <p>
-          For corporate registrations, GeneralSoft will issue an invoice for the total expected amount (based on the price of AED 400 per registered attendee) to the company details supplied. Payment must be cleared prior to the course date to guarantee connection instructions. All prices are in UAE Dirhams (AED) and exclude VAT unless specified otherwise.
+          For corporate registrations, Generalsoft will issue an invoice for the total expected amount (based on the price of AED 400 per registered attendee) to the company details supplied. Payment must be cleared prior to the course date to guarantee connection instructions. All prices are in UAE Dirhams (AED) and exclude VAT unless specified otherwise.
         </p>
 
         <h2 className="text-xl font-bold text-slate-900 mt-8">4. Intellectual Property</h2>
         <p>
-          All course materials, worksheets, slide decks, diagrams, video recordings, and templates provided during the course are the intellectual property of GeneralSoft. You are granted a personal, non-exclusive license to use these assets for your own professional development. You may not distribute, resell, upload, or publicly share course materials without our express written consent.
+          All course materials, worksheets, slide decks, diagrams, video recordings, and templates provided during the course are the intellectual property of Generalsoft. You are granted a personal, non-exclusive license to use these assets for your own professional development. You may not distribute, resell, upload, or publicly share course materials without our express written consent.
         </p>
 
         <h2 className="text-xl font-bold text-slate-900 mt-8">5. Cancellations & Postponement</h2>
         <p>
-          We strive to deliver courses as scheduled. However, GeneralSoft reserves the right to postpone or cancel a cohort due to unforeseen operational conflicts or emergency circumstances. In the event of postponement, registered attendees will be automatically transferred to the new dates, or they can request a cancellation of their ticket.
+          We strive to deliver courses as scheduled. However, Generalsoft reserves the right to postpone or cancel a cohort due to unforeseen operational conflicts or emergency circumstances. In the event of postponement, registered attendees will be automatically transferred to the new dates, or they can request a cancellation of their ticket.
         </p>
 
         <h2 className="text-xl font-bold text-slate-900 mt-8">6. Limitation of Liability</h2>
         <p>
-          GeneralSoft provides technology training for informational purposes. While we outline best practices and security frameworks, GeneralSoft is not liable for how you deploy or configure software, AI tools, or code inside your own organization. You assume all responsibility for verifying LLM outputs and respecting data privacy rules.
+          Generalsoft provides technology training for informational purposes. While we outline best practices and security frameworks, Generalsoft is not liable for how you deploy or configure software, AI tools, or code inside your own organization. You assume all responsibility for verifying LLM outputs and respecting data privacy rules.
         </p>
       </div>
     </div>

@@ -52,7 +52,7 @@ export const courses: Course[] = [
     ],
     deliveryMethod: 'Online',
     dates: 'August 28–29, 2026',
-    time: '10:30 AM – 3:30 PM',
+    time: '09:30 AM – 4:30 PM',
     breakTime: '12:30 PM – 2:00 PM',
     timezone: 'UAE time (GST / UTC+4)',
     pricing: {

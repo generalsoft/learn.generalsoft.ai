@@ -50,7 +50,7 @@ export default function Navbar() {
               <GraduationCap className="w-5.5 h-5.5" />
             </div>
             <div>
-              <span className="font-bold text-lg tracking-tight text-slate-900 block leading-none">GeneralSoft</span>
+              <span className="font-bold text-lg tracking-tight text-slate-900 block leading-none">Generalsoft</span>
               <span className="text-xs font-semibold text-primary-600 tracking-wider uppercase">Learning</span>
             </div>
           </Link>

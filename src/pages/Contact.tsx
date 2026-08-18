@@ -17,7 +17,7 @@ export default function Contact() {
       {/* Header */}
       <div className="max-w-3xl mb-12">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Contact GeneralSoft
+          Contact Generalsoft
         </h1>
         <p className="mt-4 text-lg text-slate-600 leading-relaxed font-medium">
           Have questions about our courses, corporate team training, or customization options? Reach out and we'll get back to you shortly.
@@ -35,8 +35,8 @@ export default function Contact() {
                 <Mail className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <h4 className="font-bold text-slate-900">Email Support</h4>
-                  <a href="mailto:info@generalsoft.ai" className="hover:text-primary-600 transition-colors">
-                    info@generalsoft.ai
+                  <a href="mailto:info@generalsoft.ae" className="hover:text-primary-600 transition-colors">
+                    info@generalsoft.ae
                   </a>
                 </div>
               </div>
@@ -45,8 +45,8 @@ export default function Contact() {
                 <Phone className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <h4 className="font-bold text-slate-900">Call Us</h4>
-                  <a href="tel:+97140000000" className="hover:text-primary-600 transition-colors">
-                    +971 4 000 0000
+                  <a href="tel:+971558809863" className="hover:text-primary-600 transition-colors">
+                    +971.55.880.9863
                   </a>
                 </div>
               </div>
@@ -55,7 +55,7 @@ export default function Contact() {
                 <MapPin className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <h4 className="font-bold text-slate-900">Headquarters</h4>
-                  <p>Dubai Internet City, Dubai, United Arab Emirates</p>
+                  <p>RAKEZ, RAK, UAE</p>
                 </div>
               </div>
             </div>
@@ -74,7 +74,7 @@ export default function Contact() {
               <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
               <h3 className="text-xl font-bold text-slate-900">Message Received!</h3>
               <p className="text-sm text-slate-500 max-w-sm mx-auto">
-                Thank you for reaching out. A GeneralSoft representative will review your message and respond within 1 business day.
+                Thank you for reaching out. A Generalsoft representative will review your message and respond within 1 business day.
               </p>
               <button
                 onClick={() => setIsSent(false)}

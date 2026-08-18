@@ -6,7 +6,7 @@ export default function About() {
       {/* Header */}
       <div className="max-w-3xl">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          About GeneralSoft Learning
+          About Generalsoft Learning
         </h1>
         <p className="mt-4 text-lg text-slate-600 leading-relaxed font-medium">
           We bridge the gap between complex emerging technologies and everyday business application. Our training is designed for professionals who want to lead in the AI era.
@@ -18,7 +18,7 @@ export default function About() {
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-slate-900">Our Mission</h2>
           <p className="text-slate-600 leading-relaxed">
-            Technology is moving faster than ever, creating a massive skills gap for leaders, managers, and executives. GeneralSoft Learning was founded to address this challenge by delivering highly approachable, non-technical training that focuses on real-world outcomes rather than code syntax.
+            Technology is moving faster than ever, creating a massive skills gap for leaders, managers, and executives. Generalsoft Learning was founded to address this challenge by delivering highly approachable, non-technical training that focuses on real-world outcomes rather than code syntax.
           </p>
           <p className="text-slate-600 leading-relaxed">
             Based in Dubai, UAE, we provide professional development workshops that empower teams to adopt tools like generative AI, streamline document analysis, automate reporting, and scale productivity safely.

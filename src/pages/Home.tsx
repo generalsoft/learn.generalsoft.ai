@@ -87,7 +87,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Time & Timezone</h4>
-                    <p className="text-sm font-semibold text-slate-800">10:30 AM – 3:30 PM</p>
+                    <p className="text-sm font-semibold text-slate-800">09:30 AM – 4:30 PM</p>
                     <p className="text-xs text-slate-500">Break: 12:30 PM – 2:00 PM • UAE time (GST / UTC+4)</p>
                   </div>
                 </div>
@@ -128,7 +128,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-              Why Learn with GeneralSoft?
+              Why Learn with Generalsoft?
             </h2>
             <p className="mt-4 text-slate-600 leading-relaxed font-medium">
               We move past the coding syntax and mathematical jargon to focus on practical, ready-to-use workflows that directly translate to everyday business operations.

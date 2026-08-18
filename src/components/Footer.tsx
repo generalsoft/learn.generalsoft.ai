@@ -14,7 +14,7 @@ export default function Footer() {
               <div className="w-9 h-9 rounded-lg bg-primary-600 flex items-center justify-center">
                 <GraduationCap className="w-5 h-5" />
               </div>
-              <span className="font-bold text-lg tracking-tight">GeneralSoft</span>
+              <span className="font-bold text-lg tracking-tight">Generalsoft</span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed">
               Professional, practical training in AI and modern technologies designed for business professionals and executives in Dubai and the UAE.
@@ -44,19 +44,19 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-primary-500 flex-shrink-0" />
-                <a href="mailto:info@generalsoft.ai" className="hover:text-white transition-colors">
-                  info@generalsoft.ai
+                <a href="mailto:info@generalsoft.ae" className="hover:text-white transition-colors">
+                  info@generalsoft.ae
                 </a>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-primary-500 flex-shrink-0" />
-                <a href="tel:+97140000000" className="hover:text-white transition-colors">
-                  +971 4 000 0000
+                <a href="tel:+971558809863" className="hover:text-white transition-colors">
+                  +971.55.880.9863
                 </a>
               </li>
               <li className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                <span>Dubai Internet City, Dubai, UAE</span>
+                <span>RAKEZ, RAK, UAE</span>
               </li>
             </ul>
           </div>
@@ -77,7 +77,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link to="/about" className="hover:text-white transition-colors">
-                  About GeneralSoft
+                  About Generalsoft
                 </Link>
               </li>
             </ul>
@@ -89,9 +89,11 @@ export default function Footer() {
 
         {/* Footer Bottom */}
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 text-xs">
-          <p>&copy; {currentYear} GeneralSoft. All rights reserved.</p>
-          <p className="text-slate-500">
-            Hosted on GitHub Pages. Managed custom domain: learn.generalsoft.ai
+          <p>&copy; {currentYear} Generalsoft FZ-LLC. All rights reserved.</p>
+          <p className="text-slate-500">Designed by&nbsp;
+           <a href="https://generalsoft.ae/en/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              Generalsoft FZ-LLC. 
+            </a> 
           </p>
         </div>
       </div>
