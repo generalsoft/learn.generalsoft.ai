@@ -30,9 +30,9 @@ export const courses: Course[] = [
         items: [
           'What AI actually is: De-hyping artificial intelligence',
           'How modern AI works at a high level: Generative models and neural networks',
-          'Overview of the AI landscape: ChatGPT, Claude, Gemini, and local models',
-          'Communicating with AI: The core principles of prompt engineering',
-          'Everyday productivity: Writing assistance, editing, and planning',
+          'Overview of the Local AI: costs and benefits',
+          'Communicating with AI: What, When, Why, Where, and How questions + Context',
+          'Everyday productivity: Task Execution',
           'Collaborative brainstorming: Using AI as a thought partner'
         ]
       },
