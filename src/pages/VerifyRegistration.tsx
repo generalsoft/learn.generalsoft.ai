@@ -7,6 +7,7 @@ import {
 import { verifyEmailToken, resendVerificationEmail } from '../services/api';
 import { analytics } from '../services/analytics';
 import { courses } from '../courses/courseData';
+import { setCookie, REGISTRATION_COOKIE } from '../services/cookies';
 
 type VerificationState = 'loading' | 'confirmed' | 'expired' | 'invalid' | 'error';
 
@@ -38,6 +39,13 @@ export default function VerifyRegistration() {
           setState('confirmed');
           analytics.trackEmailVerified(course.id);
           analytics.trackRegistrationComplete(course.id);
+
+          // Remember the registration document id so the course page can
+          // recognize this verified user on subsequent visits.
+          const registrationId = response.data?.id;
+          if (registrationId) {
+            setCookie(REGISTRATION_COOKIE, registrationId);
+          }
         } else {
           const msg = response.message.toLowerCase();
           if (msg.includes('expired')) {

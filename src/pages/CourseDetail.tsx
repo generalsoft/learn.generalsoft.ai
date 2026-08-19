@@ -5,9 +5,10 @@ import {
   BookOpen, Users, Compass, Loader2, MailCheck
 } from 'lucide-react';
 import { getCourseBySlug } from '../courses/courseData';
-import { registerParticipant, resendVerificationEmail } from '../services/api';
+import { registerParticipant, resendVerificationEmail, getRegistrationById } from '../services/api';
 import { analytics } from '../services/analytics';
 import { RegistrationFormData } from '../types';
+import { setCookie, getCookie, REGISTRATION_COOKIE } from '../services/cookies';
 
 export default function CourseDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -31,13 +32,42 @@ export default function CourseDetail() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [regStatus, setRegStatus] = useState<'idle' | 'pending_verification' | 'duplicate_pending' | 'duplicate_confirmed'>('idle');
+  const [regStatus, setRegStatus] = useState<'idle' | 'pending_verification' | 'duplicate_pending' | 'duplicate_confirmed' | 'already_verified'>('idle');
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
   const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     if (course) {
       analytics.trackCourseView(course.id);
     }
+  }, [course]);
+
+  // On mount, check whether a previously-verified registration document id is
+  // stored in a cookie. If it maps to a confirmed registration for this
+  // course, skip the registration form.
+  useEffect(() => {
+    if (!course) return;
+
+    let cancelled = false;
+
+    const checkExistingRegistration = async () => {
+      const registrationId = getCookie(REGISTRATION_COOKIE);
+      if (!registrationId) return;
+
+      const registration = await getRegistrationById(registrationId);
+      if (cancelled) return;
+
+      if (registration && registration.verified && registration.courseId === course.id) {
+        setVerifiedEmail(registration.email);
+        setRegStatus('already_verified');
+      }
+    };
+
+    checkExistingRegistration();
+
+    return () => {
+      cancelled = true;
+    };
   }, [course]);
 
   if (!course) {
@@ -92,7 +122,15 @@ export default function CourseDetail() {
       const response = await registerParticipant(course.id, formData);
       if (response.success) {
         analytics.trackRegistrationSubmit(course.id, formData.registrationType);
-        
+
+        // Remember the registration document id so the course page can
+        // recognize this user (and their verification status) on next visit.
+        // The id is deterministic (`courseId__email`), so this also covers the
+        // case where verification is completed later in the same browser.
+        if (response.data?.id) {
+          setCookie(REGISTRATION_COOKIE, response.data.id);
+        }
+
         // Read response message/code to determine duplicate details
         const msg = response.message.toLowerCase();
         if (msg.includes('already verified') || msg.includes('already confirmed')) {
@@ -645,6 +683,39 @@ export default function CourseDetail() {
                     <h3 className="text-xl font-bold text-slate-900">Already Registered</h3>
                     <p className="text-sm text-slate-600 leading-relaxed">
                       Your registration for <span className="font-semibold text-slate-850">{formData.email}</span> has already been confirmed.
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    You're set for the course. Joining links and reminder schedules will be sent separately. If you need support, please contact us.
+                  </p>
+
+                  <div className="pt-4">
+                    <button
+                      onClick={() => setRegStatus('idle')}
+                      className="w-full py-2.5 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl focus-ring"
+                    >
+                      Register another participant
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ALREADY VERIFIED (COOKIE) STATE */}
+              {regStatus === 'already_verified' && (
+                <div className="text-center py-8 space-y-5">
+                  <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
+                    <Check className="w-8 h-8" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-slate-900">You're Registered</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      {verifiedEmail ? (
+                        <>Your registration for <span className="font-semibold text-slate-800">{verifiedEmail}</span> has been confirmed.</>
+                      ) : (
+                        <>Your registration for this course has been confirmed.</>
+                      )}
                     </p>
                   </div>
 

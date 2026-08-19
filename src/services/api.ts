@@ -112,11 +112,13 @@ export async function verifyEmailToken(token: string): Promise<ApiResponse> {
 
     const registrationRef = snapshot.docs[0].ref;
     const registration = snapshot.docs[0].data();
+    const registrationId = snapshot.docs[0].id;
 
     if (registration.status === 'confirmed') {
       return {
         success: true,
         message: 'This registration has already been confirmed.',
+        data: { id: registrationId },
       };
     }
 
@@ -138,6 +140,7 @@ export async function verifyEmailToken(token: string): Promise<ApiResponse> {
     return {
       success: true,
       message: 'Registration confirmed.',
+      data: { id: registrationId },
     };
   } catch (error) {
     console.error('Firestore verification error:', error);
@@ -145,6 +148,44 @@ export async function verifyEmailToken(token: string): Promise<ApiResponse> {
       success: false,
       message: 'Unable to verify. Please try again later.',
     };
+  }
+}
+
+export interface RegistrationLookup {
+  id: string | null;
+  courseId: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'waitlisted' | null;
+  verified: boolean;
+  email: string | null;
+}
+
+/**
+ * Look up a registration by its Firestore document id. Used by the course page
+ * to skip the registration form when the id stored in a cookie points to an
+ * already-verified registration.
+ */
+export async function getRegistrationById(
+  registrationId: string
+): Promise<RegistrationLookup | null> {
+  try {
+    const registrationRef = doc(db, REGISTRATIONS_COLLECTION, registrationId);
+    const snap = await getDoc(registrationRef);
+
+    if (!snap.exists()) {
+      return null;
+    }
+
+    const data = snap.data();
+    return {
+      id: snap.id,
+      courseId: data.courseId ?? '',
+      status: data.status ?? null,
+      verified: data.status === 'confirmed',
+      email: data.email ?? null,
+    };
+  } catch (error) {
+    console.error('Firestore get registration error:', error);
+    return null;
   }
 }
 
