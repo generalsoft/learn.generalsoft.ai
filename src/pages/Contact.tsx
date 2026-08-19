@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { sendMessage } from '../services/api';
 
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [isSent, setIsSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate contact form submission
-    setIsSent(true);
-    setFormData({ name: '', email: '', message: '' });
+    setIsSubmitting(true);
+    setErrorMsg(null);
+
+    const response = await sendMessage(formData);
+    if (response.success) {
+      setIsSent(true);
+      setFormData({ name: '', email: '', message: '' });
+    } else {
+      setErrorMsg(response.message);
+    }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -87,6 +99,13 @@ export default function Contact() {
             <form onSubmit={handleSubmit} className="space-y-4.5">
               <h3 className="text-xl font-bold text-slate-900 mb-4">Send a Message</h3>
               
+              {errorMsg && (
+                <div className="bg-rose-50 border border-rose-200/60 rounded-xl p-3.5 flex items-start space-x-2 text-rose-800 text-xs sm:text-sm">
+                  <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
               <div>
                 <label htmlFor="name" className="block text-xs font-bold text-slate-700 mb-1">
                   Full Name
@@ -131,10 +150,20 @@ export default function Contact() {
 
               <button
                 type="submit"
-                className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3 font-bold text-white bg-primary-600 hover:bg-primary-700 transition-colors rounded-xl shadow-md focus-ring"
+                disabled={isSubmitting}
+                className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3 font-bold text-white bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 transition-colors rounded-xl shadow-md focus-ring"
               >
-                Send Message
-                <Send className="w-4 h-4 ml-2" />
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    Send Message
+                    <Send className="w-4 h-4 ml-2" />
+                  </>
+                )}
               </button>
             </form>
           )}

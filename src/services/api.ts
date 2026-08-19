@@ -1,67 +1,187 @@
 import { RegistrationFormData, ApiResponse } from '../types';
+import { db } from './firebase';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const REGISTRATIONS_COLLECTION = 'registrations';
+const MESSAGES_COLLECTION = 'messages';
+const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+function registrationDocId(courseId: string, email: string): string {
+  return `${courseId}__${normalizeEmail(email)}`;
+}
+
+function generateToken(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID().replace(/-/g, '');
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
 
 export async function registerParticipant(
   courseId: string,
   formData: RegistrationFormData
 ): Promise<ApiResponse> {
-  const url = `${API_BASE_URL}/api/register`;
-  
-  const payload = {
-    courseId,
-    ...formData,
-  };
+  const emailNormalized = normalizeEmail(formData.email);
+  const registrationRef = doc(db, REGISTRATIONS_COLLECTION, registrationDocId(courseId, emailNormalized));
 
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    const existingSnap = await getDoc(registrationRef);
+
+    if (existingSnap.exists()) {
+      const existing = existingSnap.data();
+      if (existing.status === 'confirmed') {
+        return {
+          success: true,
+          message: 'This email is already verified for this course.',
+        };
+      }
       return {
-        success: false,
-        message: errorData.message || 'Registration failed. Please check your inputs.',
+        success: true,
+        message: 'This email is already registered and awaiting email verification.',
       };
     }
 
-    return await response.json();
+    const payload = {
+      courseId,
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
+      emailNormalized,
+      registrationType: formData.registrationType,
+      companyName: formData.registrationType === 'company' ? formData.companyName?.trim() || null : null,
+      jobTitle: formData.registrationType === 'company' ? formData.jobTitle?.trim() || null : null,
+      phone: formData.phone?.trim() || null,
+      country: formData.country?.trim() || null,
+      howDidYouHear: formData.howDidYouHear || null,
+      marketingConsent: formData.marketingConsent,
+      status: 'pending',
+      token: generateToken(),
+      tokenCreatedAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
+      verifiedAt: null,
+    };
+
+    await setDoc(registrationRef, payload);
+
+    return {
+      success: true,
+      message: 'Registration received. Please verify your email address.',
+      data: { id: registrationRef.id },
+    };
   } catch (error) {
-    console.error('Registration API Error:', error);
+    console.error('Firestore registration error:', error);
+    const code = (error as { code?: string })?.code;
     return {
       success: false,
-      message: 'The registration server is temporarily unavailable. Please try again later.',
+      message: code
+        ? `Unable to save your registration (${code}). Please try again later.`
+        : 'Unable to save your registration. Please try again later.',
     };
   }
 }
 
 export async function verifyEmailToken(token: string): Promise<ApiResponse> {
-  const url = `${API_BASE_URL}/api/verify?token=${encodeURIComponent(token)}`;
-
   try {
-    const response = await fetch(url, {
-      method: 'GET',
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    const q = query(
+      collection(db, REGISTRATIONS_COLLECTION),
+      where('token', '==', token)
+    );
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
       return {
         success: false,
-        message: errorData.message || 'Verification failed or link expired.',
+        message: 'Verification failed or link expired.',
       };
     }
 
-    return await response.json();
+    const registrationRef = snapshot.docs[0].ref;
+    const registration = snapshot.docs[0].data();
+
+    if (registration.status === 'confirmed') {
+      return {
+        success: true,
+        message: 'This registration has already been confirmed.',
+      };
+    }
+
+    const createdAt = registration.tokenCreatedAt?.toDate?.();
+    if (createdAt && Date.now() - createdAt.getTime() > VERIFICATION_TTL_MS) {
+      return {
+        success: false,
+        message: 'This verification link has expired. Please request a new one.',
+      };
+    }
+
+    await updateDoc(registrationRef, {
+      status: 'confirmed',
+      verifiedAt: serverTimestamp(),
+      token: null,
+      tokenCreatedAt: null,
+    });
+
+    return {
+      success: true,
+      message: 'Registration confirmed.',
+    };
   } catch (error) {
-    console.error('Verification API Error:', error);
+    console.error('Firestore verification error:', error);
     return {
       success: false,
-      message: 'Unable to contact the verification server. Please check your internet connection.',
+      message: 'Unable to verify. Please try again later.',
+    };
+  }
+}
+
+export interface ContactMessage {
+  name: string;
+  email: string;
+  message: string;
+}
+
+export async function sendMessage(
+  data: ContactMessage
+): Promise<ApiResponse> {
+  try {
+    const messagesRef = collection(db, MESSAGES_COLLECTION);
+    const payload = {
+      name: data.name.trim(),
+      email: data.email.trim(),
+      emailNormalized: normalizeEmail(data.email),
+      message: data.message.trim(),
+      createdAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(messagesRef, payload);
+
+    return {
+      success: true,
+      message: 'Message sent successfully.',
+      data: { id: docRef.id },
+    };
+  } catch (error) {
+    console.error('Firestore send message error:', error);
+    const code = (error as { code?: string })?.code;
+    return {
+      success: false,
+      message: code
+        ? `Unable to send your message (${code}). Please try again later.`
+        : 'Unable to send your message. Please try again later.',
     };
   }
 }
@@ -70,31 +190,40 @@ export async function resendVerificationEmail(
   email: string,
   courseId: string
 ): Promise<ApiResponse> {
-  const url = `${API_BASE_URL}/api/resend-verification`;
+  const registrationRef = doc(db, REGISTRATIONS_COLLECTION, registrationDocId(courseId, email));
 
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, courseId }),
-    });
+    const existingSnap = await getDoc(registrationRef);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    if (!existingSnap.exists()) {
       return {
         success: false,
-        message: errorData.message || 'Failed to resend verification email.',
+        message: 'No pending registration found for this email.',
       };
     }
 
-    return await response.json();
+    const existing = existingSnap.data();
+    if (existing.status === 'confirmed') {
+      return {
+        success: true,
+        message: 'This registration is already confirmed.',
+      };
+    }
+
+    await updateDoc(registrationRef, {
+      token: generateToken(),
+      tokenCreatedAt: serverTimestamp(),
+    });
+
+    return {
+      success: true,
+      message: 'A new verification link has been generated.',
+    };
   } catch (error) {
-    console.error('Resend verification API Error:', error);
+    console.error('Firestore resend error:', error);
     return {
       success: false,
-      message: 'Failed to request verification email. Please try again.',
+      message: 'Failed to resend verification email. Please try again.',
     };
   }
 }
