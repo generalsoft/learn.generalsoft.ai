@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
   CheckCircle2, AlertTriangle, AlertCircle, Loader2, ArrowRight,
@@ -14,6 +14,12 @@ type VerificationState = 'loading' | 'confirmed' | 'expired' | 'invalid' | 'erro
 export default function VerifyRegistration() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  // When the emailed link points directly at the verifyEmail Cloud Function,
+  // it verifies the record (Admin SDK) and redirects back here with these
+  // params so the SPA can set the cookie and render the confirmation page.
+  const redirectState = searchParams.get('state');
+  const rid = searchParams.get('rid');
+  const redirectMessage = searchParams.get('message');
 
   // States
   const [state, setState] = useState<VerificationState>('loading');
@@ -25,16 +31,35 @@ export default function VerifyRegistration() {
   const course = courses[0];
 
   useEffect(() => {
+    // Preferred path: the Cloud Function already verified the record and
+    // redirected back with an explicit state. No client-side Firestore write
+    // is required (and none should be attempted).
+    if (redirectState === 'verified' || redirectState === 'error') {
+      if (redirectState === 'verified') {
+        if (rid) {
+          setCookie(REGISTRATION_COOKIE, rid);
+        }
+        setState('confirmed');
+        analytics.trackEmailVerified(course.id);
+        analytics.trackRegistrationComplete(course.id);
+      } else {
+        applyRedirectError();
+      }
+      return;
+    }
+
     if (!token) {
       setState('invalid');
       setErrorMsg('The verification link is missing a secure token.');
       return;
     }
 
+    // Legacy/fallback path: the link pointed directly at the SPA /verify page.
+    // Attempt a client-side verification token lookup.
     const performVerification = async () => {
       try {
         const response = await verifyEmailToken(token);
-        
+
         if (response.success) {
           setState('confirmed');
           analytics.trackEmailVerified(course.id);
@@ -51,7 +76,6 @@ export default function VerifyRegistration() {
           if (msg.includes('expired')) {
             setState('expired');
           } else if (msg.includes('already verified') || msg.includes('already confirmed')) {
-            // Already verified is technically a success state for the user
             setState('confirmed');
           } else {
             setState('error');
@@ -65,7 +89,24 @@ export default function VerifyRegistration() {
     };
 
     performVerification();
-  }, [token, course.id]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [redirectState, rid, token, course.id]);
+
+  function applyRedirectError() {
+    const msg = (redirectMessage || '').toLowerCase();
+    if (msg.includes('expired')) {
+      setState('expired');
+    } else if (msg.includes('already verified') || msg.includes('already confirmed')) {
+      setState('confirmed');
+    } else if (msg.includes('invalid') || msg.includes('token')) {
+      setState('invalid');
+      setErrorMsg(redirectMessage || 'The verification link you followed is invalid or has already been used.');
+    } else {
+      setState('error');
+      setErrorMsg(redirectMessage || 'An error occurred during verification.');
+    }
+  }
 
   const handleResend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +130,7 @@ export default function VerifyRegistration() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-16 sm:py-24">
       <div className="bg-white rounded-2xl border border-slate-200/60 shadow-xl overflow-hidden">
-        
+
         {/* Loading State */}
         {state === 'loading' && (
           <div className="p-8 sm:p-12 text-center space-y-4">
