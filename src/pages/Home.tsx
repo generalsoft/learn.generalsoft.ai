@@ -77,7 +77,7 @@ export default function Home() {
                   <div>
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Dates</h4>
                     <p className="text-sm font-semibold text-slate-800">August 28–29, 2026</p>
-                    <p className="text-xs text-slate-500">Thursday & Friday</p>
+                    <p className="text-xs text-slate-500">Friday & Saturday</p>
                   </div>
                 </div>
 
