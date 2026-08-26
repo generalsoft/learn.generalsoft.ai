@@ -26,7 +26,7 @@ export default function CourseDetail() {
     phone: '',
     country: '',
     howDidYouHear: '',
-    marketingConsent: false,
+    marketingConsent: true,
     website: '' // Honeypot field
   });
 
