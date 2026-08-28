@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { courses, getCourseBySlug, getCourseById } from './courseData.js';
-import { getCourseMaterials } from './courseMaterials.js';
+import { getCourseMaterials, classifyMaterial } from './courseMaterials.js';
 
 describe('Course Catalog and Configuration', () => {
   it('should contain the AI Soup to Nuts course', () => {
@@ -40,5 +40,18 @@ describe('Course Materials', () => {
       expect(material.url).toBeTruthy();
       expect(material.slug).toBe('ai-soup-to-nuts');
     }
+  });
+});
+
+describe('Material classification', () => {
+  it('classifies common file extensions into presentation kinds', () => {
+    expect(classifyMaterial('html')).toBe('html');
+    expect(classifyMaterial('htm')).toBe('html');
+    expect(classifyMaterial('pdf')).toBe('pdf');
+    expect(classifyMaterial('png')).toBe('image');
+    expect(classifyMaterial('jpg')).toBe('image');
+    expect(classifyMaterial('mp4')).toBe('video');
+    expect(classifyMaterial('zip')).toBe('other');
+    expect(classifyMaterial('')).toBe('other');
   });
 });

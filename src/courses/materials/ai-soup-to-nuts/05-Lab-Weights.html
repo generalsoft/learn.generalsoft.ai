@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workshop #1: Language Exercise</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --panel-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 6px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: #0f172a;
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus {
+            outline: 1px solid var(--accent-blue);
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button.btn {
+            background: #334155;
+            color: var(--text-main);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        button.btn:hover {
+            background: #475569;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: var(--accent-purple);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Token visualizer */
+        .tokens-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .token-chip {
+            background: #0f172a;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* Embeddings Grid */
+        .embeddings-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 320px;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding-right: 4px;
+        }
+
+        .embedding-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .word-label {
+            width: 90px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .vector-cells {
+            display: flex;
+            gap: 4px;
+        }
+
+        .vector-cell {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #000;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Matrix Visualization */
+        .attention-matrix-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        canvas {
+            background: #0f172a;
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .info-card {
+            background: rgba(56, 189, 248, 0.05);
+            border-left: 3px solid var(--accent-blue);
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Workshop #1: Language Exercise (Embeddings & Attention)</h1>
+        <p class="subtitle">See how neural networks map words to vector spaces and compute contextual self-attention weights.</p>
+    </header>
+
+    <!-- Controls -->
+    <div class="panel">
+        <div class="input-group">
+            <input type="text" id="sentenceInput" value="the quick brown fox jumped over the lazy dog" placeholder="Enter a sentence...">
+            <button class="btn" style="background: var(--accent-blue); color: #000; font-weight: bold;" onclick="processText()">Process Text</button>
+        </div>
+        <div class="preset-buttons">
+            <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center;">Presets:</span>
+            <button class="btn" onclick="setPreset('the quick brown fox jumped over the lazy dog')">"the quick brown fox..."</button>
+            <button class="btn" onclick="setPreset('the bank of the river')">"the bank of the river"</button>
+            <button class="btn" onclick="setPreset('money in the bank')">"money in the bank"</button>
+            <button class="btn" onclick="setPreset('king queen man woman')">"king queen man woman"</button>
+        </div>
+    </div>
+
+    <!-- Step 1: Embeddings -->
+    <div class="panel">
+        <div class="section-title">
+            <span>1. Vector Embeddings (8-Dimensional Space)</span>
+        </div>
+        <div class="tokens-container" id="tokenList"></div>
+        <div class="embeddings-grid" id="embeddingsGrid"></div>
+        <div class="info-card">
+            Each word is mapped to an 8-number vector. Color intensity represents value magnitude [-1.0 to 1.0]. Similar words have higher dot-product alignment.
+        </div>
+    </div>
+
+    <!-- Step 2: Attention -->
+    <div class="panel">
+        <div class="section-title">
+            <span>2. Self-Attention Matrix Heatmap</span>
+            <span id="hoverInfo" style="font-size: 0.85rem; color: var(--accent-green);">Hover over heatmap to inspect relationships</span>
+        </div>
+        <div class="attention-matrix-wrapper">
+            <canvas id="attentionCanvas" width="500" height="500"></canvas>
+        </div>
+        <div class="info-card">
+            Calculated via Scaled Dot-Product Attention: <code>Softmax(Q × Kᵀ / √d)</code>. Brighter cells indicate stronger contextual connections between token pairs.
+        </div>
+    </div>
+</div>
+
+<script>
+    const DICTIONARY = {
+        "the":    [ 0.1, -0.2,  0.0,  0.1, -0.1,  0.0,  0.2, -0.1],
+        "quick":  [ 0.4,  0.3, -0.2,  0.5, -0.1,  0.6, -0.3,  0.2],
+        "brown":  [ 0.3,  0.2, -0.5,  0.1, -0.4,  0.2,  0.1,  0.4],
+        "fox":    [ 0.8,  0.6, -0.7,  0.3, -0.5,  0.7, -0.2,  0.6],
+        "jumped": [ 0.5,  0.4, -0.3,  0.6, -0.2,  0.5, -0.1,  0.3],
+        "over":   [ 0.1,  0.0, -0.1,  0.2,  0.0,  0.1,  0.0, -0.1],
+        "lazy":   [-0.4, -0.3,  0.2, -0.5,  0.1, -0.6,  0.3, -0.2],
+        "dog":    [ 0.7,  0.5, -0.6,  0.4, -0.4,  0.8, -0.1,  0.5],
+        "bank":   [ 0.8,  0.7, -0.6,  0.4, -0.5,  0.9,  0.1,  0.3],
+        "of":     [ 0.0, -0.1,  0.1,  0.0,  0.0,  0.1, -0.1,  0.0],
+        "river":  [ 0.7,  0.9, -0.8,  0.2, -0.6,  0.8, -0.2,  0.5],
+        "money":  [ 0.9,  0.5, -0.4,  0.8, -0.3,  0.7,  0.4,  0.1],
+        "in":     [ 0.1,  0.0, -0.1,  0.1,  0.0,  0.0,  0.1, -0.1],
+        "king":   [ 0.9,  0.1,  0.8,  0.4,  0.7, -0.2,  0.6,  0.5],
+        "queen":  [ 0.9,  0.2,  0.7,  0.5, -0.7, -0.3,  0.6,  0.4],
+        "man":    [ 0.7, -0.1,  0.9,  0.2,  0.8, -0.1,  0.3,  0.2],
+        "woman":  [ 0.7,  0.0,  0.8,  0.3, -0.8, -0.2,  0.4,  0.1]
+    };
+
+    let currentTokens = [];
+    let currentEmbeddings = [];
+    let attentionMatrix = [];
+    let activePadding = 80;
+
+    function hashWordToVector(word) {
+        let hash = 0;
+        for (let i = 0; i < word.length; i++) {
+            hash = word.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const vec = [];
+        for (let i = 0; i < 8; i++) {
+            const val = Math.sin(hash + i) * 1;
+            vec.push(parseFloat(val.toFixed(2)));
+        }
+        return vec;
+    }
+
+    function getEmbedding(word) {
+        const cleanWord = word.toLowerCase().trim();
+        return DICTIONARY[cleanWord] || hashWordToVector(cleanWord);
+    }
+
+    function softmax(arr) {
+        const max = Math.max(...arr);
+        const exps = arr.map(x => Math.exp(x - max));
+        const sumExp = exps.reduce((a, b) => a + b, 0);
+        return exps.map(x => x / sumExp);
+    }
+
+    function computeAttention(embeddings) {
+        const n = embeddings.length;
+        const d_k = 8;
+        const matrix = [];
+
+        for (let i = 0; i < n; i++) {
+            const scores = [];
+            for (let j = 0; j < n; j++) {
+                let dot = 0;
+                for (let k = 0; k < d_k; k++) {
+                    dot += embeddings[i][k] * embeddings[j][k];
+                }
+                scores.push(dot / Math.sqrt(d_k));
+            }
+            matrix.push(softmax(scores));
+        }
+        return matrix;
+    }
+
+    function processText() {
+        const input = document.getElementById('sentenceInput').value.trim();
+        if (!input) return;
+
+        currentTokens = input.split(/\s+/);
+        currentEmbeddings = currentTokens.map(getEmbedding);
+        attentionMatrix = computeAttention(currentEmbeddings);
+
+        renderTokens();
+        renderEmbeddings();
+        renderAttentionMatrix();
+    }
+
+    function setPreset(text) {
+        document.getElementById('sentenceInput').value = text;
+        processText();
+    }
+
+    function renderTokens() {
+        const container = document.getElementById('tokenList');
+        container.innerHTML = currentTokens
+            .map(t => `<div class="token-chip">${t}</div>`)
+            .join('');
+    }
+
+    function renderEmbeddings() {
+        const container = document.getElementById('embeddingsGrid');
+        container.innerHTML = '';
+
+        currentTokens.forEach((token, idx) => {
+            const row = document.createElement('div');
+            row.className = 'embedding-row';
+            
+            const label = document.createElement('div');
+            label.className = 'word-label';
+            label.innerText = token;
+            label.title = token;
+            row.appendChild(label);
+
+            const cells = document.createElement('div');
+            cells.className = 'vector-cells';
+
+            currentEmbeddings[idx].forEach(val => {
+                const cell = document.createElement('div');
+                cell.className = 'vector-cell';
+                
+                const alpha = Math.abs(val);
+                cell.style.backgroundColor = val >= 0 
+                    ? `rgba(74, 222, 128, ${alpha})` 
+                    : `rgba(192, 132, 252, ${alpha})`;
+                cell.innerText = val.toFixed(1);
+                cells.appendChild(cell);
+            });
+
+            row.appendChild(cells);
+            container.appendChild(row);
+        });
+    }
+
+    function renderAttentionMatrix() {
+        const canvas = document.getElementById('attentionCanvas');
+        const ctx = canvas.getContext('2d');
+        const n = currentTokens.length;
+
+        if (n === 0) return;
+
+        const minCellSize = 28;
+        const basePadding = Math.min(100, Math.max(70, Math.max(...currentTokens.map(t => t.length)) * 7));
+        activePadding = basePadding;
+
+        const canvasDimension = Math.max(450, activePadding + n * minCellSize);
+        canvas.width = canvasDimension;
+        canvas.height = canvasDimension;
+
+        const size = canvas.width;
+        const cellSize = (size - activePadding) / n;
+
+        ctx.clearRect(0, 0, size, size);
+
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                const weight = attentionMatrix[i][j];
+                const x = activePadding + j * cellSize;
+                const y = activePadding + i * cellSize;
+
+                ctx.fillStyle = `rgba(56, 189, 248, ${weight})`;
+                ctx.fillRect(x, y, cellSize, cellSize);
+
+                ctx.strokeStyle = '#334155';
+                ctx.strokeRect(x, y, cellSize, cellSize);
+
+                if (cellSize >= 24) {
+                    ctx.fillStyle = weight > 0.4 ? '#000' : '#fff';
+                    ctx.font = `${Math.max(9, Math.min(12, cellSize / 3))}px monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(weight.toFixed(2), x + cellSize / 2, y + cellSize / 2);
+                }
+            }
+        }
+
+        const fontSize = Math.max(9, Math.min(13, Math.floor(activePadding / 6)));
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = `${fontSize}px monospace`;
+
+        for (let i = 0; i < n; i++) {
+            let label = currentTokens[i];
+            if (label.length > 10) label = label.substring(0, 8) + '..';
+
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, activePadding - 8, activePadding + i * cellSize + cellSize / 2);
+
+            ctx.save();
+            ctx.translate(activePadding + i * cellSize + cellSize / 2, activePadding - 8);
+            ctx.rotate(-Math.PI / 4);
+            ctx.textAlign = 'left';
+            ctx.fillText(label, 0, 0);
+            ctx.restore();
+        }
+    }
+
+    const canvas = document.getElementById('attentionCanvas');
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const n = currentTokens.length;
+        if (n === 0) return;
+
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        const canvasX = (e.clientX - rect.left) * scaleX;
+        const canvasY = (e.clientY - rect.top) * scaleY;
+
+        const cellSize = (canvas.width - activePadding) / n;
+
+        if (canvasX >= activePadding && canvasY >= activePadding) {
+            const col = Math.floor((canvasX - activePadding) / cellSize);
+            const row = Math.floor((canvasY - activePadding) / cellSize);
+
+            if (row >= 0 && row < n && col >= 0 && col < n) {
+                const query = currentTokens[row];
+                const key = currentTokens[col];
+                const score = attentionMatrix[row][col].toFixed(3);
+                document.getElementById('hoverInfo').innerText = 
+                    `"${query}" (Row ${row + 1}) → attends to → "${key}" (Col ${col + 1}) [Weight: ${score}]`;
+                return;
+            }
+        }
+        document.getElementById('hoverInfo').innerText = 'Hover over heatmap to inspect relationships';
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        document.getElementById('hoverInfo').innerText = 'Hover over heatmap to inspect relationships';
+    });
+
+    window.onload = processText;
+</script>
+</body>
+</html>

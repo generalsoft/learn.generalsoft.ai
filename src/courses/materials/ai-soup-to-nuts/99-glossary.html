@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Soup to Nuts — Glossary</title>
+<style>
+  :root { --bg:#0b1020; --panel:#121a2e; --panel2:#0f1628; --text:#eef3ff; --muted:#9eabc7; --accent:#69b7ff; --good:#6ee7a2; --bad:#ff8d8d; --line:#263653; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:1400px;margin:auto;padding:24px}
+  h1{margin:0 0 4px;font-size:30px}
+  .sub{color:var(--muted);margin-bottom:18px}
+  .layout{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .title{font-weight:700;margin-bottom:10px}
+  .sidebar{position:sticky;top:24px;display:flex;flex-direction:column;gap:16px}
+  .search input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px}
+  .search input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .navlist{display:flex;flex-direction:column;gap:2px}
+  .navlist a{color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:8px;font-size:13.5px;display:flex;justify-content:space-between;gap:8px}
+  .navlist a:hover{background:var(--panel2);color:var(--text)}
+  .navlist a.active{background:var(--panel2);color:var(--accent)}
+  .navlist a .count{color:var(--muted);font-size:12px}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .metric{background:var(--panel2);border:1px solid var(--line);padding:10px;border-radius:9px}
+  .metric b{display:block;font-size:20px}
+  .metric span{color:var(--muted);font-size:12px}
+  section.group{margin-bottom:16px;scroll-margin-top:20px}
+  .group-head{display:flex;align-items:baseline;gap:10px;margin:0 0 10px 4px}
+  .group-head h2{font-size:19px;margin:0}
+  .group-head .n{color:var(--muted);font-size:12px}
+  .terms{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .term{border-left:3px solid var(--accent);padding:10px 12px;background:var(--panel2);border-radius:0 8px 8px 0}
+  .term b{display:block;margin-bottom:3px}
+  .term p{margin:0;color:var(--muted);font-size:13.5px}
+  mark{background:rgba(105,183,255,.35);color:inherit;border-radius:3px;padding:0 2px}
+  .empty{color:var(--muted);padding:20px;text-align:center}
+  .tip{margin-top:6px}
+  .tip p{margin:0;color:var(--muted);font-size:13.5px}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:static}.terms{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AI Glossary: Soup to Nuts</h1>
+  <div class="sub">A reference for the workshop — search or browse by category. Definitions stay in plain language on purpose.</div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="card search">
+        <div class="title">Search</div>
+        <input id="q" type="text" placeholder="Type a term, e.g. “token” or “bias”…" autocomplete="off">
+        <div class="metrics" style="margin-top:12px">
+          <div class="metric"><b id="shown">62</b><span>terms shown</span></div>
+          <div class="metric"><b id="total">62</b><span>total terms</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="title">Jump to section</div>
+        <nav class="navlist" id="nav"></nav>
+      </div>
+    </div>
+
+    <div id="content"></div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  {section:"Foundations & Core Concepts", terms:[
+    ["Artificial Intelligence (AI)","The broad field of building systems that perform tasks normally requiring human intelligence — reasoning, perception, language, decision-making."],
+    ["Machine Learning (ML)","A subset of AI where systems learn patterns from data rather than following explicit, hand-coded rules."],
+    ["Deep Learning","A subset of ML using multi-layered neural networks. Powers most modern breakthroughs in image recognition and language."],
+    ["Neural Network","A computing structure loosely inspired by the brain, made of interconnected nodes organized in layers."],
+    ["Algorithm","A set of step-by-step instructions a computer follows — in ML, the method used to learn patterns from data."],
+    ["Model","The output of training: a structure with learned parameters that can make predictions or generate content."],
+    ["Training","Exposing a model to data so it adjusts its internal parameters to improve performance."],
+    ["Inference","Using an already-trained model to make a prediction or generate output on new data."],
+    ["Parameters / Weights","The internal numerical values a model adjusts during training. Modern models have billions to trillions."],
+    ["Dataset","The collection of examples used to train or evaluate a model."],
+    ["Bias (Statistical/Data)","Systematic skew in data or model outputs, often reflecting imbalances present in training data."],
+  ]},
+  {section:"Types of Machine Learning", terms:[
+    ["Supervised Learning","Training on labeled input-output pairs so the model learns to map inputs to known correct answers."],
+    ["Unsupervised Learning","Training on unlabeled data to find hidden patterns or groupings without predefined answers."],
+    ["Reinforcement Learning (RL)","Training an agent through trial and error, rewarding desired behavior and penalizing undesired behavior."],
+    ["RLHF","Using human preference ratings as the reward signal to fine-tune a model's behavior."],
+    ["Self-Supervised Learning","The model generates its own labels from raw data — how most LLMs are pre-trained."],
+    ["Transfer Learning","Taking a model trained on one task and adapting it to a new, related task."],
+    ["Fine-Tuning","Further training a pre-trained model on a smaller dataset to specialize it."],
+  ]},
+  {section:"Language & Generative AI", terms:[
+    ["Natural Language Processing (NLP)","The field of AI focused on understanding, interpreting, and generating human language."],
+    ["Large Language Model (LLM)","A neural network trained on massive text to understand and generate human-like language."],
+    ["Generative AI (GenAI)","AI that creates new content — text, images, audio, video, code — rather than just classifying."],
+    ["Transformer","The neural network architecture behind most modern LLMs, using attention to weigh relevance between tokens."],
+    ["Attention Mechanism","Lets a model dynamically focus on the most relevant parts of the input for each part of the output."],
+    ["Token","A chunk of text a model processes as its basic unit — words, sub-words, or characters."],
+    ["Context Window","The maximum amount of text a model can consider at once, in tokens."],
+    ["Prompt","The input text or instructions given to a model to produce a desired output."],
+    ["Prompt Engineering","Crafting inputs strategically to get better, more reliable outputs from a model."],
+    ["System Prompt","Instructions that set a model's overall behavior or persona, usually invisible to the end user."],
+    ["Hallucination","When a model generates confident-sounding but factually incorrect information."],
+    ["Temperature","A setting controlling output randomness — low is predictable, high is more varied."],
+    ["Zero-Shot / Few-Shot Learning","Getting a model to do a task with no examples or just a few, given in the prompt."],
+    ["Chain-of-Thought (CoT)","A model working through intermediate reasoning steps before its final answer."],
+    ["Multimodal AI","Models that process or generate multiple data types — text, images, audio, video."],
+    ["Diffusion Model","A generative model (often for images) that creates content by removing noise from randomness."],
+    ["Embedding","A numerical vector representation of data positioned so similar items sit close together."],
+    ["Vector Database","A database optimized for searching embeddings by similarity."],
+  ]},
+  {section:"Building AI Applications", terms:[
+    ["API","A way for software, including AI models, to communicate programmatically."],
+    ["Retrieval-Augmented Generation (RAG)","A model retrieves relevant external info and incorporates it into its response, reducing hallucination."],
+    ["Agent / AI Agent","A system that can autonomously plan, use tools, and iterate toward a goal."],
+    ["Tool Use / Function Calling","A model invoking external tools or APIs as part of generating a response."],
+    ["Model Context Protocol (MCP)","An open standard letting AI models connect to external tools and data sources consistently."],
+    ["Orchestration","Coordinating multiple AI calls, tools, or agents to complete a complex task."],
+    ["Guardrails","Rules or filters that constrain a model's outputs to prevent harmful or off-topic responses."],
+    ["Latency","The time it takes an AI system to respond after receiving input."],
+    ["Foundation Model","A large, general-purpose model trained on broad data, adaptable to specific tasks."],
+  ]},
+  {section:"Evaluation, Safety & Ethics", terms:[
+    ["Alignment","Ensuring an AI system's goals and behaviors match human intentions and values."],
+    ["Explainability / Interpretability","How well humans can understand why a model produced a given output."],
+    ["Model Evaluation / Benchmarking","Testing a model against standardized tasks to measure capability, safety, or accuracy."],
+    ["Red Teaming","Deliberately probing a system for weaknesses or harmful outputs before deployment."],
+    ["Overfitting","When a model learns training data too specifically, performing poorly on new data."],
+    ["Data Privacy","Protecting personal or sensitive information used in training or interaction."],
+    ["AI Governance","Policies and practices guiding responsible development and deployment of AI."],
+    ["Responsible AI","An umbrella term for fairness, transparency, accountability, and safety in AI."],
+    ["Artificial General Intelligence (AGI)","A hypothetical AI with human-level ability across virtually any task."],
+    ["Superintelligence","A hypothetical AI that significantly surpasses human intelligence across all domains."],
+  ]},
+  {section:"Business & Workplace", terms:[
+    ["Copilot","An AI assistant embedded in a tool to help a human complete tasks."],
+    ["Automation","Using technology, including AI, to perform tasks with minimal human intervention."],
+    ["Human-in-the-Loop (HITL)","A design where a human reviews or corrects AI outputs before they're finalized."],
+    ["AI Literacy","The ability to understand, evaluate, and effectively use AI tools."],
+    ["Shadow AI","Unsanctioned use of AI tools inside an organization, outside IT oversight."],
+    ["Total Cost of Ownership (TCO)","The full cost of deploying AI — compute, licensing, integration, and maintenance."],
+  ]},
+  {section:"Infrastructure & Compute", terms:[
+    ["GPU","Hardware, originally for graphics, essential for training and running AI due to parallel processing."],
+    ["Compute","Shorthand for the processing power required to train or run AI models."],
+    ["Cloud AI / On-Premise AI","Running models via remote servers versus a company's own local hardware."],
+    ["Open-Source vs. Closed Models","Public code/weights anyone can inspect versus access only via a company's API or product."],
+    ["Scaling Laws","Patterns showing model performance improves predictably as data, compute, and size increase."],
+  ]},
+  {section:"Looking Ahead", terms:[
+    ["Agentic AI","The trend toward AI systems acting autonomously across multi-step workflows, not single prompts."],
+    ["Multi-Agent Systems","Multiple specialized AI agents collaborating to complete complex tasks together."],
+    ["Synthetic Data","Artificially generated data used to train models when real data is scarce or sensitive."],
+    ["World Model","An AI's internal representation of how the world works, used to simulate or predict."],
+    ["AI Safety Research","The field ensuring advanced AI remains controllable and beneficial as capabilities increase."],
+    ["Compute Governance","Policy discussions around who controls access to large-scale AI computing power."],
+    ["Constitutional AI","Guiding a model's behavior with explicit principles, rather than feedback alone."],
+  ]},
+];
+
+const content = document.getElementById('content');
+const nav = document.getElementById('nav');
+const totalCount = DATA.reduce((s,g)=>s+g.terms.length,0);
+document.getElementById('total').textContent = totalCount;
+
+function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-')}
+
+function render(query){
+  const q = (query||'').trim().toLowerCase();
+  content.innerHTML = '';
+  nav.innerHTML = '';
+  let shown = 0;
+  let anyGroup = false;
+
+  DATA.forEach(group=>{
+    const filtered = group.terms.filter(([t,d])=>!q || t.toLowerCase().includes(q) || d.toLowerCase().includes(q));
+    if(!filtered.length) return;
+    anyGroup = true;
+    shown += filtered.length;
+
+    const id = slug(group.section);
+    const a = document.createElement('a');
+    a.href = '#'+id; a.innerHTML = `<span>${group.section}</span><span class="count">${filtered.length}</span>`;
+    nav.appendChild(a);
+
+    const sec = document.createElement('section');
+    sec.className = 'group'; sec.id = id;
+    const head = document.createElement('div');
+    head.className = 'group-head';
+    head.innerHTML = `<h2>${group.section}</h2><span class="n">${filtered.length} term${filtered.length===1?'':'s'}</span>`;
+    sec.appendChild(head);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'card';
+    const grid = document.createElement('div');
+    grid.className = 'terms';
+    filtered.forEach(([t,d])=>{
+      const el = document.createElement('div');
+      el.className = 'term';
+      el.innerHTML = `<b>${hl(t,q)}</b><p>${hl(d,q)}</p>`;
+      grid.appendChild(el);
+    });
+    wrap.appendChild(grid);
+    sec.appendChild(wrap);
+    content.appendChild(sec);
+  });
+
+  document.getElementById('shown').textContent = shown;
+
+  if(!anyGroup){
+    content.innerHTML = `<div class="card empty">No terms match “${query}”. Try a different word.</div>`;
+  }
+}
+
+function hl(text,q){
+  if(!q) return text;
+  const i = text.toLowerCase().indexOf(q);
+  if(i===-1) return text;
+  return text.slice(0,i) + '<mark>' + text.slice(i,i+q.length) + '</mark>' + text.slice(i+q.length);
+}
+
+document.getElementById('q').addEventListener('input', e=>render(e.target.value));
+render('');
+</script>
+</body>
+</html>

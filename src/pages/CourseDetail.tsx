@@ -3,10 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import {
   Calendar, Clock, Globe, Check, Info, AlertCircle, ArrowRight,
   BookOpen, Users, Compass, Loader2, MailCheck,
-  FolderOpen, FileText, Download, Image as ImageIcon, Video, Archive, FileSpreadsheet
+  FolderOpen, FileText, Download, Image as ImageIcon, Video, Archive, FileSpreadsheet,
+  X, ExternalLink
 } from 'lucide-react';
 import { getCourseBySlug } from '../courses/courseData';
 import { getCourseMaterials } from '../courses/courseMaterials';
+import type { CourseMaterial } from '../courses/courseMaterials';
 import { registerParticipant, resendVerificationEmail, getRegistrationById } from '../services/api';
 import { analytics } from '../services/analytics';
 import { RegistrationFormData } from '../types';
@@ -44,6 +46,9 @@ function materialPresentation(ext: string): { icon: typeof FileText; badgeClass:
     case 'rar':
     case '7z':
       return { icon: Archive, badgeClass: 'bg-amber-50 text-amber-700 border-amber-100', label: 'Archive' };
+    case 'html':
+    case 'htm':
+      return { icon: Globe, badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-100', label: 'Web page' };
     case 'md':
     case 'txt':
     case 'rtf':
@@ -58,6 +63,7 @@ export default function CourseDetail() {
   const course = getCourseBySlug(slug || '');
   const materials = course ? getCourseMaterials(course.slug) : [];
   const formRef = useRef<HTMLDivElement>(null);
+  const [viewingMaterial, setViewingMaterial] = useState<CourseMaterial | null>(null);
 
   // States
   const [formData, setFormData] = useState<RegistrationFormData>({
@@ -113,6 +119,21 @@ export default function CourseDetail() {
       cancelled = true;
     };
   }, [course]);
+
+  // Lock page scroll and close the viewer on Escape while a material is open.
+  useEffect(() => {
+    if (!viewingMaterial) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setViewingMaterial(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [viewingMaterial]);
 
   if (!course) {
     return (
@@ -385,17 +406,16 @@ export default function CourseDetail() {
                   Course Materials
                 </h2>
                 <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                  Download the resources for this course.
+                  Open labs and documents in place, or download them for offline use.
                 </p>
                 <div className="space-y-3">
                   {materials.map((material) => {
                     const { icon: Icon, badgeClass, label } = materialPresentation(material.ext);
+                    const viewable = material.kind !== 'other';
                     return (
-                      <a
+                      <div
                         key={material.url}
-                        href={material.url}
-                        download={material.name}
-                        className="group flex items-center gap-4 bg-white rounded-xl border border-slate-200/60 p-4 hover:border-primary-300 hover:shadow-sm transition-all focus-ring"
+                        className="group flex items-center gap-4 bg-white rounded-xl border border-slate-200/60 p-4 hover:border-primary-300 hover:shadow-sm transition-all"
                       >
                         <span className={`flex-shrink-0 w-11 h-11 rounded-lg border flex items-center justify-center ${badgeClass}`}>
                           <Icon className="w-5 h-5" />
@@ -404,8 +424,32 @@ export default function CourseDetail() {
                           <span className="block text-sm font-semibold text-slate-800 truncate">{material.name}</span>
                           <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
                         </span>
-                        <Download className="w-4 h-4 text-slate-400 group-hover:text-primary-600 flex-shrink-0 transition-colors" />
-                      </a>
+                        <span className="flex items-center gap-2 flex-shrink-0">
+                          {viewable && (
+                            <button
+                              type="button"
+                              onClick={() => setViewingMaterial(material)}
+                              className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-100 rounded-lg transition-colors focus-ring"
+                            >
+                              Open
+                            </button>
+                          )}
+                          <a
+                            href={material.url}
+                            download={material.name}
+                            title="Download"
+                            aria-label={`Download ${material.name}`}
+                            className={`inline-flex items-center gap-1.5 rounded-lg transition-colors focus-ring ${
+                              viewable
+                                ? 'p-2 text-slate-400 hover:text-primary-600 border border-slate-200 hover:border-primary-200'
+                                : 'px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200'
+                            }`}
+                          >
+                            <Download className="w-4 h-4" />
+                            {!viewable && 'Download'}
+                          </a>
+                        </span>
+                      </div>
                     );
                   })}
                 </div>
@@ -818,6 +862,67 @@ export default function CourseDetail() {
 
         </div>
       </section>
+
+      {/* Material Viewer Modal */}
+      {viewingMaterial && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-slate-900/95"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Viewing ${viewingMaterial.name}`}
+        >
+          <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3 bg-slate-900 border-b border-slate-700/60 flex-shrink-0">
+            <div className="min-w-0 flex items-center gap-3">
+              <span className="text-sm sm:text-base font-semibold text-slate-100 truncate">{viewingMaterial.name}</span>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <a
+                href={viewingMaterial.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors focus-ring"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Open in new tab
+              </a>
+              <a
+                href={viewingMaterial.url}
+                download={viewingMaterial.name}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors focus-ring"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download
+              </a>
+              <button
+                type="button"
+                onClick={() => setViewingMaterial(null)}
+                aria-label="Close viewer"
+                className="inline-flex items-center justify-center p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors focus-ring"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 min-h-0 bg-slate-800">
+            {viewingMaterial.kind === 'html' || viewingMaterial.kind === 'pdf' ? (
+              <iframe src={viewingMaterial.url} title={viewingMaterial.name} className="w-full h-full border-0" />
+            ) : viewingMaterial.kind === 'image' ? (
+              <div className="w-full h-full flex items-center justify-center p-6">
+                <img src={viewingMaterial.url} alt={viewingMaterial.name} className="max-w-full max-h-full object-contain" />
+              </div>
+            ) : viewingMaterial.kind === 'video' ? (
+              <div className="w-full h-full flex items-center justify-center p-6">
+                <video src={viewingMaterial.url} controls className="max-w-full max-h-full" />
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center p-6 text-slate-400 text-sm">
+                Preview is not available for this file type. Use "Download" instead.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
