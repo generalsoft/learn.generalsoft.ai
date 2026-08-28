@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transformer Internals — Visual Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: #0b1020;
+      color: #eef3ff;
+      font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+    }
+    .wrap { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 28px; letter-spacing: -0.3px; }
+    .sub { color: #9eabc7; margin-bottom: 16px; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1.8fr;
+      gap: 20px;
+      margin-top: 12px;
+    }
+    .card {
+      background: #121a2e;
+      border: 1px solid #263653;
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+    .title {
+      font-weight: 750;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .title .badge { font-weight: 400; font-size: 12px; color: #9eabc7; }
+    .status {
+      background: #0f1628;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #9eabc7;
+      border-left: 3px solid #4b93ce;
+      margin: 6px 0 10px;
+      font-size: 14px;
+    }
+    .slider-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .slider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9eabc7;
+      flex: 1 1 140px;
+    }
+    input[type=range] { flex: 1; min-width: 60px; }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 6px;
+    }
+    button {
+      background: #1b2945;
+      color: #eef3ff;
+      border: 1px solid #345078;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+      font-size: 14px;
+    }
+    button:hover { background: #263b60; }
+    button.primary { background: #28669d; border-color: #4b93ce; }
+    .viz-canvas {
+      width: 100%;
+      background: #0a0f1e;
+      border-radius: 10px;
+      border: 1px solid #263653;
+      display: block;
+      aspect-ratio: 16/9;
+      min-height: 420px;
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 8px 0;
+      font-size: 12px;
+      color: #9eabc7;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-color {
+      width: 16px;
+      height: 4px;
+      border-radius: 2px;
+    }
+    .legend-color.blue { background: #4b93ce; }
+    .legend-color.red { background: #ff8d8d; }
+    .legend-color.green { background: #6ee7a2; }
+    .legend-color.purple { background: #b388ff; }
+    .legend-color.orange { background: #ffb347; }
+    .legend-color.cyan { background: #4dd0e1; }
+    .flex-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .badge { background: #1b2945; padding: 2px 10px; border-radius: 20px; font-size: 13px; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .metric {
+      background: #0f1628;
+      border: 1px solid #263653;
+      padding: 6px 10px;
+      border-radius: 9px;
+    }
+    .metric b { display: block; font-size: 18px; }
+    .metric span { color: #9eabc7; font-size: 11px; }
+    .input-display {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 8px 0;
+      padding: 8px;
+      background: #0a0f1e;
+      border-radius: 8px;
+      border: 1px solid #263653;
+    }
+    .token {
+      background: #1b2945;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 18px;
+      border: 2px solid #345078;
+      transition: 0.2s;
+    }
+    .token.active {
+      border-color: #6ee7a2;
+      box-shadow: 0 0 15px rgba(107, 255, 162, 0.3);
+    }
+    .token.attending {
+      border-color: #b388ff;
+      box-shadow: 0 0 15px rgba(179, 136, 255, 0.3);
+    }
+    @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+    <div>
+      <h1>🧠 Transformer Internals</h1>
+      <div class="sub">Visualizing the building blocks: Attention · Feed-Forward · Output</div>
+    </div>
+    <button id="resetBtn" class="primary">↺ Reset</button>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: Controls -->
+    <div class="card">
+      <div class="title">Controls <span class="badge">adjust parameters in real-time</span></div>
+      
+      <div class="slider-row">
+        <label class="slider">Embedding size <input id="embedSlider" type="range" min="2" max="6" step="1" value="4"><b id="embedVal">4</b></label>
+        <label class="slider">Heads <input id="headsSlider" type="range" min="1" max="4" step="1" value="2"><b id="headsVal">2</b></label>
+      </div>
+      <div class="slider-row">
+        <label class="slider">Sequence length <input id="seqSlider" type="range" min="2" max="6" step="1" value="4"><b id="seqVal">4</b></label>
+        <label class="slider">Temperature <input id="tempSlider" type="range" min="0.1" max="2.0" step="0.1" value="1.0"><b id="tempVal">1.0</b></label>
+      </div>
+
+      <div class="status" id="statusMsg">Transformer processes input tokens through attention and feed-forward layers.</div>
+      
+      <div class="metrics">
+        <div class="metric"><b id="layerDisplay">0</b><span>layer</span></div>
+        <div class="metric"><b id="headDisplay">0</b><span>head</span></div>
+        <div class="metric"><b id="attnDisplay">—</b><span>avg attention</span></div>
+        <div class="metric"><b id="outputDisplay">—</b><span>prediction</span></div>
+      </div>
+
+      <div class="btn-group">
+        <button id="stepBtn">Step →</button>
+        <button id="autoBtn" class="primary">▶ Auto</button>
+        <button id="resetBtn2">↺ Reset</button>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <div class="title" style="font-size: 14px;">Input tokens <span class="badge">click to focus attention</span></div>
+        <div class="input-display" id="tokenDisplay"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Visualization -->
+    <div class="card">
+      <div class="title">Transformer Architecture <span class="badge">attention · feed-forward · output</span></div>
+      <canvas class="viz-canvas" id="vizCanvas" width="900" height="500"></canvas>
+      
+      <div class="legend">
+        <span class="legend-item"><span class="legend-color blue"></span> Input embedding</span>
+        <span class="legend-item"><span class="legend-color green"></span> Attention weights</span>
+        <span class="legend-item"><span class="legend-color orange"></span> Feed-forward</span>
+        <span class="legend-item"><span class="legend-color purple"></span> Output</span>
+        <span class="legend-item"><span class="legend-color cyan"></span> Residual connection</span>
+      </div>
+
+      <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin: 8px 0;">
+        <div>
+          <div style="font-size: 12px; color: #9eabc7; text-align: center;">Attention matrix</div>
+          <canvas id="attnMatrix" width="120" height="120" style="background:#0a0f1e; border-radius:6px; border:1px solid #263653;"></canvas>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: #9eabc7; text-align: center;">Output distribution</div>
+          <canvas id="outputDist" width="120" height="120" style="background:#0a0f1e; border-radius:6px; border:1px solid #263653;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- SETUP ----------
+const vizCanvas = document.getElementById('vizCanvas');
+const vctx = vizCanvas.getContext('2d');
+const attnMatrix = document.getElementById('attnMatrix');
+const amctx = attnMatrix.getContext('2d');
+const outputDist = document.getElementById('outputDist');
+const odctx = outputDist.getContext('2d');
+
+// State
+let embedSize = 4;
+let numHeads = 2;
+let seqLen = 4;
+let temperature = 1.0;
+let layer = 0;
+let headIdx = 0;
+let autoMode = false;
+let autoInterval = null;
+
+// Transformer parameters
+let W_q = [], W_k = [], W_v = [], W_o = [];
+let W_ff1 = [], W_ff2 = [];
+let layerNorm1 = [], layerNorm2 = [];
+let outputWeights = [];
+
+// Input tokens (random embeddings)
+let tokens = [];
+let tokenLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+let selectedToken = 0;
+
+// ---------- INITIALIZATION ----------
+function initTransformer() {
+  const d = embedSize;
+  const h = numHeads;
+  const d_k = Math.floor(d / h);
+  
+  // Initialize attention weights
+  W_q = Array.from({ length: h }, () => Array.from({ length: d }, () => Array.from({ length: d_k }, () => (Math.random()*2-1)*0.5)));
+  W_k = Array.from({ length: h }, () => Array.from({ length: d }, () => Array.from({ length: d_k }, () => (Math.random()*2-1)*0.5)));
+  W_v = Array.from({ length: h }, () => Array.from({ length: d }, () => Array.from({ length: d_k }, () => (Math.random()*2-1)*0.5)));
+  W_o = Array.from({ length: h }, () => Array.from({ length: d_k }, () => Array.from({ length: d }, () => (Math.random()*2-1)*0.5)));
+  
+  // Feed-forward
+  W_ff1 = Array.from({ length: d }, () => Array.from({ length: d*2 }, () => (Math.random()*2-1)*0.5));
+  W_ff2 = Array.from({ length: d*2 }, () => Array.from({ length: d }, () => (Math.random()*2-1)*0.5));
+  
+  // Layer norms
+  layerNorm1 = Array.from({ length: d }, () => 1 + (Math.random()-0.5)*0.2);
+  layerNorm2 = Array.from({ length: d }, () => 1 + (Math.random()-0.5)*0.2);
+  
+  // Output
+  outputWeights = Array.from({ length: d }, () => Array.from({ length: 2 }, () => (Math.random()*2-1)*0.5));
+  
+  // Initialize tokens
+  tokens = [];
+  for (let i = 0; i < seqLen; i++) {
+    tokens.push(Array.from({ length: d }, () => (Math.random()*2-1)*0.5));
+  }
+  
+  layer = 0;
+  headIdx = 0;
+  updateDisplay();
+}
+
+// ---------- FORWARD PASS ----------
+function forward() {
+  const d = embedSize;
+  const h = numHeads;
+  const d_k = Math.floor(d / h);
+  const seq = seqLen;
+  
+  // Multi-head attention
+  let attnOutputs = [];
+  let attentionWeights = [];
+  
+  for (let head = 0; head < h; head++) {
+    const q = tokens.map(t => matVec(W_q[head], t));
+    const k = tokens.map(t => matVec(W_k[head], t));
+    const v = tokens.map(t => matVec(W_v[head], t));
+    
+    // Attention scores
+    const scores = Array.from({ length: seq }, () => Array(seq).fill(0));
+    for (let i = 0; i < seq; i++) {
+      for (let j = 0; j < seq; j++) {
+        scores[i][j] = dot(q[i], k[j]) / Math.sqrt(d_k);
+      }
+    }
+    
+    // Softmax
+    const attn = scores.map(row => {
+      const exp = row.map(x => Math.exp(x / temperature));
+      const sum = exp.reduce((a,b) => a+b, 0);
+      return exp.map(x => x / sum);
+    });
+    attentionWeights.push(attn);
+    
+    // Apply attention to values
+    const headOut = attn.map((row, i) => {
+      const sum = new Float32Array(d_k);
+      for (let j = 0; j < seq; j++) {
+        for (let k = 0; k < d_k; k++) {
+          sum[k] += row[j] * v[j][k];
+        }
+      }
+      return sum;
+    });
+    attnOutputs.push(headOut);
+  }
+  
+  // Concatenate heads and project
+  const concat = Array.from({ length: seq }, () => new Float32Array(d));
+  for (let i = 0; i < seq; i++) {
+    let idx = 0;
+    for (let head = 0; head < h; head++) {
+      for (let k = 0; k < d_k; k++) {
+        concat[i][idx++] = attnOutputs[head][i][k];
+      }
+    }
+  }
+  
+  // Project with W_o (simplified: just sum heads)
+  const attnOut = concat.map(t => {
+    const out = new Float32Array(d);
+    for (let head = 0; head < h; head++) {
+      const headOut = matVec(W_o[head], t.slice(head*d_k, (head+1)*d_k));
+      for (let i = 0; i < d; i++) out[i] += headOut[i];
+    }
+    return out;
+  });
+  
+  // Residual + layer norm (simplified)
+  const norm1 = tokens.map((t, i) => {
+    const residual = t.map((v, j) => v + attnOut[i][j]);
+    return residual.map(v => v * layerNorm1[0]); // simplified
+  });
+  
+  // Feed-forward
+  const ffOut = norm1.map(t => {
+    const hidden = matVec(W_ff1, t);
+    const relu = hidden.map(v => Math.max(0, v));
+    const out = matVec(W_ff2, relu);
+    return out;
+  });
+  
+  // Residual + layer norm 2
+  const norm2 = norm1.map((t, i) => {
+    return t.map((v, j) => v + ffOut[i][j]);
+  });
+  
+  // Output
+  const logits = norm2.map(t => {
+    const out = matVec(outputWeights, t);
+    return softmax(out);
+  });
+  
+  return { attentionWeights, norm2, logits };
+}
+
+// ---------- HELPERS ----------
+function dot(a, b) {
+  let sum = 0;
+  for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
+  return sum;
+}
+
+function matVec(mat, vec) {
+  return mat.map(row => dot(row, vec));
+}
+
+function softmax(arr) {
+  const exp = arr.map(x => Math.exp(x));
+  const sum = exp.reduce((a,b) => a+b, 0);
+  return exp.map(x => x / sum);
+}
+
+// ---------- VISUALIZATION ----------
+function updateDisplay() {
+  const d = embedSize;
+  const h = numHeads;
+  
+  // Run forward pass
+  const { attentionWeights, norm2, logits } = forward();
+  
+  // Update token display
+  const tokenDisplay = document.getElementById('tokenDisplay');
+  tokenDisplay.innerHTML = '';
+  for (let i = 0; i < seqLen; i++) {
+    const token = document.createElement('div');
+    token.className = 'token';
+    if (i === selectedToken) token.classList.add('active');
+    token.textContent = tokenLabels[i];
+    token.onclick = () => { selectedToken = i; updateDisplay(); };
+    tokenDisplay.appendChild(token);
+  }
+  
+  // Update metrics
+  document.getElementById('layerDisplay').textContent = layer + 1;
+  document.getElementById('headDisplay').textContent = headIdx + 1;
+  
+  const avgAttn = attentionWeights.reduce((sum, head) => {
+    return sum + head.reduce((s, row) => s + row.reduce((a,b) => a+b, 0), 0) / (seqLen * seqLen);
+  }, 0) / h;
+  document.getElementById('attnDisplay').textContent = avgAttn.toFixed(3);
+  
+  const pred = logits[selectedToken] || [0.5, 0.5];
+  document.getElementById('outputDisplay').textContent = pred[0] > pred[1] ? 'Class A' : 'Class B';
+  
+  // Draw main visualization
+  drawViz(attentionWeights, norm2, logits);
+  
+  // Draw attention matrix
+  drawAttentionMatrix(attentionWeights);
+  
+  // Draw output distribution
+  drawOutputDistribution(logits);
+  
+  document.getElementById('statusMsg').textContent = `Processing ${seqLen} tokens through ${h} attention heads (embedding size ${d})`;
+}
+
+function drawViz(attentionWeights, hidden, logits) {
+  const w = vizCanvas.width, h = vizCanvas.height;
+  vctx.clearRect(0, 0, w, h);
+  
+  // Layout
+  const xPositions = [0.1, 0.28, 0.46, 0.64, 0.82];
+  const labels = ['Input', 'Attention', 'FFN', 'Norm', 'Output'];
+  const yStart = 0.15;
+  const yEnd = 0.85;
+  
+  // Draw connections between layers
+  for (let layer = 0; layer < 4; layer++) {
+    const x1 = xPositions[layer] * w;
+    const x2 = xPositions[layer+1] * w;
+    const numNodes = layer === 0 ? seqLen : embedSize;
+    const numNodesNext = layer === 3 ? 2 : embedSize;
+    
+    for (let i = 0; i < Math.min(numNodes, 8); i++) {
+      for (let j = 0; j < Math.min(numNodesNext, 8); j++) {
+        const y1 = yStart * h + (i / (Math.min(numNodes, 8) - 1 || 1)) * (yEnd - yStart) * h;
+        const y2 = yStart * h + (j / (Math.min(numNodesNext, 8) - 1 || 1)) * (yEnd - yStart) * h;
+        const alpha = 0.05 + Math.random() * 0.1;
+        vctx.beginPath();
+        vctx.moveTo(x1, y1);
+        vctx.lineTo(x2, y2);
+        vctx.strokeStyle = `rgba(75, 147, 206, ${alpha})`;
+        vctx.lineWidth = 0.5;
+        vctx.stroke();
+      }
+    }
+  }
+  
+  // Draw nodes for each layer
+  const layerData = [
+    { label: 'Input', count: seqLen, color: '#4b93ce' },
+    { label: 'Attention', count: Math.min(embedSize, 6), color: '#6ee7a2' },
+    { label: 'FFN', count: Math.min(embedSize*2, 8), color: '#ffb347' },
+    { label: 'Norm', count: Math.min(embedSize, 6), color: '#4dd0e1' },
+    { label: 'Output', count: 2, color: '#b388ff' }
+  ];
+  
+  for (let l = 0; l < 5; l++) {
+    const x = xPositions[l] * w;
+    const count = layerData[l].count;
+    const color = layerData[l].color;
+    
+    for (let i = 0; i < count; i++) {
+      const y = yStart * h + (i / (count - 1 || 1)) * (yEnd - yStart) * h;
+      const radius = 8 + (l === 4 ? 4 : 0);
+      
+      // Glow for attention layer
+      if (l === 1 && attentionWeights.length > 0) {
+        const glow = attentionWeights[headIdx % attentionWeights.length]?.[selectedToken]?.[i % seqLen] || 0;
+        const grad = vctx.createRadialGradient(x, y, 0, x, y, radius + 10 + glow * 15);
+        grad.addColorStop(0, `rgba(107, 255, 162, ${glow * 0.5})`);
+        grad.addColorStop(1, 'transparent');
+        vctx.fillStyle = grad;
+        vctx.fillRect(x - radius - 20, y - radius - 20, radius*2 + 40, radius*2 + 40);
+      }
+      
+      // Node circle
+      vctx.beginPath();
+      vctx.arc(x, y, radius, 0, Math.PI * 2);
+      vctx.fillStyle = l === 4 ? '#2a1a3a' : '#0a0f1e';
+      vctx.fill();
+      vctx.strokeStyle = color;
+      vctx.lineWidth = l === 4 ? 3 : 2;
+      vctx.stroke();
+      
+      // Label
+      if (l === 0) {
+        vctx.fillStyle = '#eef3ff';
+        vctx.textAlign = 'center';
+        vctx.textBaseline = 'middle';
+        vctx.font = '10px system-ui';
+        vctx.fillText(tokenLabels[i % seqLen], x, y);
+      } else if (l === 4) {
+        const val = logits[selectedToken]?.[i] || 0.5;
+        vctx.fillStyle = '#eef3ff';
+        vctx.textAlign = 'center';
+        vctx.textBaseline = 'middle';
+        vctx.font = 'bold 11px system-ui';
+        vctx.fillText((val * 100).toFixed(0) + '%', x, y);
+      }
+    }
+    
+    // Layer label
+    vctx.fillStyle = '#9eabc7';
+    vctx.textAlign = 'center';
+    vctx.textBaseline = 'bottom';
+    vctx.font = '10px system-ui';
+    vctx.fillText(layerData[l].label, x, 20);
+  }
+  
+  // Legend for residual connections
+  vctx.fillStyle = '#4dd0e1';
+  vctx.font = '9px system-ui';
+  vctx.textAlign = 'left';
+  vctx.fillText('↻ Residual connections', 10, h - 10);
+}
+
+function drawAttentionMatrix(attentionWeights) {
+  const size = attnMatrix.width;
+  amctx.clearRect(0, 0, size, size);
+  
+  if (!attentionWeights || attentionWeights.length === 0) return;
+  
+  const head = attentionWeights[headIdx % attentionWeights.length];
+  if (!head) return;
+  
+  const cellSize = size / seqLen;
+  for (let i = 0; i < seqLen; i++) {
+    for (let j = 0; j < seqLen; j++) {
+      const val = head[i]?.[j] || 0;
+      const intensity = Math.min(1, val * 3);
+      amctx.fillStyle = `rgba(107, 255, 162, ${intensity})`;
+      amctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+      amctx.strokeStyle = '#263653';
+      amctx.lineWidth = 0.5;
+      amctx.strokeRect(j * cellSize, i * cellSize, cellSize, cellSize);
+    }
+  }
+  
+  // Highlight selected token
+  amctx.strokeStyle = '#ffb347';
+  amctx.lineWidth = 2;
+  amctx.strokeRect(0, selectedToken * cellSize, size, cellSize);
+  amctx.strokeRect(selectedToken * cellSize, 0, cellSize, size);
+}
+
+function drawOutputDistribution(logits) {
+  const size = outputDist.width;
+  odctx.clearRect(0, 0, size, size);
+  
+  if (!logits || logits.length === 0) return;
+  
+  const pred = logits[selectedToken] || [0.5, 0.5];
+  const barWidth = size * 0.25;
+  const gap = size * 0.1;
+  const maxHeight = size * 0.7;
+  const startX = size * 0.15;
+  
+  const classes = ['A', 'B'];
+  const colors = ['#4b93ce', '#b388ff'];
+  
+  for (let i = 0; i < 2; i++) {
+    const x = startX + i * (barWidth + gap);
+    const height = pred[i] * maxHeight;
+    const y = size - height - size * 0.15;
+    
+    odctx.fillStyle = colors[i];
+    odctx.fillRect(x, y, barWidth, height);
+    
+    odctx.strokeStyle = '#263653';
+    odctx.lineWidth = 1;
+    odctx.strokeRect(x, y, barWidth, height);
+    
+    odctx.fillStyle = '#eef3ff';
+    odctx.textAlign = 'center';
+    odctx.textBaseline = 'top';
+    odctx.font = '10px system-ui';
+    odctx.fillText(classes[i], x + barWidth/2, size - size * 0.12);
+    odctx.fillText((pred[i] * 100).toFixed(0) + '%', x + barWidth/2, y - 14);
+  }
+}
+
+// ---------- TRAINING STEP ----------
+function step() {
+  // Simulate learning by adjusting weights slightly
+  const lr = 0.01;
+  
+  // Update attention weights
+  for (let h = 0; h < numHeads; h++) {
+    for (let i = 0; i < embedSize; i++) {
+      for (let j = 0; j < Math.floor(embedSize / numHeads); j++) {
+        W_q[h][i][j] += (Math.random() - 0.5) * lr;
+        W_k[h][i][j] += (Math.random() - 0.5) * lr;
+        W_v[h][i][j] += (Math.random() - 0.5) * lr;
+      }
+    }
+  }
+  
+  // Update feed-forward
+  for (let i = 0; i < embedSize; i++) {
+    for (let j = 0; j < embedSize*2; j++) {
+      W_ff1[i][j] += (Math.random() - 0.5) * lr;
+    }
+  }
+  for (let i = 0; i < embedSize*2; i++) {
+    for (let j = 0; j < embedSize; j++) {
+      W_ff2[i][j] += (Math.random() - 0.5) * lr;
+    }
+  }
+  
+  // Update output
+  for (let i = 0; i < embedSize; i++) {
+    for (let j = 0; j < 2; j++) {
+      outputWeights[i][j] += (Math.random() - 0.5) * lr;
+    }
+  }
+  
+  layer++;
+  headIdx = (headIdx + 1) % numHeads;
+  updateDisplay();
+}
+
+// ---------- EVENT BINDING ----------
+document.getElementById('stepBtn').onclick = step;
+
+document.getElementById('autoBtn').onclick = function() {
+  autoMode = !autoMode;
+  this.textContent = autoMode ? '⏸ Pause' : '▶ Auto';
+  if (autoMode) {
+    autoInterval = setInterval(step, 500);
+  } else {
+    clearInterval(autoInterval);
+  }
+};
+
+document.getElementById('resetBtn').onclick = function() {
+  if (autoMode) {
+    autoMode = false;
+    document.getElementById('autoBtn').textContent = '▶ Auto';
+    clearInterval(autoInterval);
+  }
+  initTransformer();
+};
+
+document.getElementById('resetBtn2').onclick = function() {
+  if (autoMode) {
+    autoMode = false;
+    document.getElementById('autoBtn').textContent = '▶ Auto';
+    clearInterval(autoInterval);
+  }
+  initTransformer();
+};
+
+document.getElementById('embedSlider').oninput = function() {
+  embedSize = parseInt(this.value);
+  document.getElementById('embedVal').textContent = embedSize;
+  initTransformer();
+};
+
+document.getElementById('headsSlider').oninput = function() {
+  numHeads = parseInt(this.value);
+  document.getElementById('headsVal').textContent = numHeads;
+  initTransformer();
+};
+
+document.getElementById('seqSlider').oninput = function() {
+  seqLen = parseInt(this.value);
+  document.getElementById('seqVal').textContent = seqLen;
+  initTransformer();
+};
+
+document.getElementById('tempSlider').oninput = function() {
+  temperature = parseFloat(this.value);
+  document.getElementById('tempVal').textContent = temperature.toFixed(1);
+  updateDisplay();
+};
+
+// ---------- INIT ----------
+initTransformer();
+</script>
+</body>
+</html>

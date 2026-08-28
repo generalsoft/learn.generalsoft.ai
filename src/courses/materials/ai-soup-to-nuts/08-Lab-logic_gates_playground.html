@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Soups to Nuts — Logic Gates Playground</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: #0b1020;
+      color: #eef3ff;
+      font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+    }
+    .wrap {
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    .top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+    h1 { font-size: 30px; letter-spacing: -0.3px; }
+    .sub { color: #9eabc7; margin-bottom: 16px; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 18px; }
+    button {
+      background: #1b2945;
+      color: #eef3ff;
+      border: 1px solid #345078;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    button:hover { background: #263b60; }
+    button.active, button.primary { background: #28669d; border-color: #4b93ce; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.6fr 0.9fr;
+      gap: 18px;
+    }
+    .stack { display: flex; flex-direction: column; gap: 18px; }
+    .card {
+      background: #121a2e;
+      border: 1px solid #263653;
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+    .title {
+      font-weight: 750;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      letter-spacing: 0.2px;
+    }
+    .small { font-size: 12px; color: #9eabc7; }
+    .analogy { font-size: 16px; line-height: 1.5; margin-bottom: 4px; }
+    .switches {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      min-height: 90px;
+      margin: 12px 0 4px;
+    }
+    .sw { display: grid; justify-items: center; gap: 4px; }
+    .toggle {
+      width: 54px; height: 28px;
+      border-radius: 20px;
+      background: #303b53;
+      padding: 3px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .toggle i {
+      display: block;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #d5dbea;
+      transition: 0.15s;
+    }
+    .toggle.on { background: #28669d; }
+    .toggle.on i { transform: translateX(26px); background: white; }
+    .light {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 2px solid #5d6c86;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      background: #1d2740;
+      transition: 0.15s;
+    }
+    .light.on { background: #ffe48a; box-shadow: 0 0 25px #ffe48a; border-color: #fff2b8; color: #0b1020; }
+    .wire { width: 50px; height: 3px; background: #52637f; }
+    .gateName { font-size: 26px; font-weight: 850; }
+    .truth { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    .truth th, .truth td { padding: 6px 4px; text-align: center; border-bottom: 1px solid #263653; }
+    .truth th { color: #9eabc7; font-weight: 500; }
+    .truth td.on { color: #6ee7a2; font-weight: 700; }
+    .truth td.off { color: #ff8d8d; font-weight: 700; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0 2px;
+    }
+    .metric {
+      background: #0f1628;
+      border: 1px solid #263653;
+      padding: 8px 10px;
+      border-radius: 9px;
+    }
+    .metric b { display: block; font-size: 20px; }
+    .metric span { color: #9eabc7; font-size: 11px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 7px; margin: 6px 0 4px; }
+    .controlrow { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+    .slider { display: flex; align-items: center; gap: 8px; color: #9eabc7; flex: 1 1 160px; }
+    input[type=range] { flex: 1; min-width: 60px; }
+    .status {
+      background: #0f1628;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #9eabc7;
+      margin-bottom: 10px;
+      border-left: 3px solid #4b93ce;
+    }
+    .steps { display: grid; gap: 10px; }
+    .step {
+      border-left: 3px solid #69b7ff;
+      background: #0f1628;
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+    }
+    .step b { display: block; font-weight: 700; }
+    .canvas {
+      width: 100%;
+      background: #0f1628;
+      border-radius: 10px;
+      display: block;
+    }
+    .net { height: 340px; }
+    .boundary { height: 280px; }
+    .loss { height: 150px; }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>⚡ Logic Gates Playground</h1>
+      <div class="sub">Stairwell switches → Boolean logic → neural network learns the rule</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="gate active" data-gate="OR">OR</button>
+    <button class="gate" data-gate="AND">AND</button>
+    <button class="gate" data-gate="XOR">XOR — payoff</button>
+  </div>
+
+  <div class="grid">
+    <div class="stack">
+      <!-- CARD 1: physical intuition -->
+      <div class="card">
+        <div class="title">1. The physical intuition</div>
+        <div class="analogy" id="analogy"></div>
+        <div class="switches">
+          <div class="sw"><b>Switch A</b><div class="toggle" id="swA"><i></i></div><span id="aVal">OFF (0)</span></div>
+          <div class="wire"></div>
+          <div class="sw"><div class="gateName" id="gateLabel">OR</div><span class="small">logic rule</span></div>
+          <div class="wire"></div>
+          <div class="sw"><b>Light</b><div class="light" id="light">○</div><span id="outVal">OFF (0)</span></div>
+          <div class="sw"><b>Switch B</b><div class="toggle" id="swB"><i></i></div><span id="bVal">OFF (0)</span></div>
+        </div>
+        <div class="small">Click either switch. Then ask the room: “What should happen?”</div>
+      </div>
+
+      <!-- CARD 2: truth table -->
+      <div class="card">
+        <div class="title">2. Truth table</div>
+        <table class="truth"><thead><tr><th>Switch A</th><th>Switch B</th><th>Target</th><th>Network prediction</th></tr></thead><tbody id="truthBody"></tbody></table>
+      </div>
+
+      <!-- CARD 3: neural network -->
+      <div class="card">
+        <div class="title">3. Watch the tiny neural network learn</div>
+        <canvas class="canvas net" id="net"></canvas>
+        <div class="metrics">
+          <div class="metric"><b id="epoch">0</b><span>training steps</span></div>
+          <div class="metric"><b id="lossVal">0.693</b><span>loss</span></div>
+          <div class="metric"><b id="accuracy">50%</b><span>rounded accuracy</span></div>
+        </div>
+      </div>
+
+      <!-- CARD 4: decision boundary -->
+      <div class="card">
+        <div class="title">4. What has the network learned?</div>
+        <canvas class="canvas boundary" id="boundary"></canvas>
+      </div>
+
+      <!-- CARD 5: loss -->
+      <div class="card">
+        <div class="title">5. Loss — is learning improving?</div>
+        <canvas class="canvas loss" id="loss"></canvas>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="stack">
+      <div class="card">
+        <div class="title">Training controls</div>
+        <div class="status" id="status">OR is selected. Press Train.</div>
+        <div class="controls">
+          <button class="primary" id="train">▶ Train</button>
+          <button id="step">Step ×1</button>
+          <button id="ten">Step ×10</button>
+          <button id="hundred">Train ×100</button>
+          <button id="reset">↺ Reset</button>
+        </div>
+        <div class="controlrow">
+          <label class="slider">Learning rate <input id="lr" type="range" min=".01" max="2" step=".01" value=".5"><b id="lrVal">0.50</b></label>
+          <label class="slider">Hidden neurons <input id="hidden" type="range" min="2" max="6" step="1" value="4"><b id="hiddenVal">4</b></label>
+          <label class="slider">Speed <input id="speed" type="range" min="1" max="120" step="1" value="30"><b id="speedVal">30</b>/s</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title">Teaching script</div>
+        <div class="steps">
+          <div class="step"><b>Start with OR</b>“If either switch can make the light turn on, what is the rule?”</div>
+          <div class="step"><b>Translate</b>OFF = 0, ON = 1. The four switch combinations become four training examples.</div>
+          <div class="step"><b>Let AI learn</b>“I am not programming the answer. I am showing examples and letting the network adjust its weights.”</div>
+          <div class="step"><b>Watch loss fall</b>“The network is measuring how wrong it is, then changing itself to become less wrong.”</div>
+          <div class="step"><b>Payoff: XOR</b>“Now make the light turn on only when exactly one switch is on.” The boundary becomes non-linear.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title">Key connection to modern AI</div>
+        <p style="margin-top:0">The demo is tiny, but the loop is real:</p>
+        <div style="font-size:17px;text-align:center;padding:8px;background:#0f1628;border-radius:10px;margin:6px 0;">data → prediction → loss → gradients → weight update → repeat</div>
+        <p class="small">Students can see the machinery changing.</p>
+      </div>
+
+      <div class="card">
+        <div class="title">Suggested classroom challenge</div>
+        <p><b>Challenge 1:</b> Can you make OR learn in fewer steps?</p>
+        <p><b>Challenge 2:</b> Make the learning rate too high. What happens?</p>
+        <p><b>Challenge 3:</b> Switch to XOR. What changed?</p>
+        <p style="margin-bottom:0"><b>Challenge 4:</b> Reduce hidden neurons. How few can XOR learn?</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- GATE DEFINITIONS ----------
+  const gates = {
+    OR:  { truth: [0,1,1,1], analogy: "OR is our simple stairwell-switch intuition: the light is ON if either input is ON." },
+    AND: { truth: [0,0,0,1], analogy: "AND means both conditions must be ON. The light comes on only when A AND B are both ON." },
+    XOR: { truth: [0,1,1,0], analogy: "XOR is the twist: the light is ON when exactly one switch is ON. Both ON → OFF again. The hidden layer earns its keep." }
+  };
+
+  // ---------- STATE ----------
+  let gate = 'OR';
+  let hiddenN = 4;
+  let lr = 0.5;
+  let speed = 30;
+  let epoch = 0;
+  let losses = [];
+  let running = false;
+
+  // network weights
+  let W1 = [], b1 = [], W2 = [], b2 = 0;
+
+  const X = [[0,0],[0,1],[1,0],[1,1]];
+
+  // canvases
+  const nc = document.getElementById('net');
+  const bc = document.getElementById('boundary');
+  const lc = document.getElementById('loss');
+  const nctx = nc.getContext('2d');
+  const bctx = bc.getContext('2d');
+  const lctx = lc.getContext('2d');
+
+  // ---------- HELPERS ----------
+  function rand() { return (Math.random()*2 - 1) * 0.8; }
+
+  function initWeights() {
+    W1 = Array.from({ length: hiddenN }, () => [rand(), rand()]);
+    b1 = Array.from({ length: hiddenN }, rand);
+    W2 = Array.from({ length: hiddenN }, rand);
+    b2 = rand();
+    epoch = 0;
+    losses = [];
+    running = false;
+    document.getElementById('train').textContent = '▶ Train';
+  }
+
+  function sig(z) { return 1 / (1 + Math.exp(-Math.max(-30, Math.min(30, z)))); }
+
+  function forward(x) {
+    const a = W1.map((w, i) => Math.tanh(w[0]*x[0] + w[1]*x[1] + b1[i]));
+    const p = sig(a.reduce((s, v, i) => s + v * W2[i], b2));
+    return { a, p };
+  }
+
+  // ---------- TRAIN ONE STEP ----------
+  function trainOne() {
+    const Y = gates[gate].truth;
+    const gW1 = Array.from({ length: hiddenN }, () => [0,0]);
+    const gb1 = Array(hiddenN).fill(0);
+    const gW2 = Array(hiddenN).fill(0);
+    let gb2 = 0;
+    let loss = 0;
+
+    for (let k = 0; k < 4; k++) {
+      const f = forward(X[k]);
+      const p = f.p;
+      const y = Y[k];
+      loss += -(y * Math.log(p + 1e-9) + (1 - y) * Math.log(1 - p + 1e-9));
+      const d2 = p - y;
+
+      for (let i = 0; i < hiddenN; i++) {
+        gW2[i] += d2 * f.a[i];
+      }
+      gb2 += d2;
+
+      for (let i = 0; i < hiddenN; i++) {
+        const d1 = d2 * W2[i] * (1 - f.a[i] * f.a[i]);
+        gW1[i][0] += d1 * X[k][0];
+        gW1[i][1] += d1 * X[k][1];
+        gb1[i] += d1;
+      }
+    }
+
+    // update
+    for (let i = 0; i < hiddenN; i++) {
+      W2[i] -= lr * gW2[i] / 4;
+      b1[i] -= lr * gb1[i] / 4;
+      W1[i][0] -= lr * gW1[i][0] / 4;
+      W1[i][1] -= lr * gW1[i][1] / 4;
+    }
+    b2 -= lr * gb2 / 4;
+
+    epoch++;
+    loss /= 4;
+    losses.push(loss);
+    if (losses.length > 500) losses.shift();
+  }
+
+  // ---------- RENDERING ----------
+  function resize(canvas) {
+    const dpr = devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    return [rect.width, rect.height, dpr];
+  }
+
+  function drawNet() {
+    const [w, h, dpr] = resize(nc);
+    nctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    nctx.clearRect(0, 0, w, h);
+
+    const layers = [2, hiddenN, 1];
+    const xs = [w*0.16, w*0.52, w*0.84];
+    const pos = (layer, idx) => [xs[layer], h * (idx + 1) / (layers[layer] + 1)];
+
+    const swA = document.getElementById('swA').classList.contains('on') ? 1 : 0;
+    const swB = document.getElementById('swB').classList.contains('on') ? 1 : 0;
+    const f = forward([swA, swB]);
+    const acts = [[swA, swB], f.a, [f.p]];
+
+    // edges input -> hidden
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < hiddenN; j++) {
+        const [x1,y1] = pos(0, i);
+        const [x2,y2] = pos(1, j);
+        const v = W1[j][i];
+        nctx.beginPath();
+        nctx.moveTo(x1, y1);
+        nctx.lineTo(x2, y2);
+        nctx.lineWidth = 1 + Math.min(5, Math.abs(v) * 4);
+        nctx.globalAlpha = 0.25 + Math.min(0.65, Math.abs(v));
+        nctx.strokeStyle = v >= 0 ? '#69b7ff' : '#ff8d8d';
+        nctx.stroke();
+      }
+    }
+    // edges hidden -> output
+    for (let j = 0; j < hiddenN; j++) {
+      const [x1,y1] = pos(1, j);
+      const [x2,y2] = pos(2, 0);
+      const v = W2[j];
+      nctx.beginPath();
+      nctx.moveTo(x1, y1);
+      nctx.lineTo(x2, y2);
+      nctx.lineWidth = 1 + Math.min(5, Math.abs(v) * 4);
+      nctx.globalAlpha = 0.25 + Math.min(0.65, Math.abs(v));
+      nctx.strokeStyle = v >= 0 ? '#69b7ff' : '#ff8d8d';
+      nctx.stroke();
+    }
+    nctx.globalAlpha = 1;
+
+    // nodes
+    layers.forEach((num, l) => {
+      for (let i = 0; i < num; i++) {
+        const [x, y] = pos(l, i);
+        const v = acts[l][i] !== undefined ? acts[l][i] : 0;
+        nctx.beginPath();
+        nctx.arc(x, y, 21, 0, Math.PI*2);
+        nctx.fillStyle = '#111a2c';
+        nctx.fill();
+        nctx.lineWidth = 2;
+        nctx.strokeStyle = v >= 0.5 ? '#69b7ff' : '#ff8d8d';
+        nctx.stroke();
+        nctx.fillStyle = '#eef3ff';
+        nctx.textAlign = 'center';
+        nctx.textBaseline = 'middle';
+        nctx.font = '12px system-ui';
+        nctx.fillText(v.toFixed(2), x, y);
+      }
+    });
+    nctx.fillStyle = '#9eabc7';
+    nctx.font = '12px system-ui';
+    nctx.textAlign = 'center';
+    nctx.fillText('Input', xs[0], 18);
+    nctx.fillText('Hidden layer', xs[1], 18);
+    nctx.fillText('Output', xs[2], 18);
+  }
+
+  function drawBoundary() {
+    const [w, h, dpr] = resize(bc);
+    bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    bctx.clearRect(0, 0, w, h);
+    const pad = 34;
+    const W = w - 2*pad;
+    const H = h - 2*pad;
+    const res = 45;
+
+    for (let gy = 0; gy < res; gy++) {
+      for (let gx = 0; gx < res; gx++) {
+        const a = gx / (res - 1);
+        const b = 1 - gy / (res - 1);
+        const q = forward([a, b]).p;
+        bctx.fillStyle = `rgba(105,183,255,${0.04 + 0.40 * q})`;
+        bctx.fillRect(pad + gx*W/(res-1), pad + gy*H/(res-1), W/(res-1)+1, H/(res-1)+1);
+        bctx.fillStyle = `rgba(255,141,141,${0.04 + 0.40 * (1-q)})`;
+        bctx.fillRect(pad + gx*W/(res-1), pad + gy*H/(res-1), W/(res-1)+1, H/(res-1)+1);
+      }
+    }
+    bctx.strokeStyle = '#52637f';
+    bctx.strokeRect(pad, pad, W, H);
+    const Y = gates[gate].truth;
+    Y.forEach((y, i) => {
+      const x = X[i];
+      const px = pad + x[0] * W;
+      const py = pad + (1 - x[1]) * H;
+      bctx.beginPath();
+      bctx.arc(px, py, 9, 0, Math.PI*2);
+      bctx.fillStyle = y ? '#69b7ff' : '#ff8d8d';
+      bctx.fill();
+      bctx.strokeStyle = '#fff';
+      bctx.stroke();
+      bctx.fillStyle = '#eef3ff';
+      bctx.font = '11px system-ui';
+      bctx.textAlign = 'left';
+      bctx.fillText('target '+y, px+12, py+4);
+    });
+  }
+
+  function drawLoss() {
+    const [w, h, dpr] = resize(lc);
+    lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    lctx.clearRect(0, 0, w, h);
+    const pad = 28;
+    const W = w - 2*pad;
+    const H = h - 2*pad;
+    lctx.strokeStyle = '#52637f';
+    lctx.strokeRect(pad, pad, W, H);
+    if (losses.length < 2) {
+      lctx.fillStyle = '#9eabc7';
+      lctx.font = '13px system-ui';
+      lctx.textAlign = 'center';
+      lctx.fillText('loss history', w/2, h/2 + 5);
+      return;
+    }
+    const mx = Math.max(0.7, ...losses);
+    const mn = Math.min(0, ...losses);
+    const rg = mx - mn || 1;
+    lctx.beginPath();
+    for (let i = 0; i < losses.length; i++) {
+      const x = pad + (i / (losses.length - 1)) * W;
+      const y = pad + (1 - (losses[i] - mn) / rg) * H;
+      i === 0 ? lctx.moveTo(x, y) : lctx.lineTo(x, y);
+    }
+    lctx.strokeStyle = '#6ee7a2';
+    lctx.lineWidth = 2.5;
+    lctx.stroke();
+  }
+
+  function updateUI() {
+    const Y = gates[gate].truth;
+    const ps = X.map(x => forward(x).p);
+    const good = ps.reduce((s, p, i) => s + (Math.round(p) === Y[i]), 0);
+
+    document.getElementById('gateLabel').textContent = gate;
+    document.getElementById('analogy').textContent = gates[gate].analogy;
+    document.getElementById('epoch').textContent = epoch;
+    document.getElementById('lossVal').textContent = (losses.length ? losses[losses.length-1] : 0.693).toFixed(3);
+    document.getElementById('accuracy').textContent = Math.round(good/4 * 100) + '%';
+
+    document.getElementById('truthBody').innerHTML = X.map((x, i) =>
+      `<tr><td>${x[0]}</td><td>${x[1]}</td><td class="${Y[i]?'on':'off'}">${Y[i]}</td><td>${ps[i].toFixed(3)}</td></tr>`
+    ).join('');
+
+    const swA = document.getElementById('swA').classList.contains('on') ? 1 : 0;
+    const swB = document.getElementById('swB').classList.contains('on') ? 1 : 0;
+    const out = gate === 'OR' ? (swA|swB) : gate === 'AND' ? (swA&swB) : (swA^swB);
+    document.getElementById('aVal').textContent = swA ? 'ON (1)' : 'OFF (0)';
+    document.getElementById('bVal').textContent = swB ? 'ON (1)' : 'OFF (0)';
+    document.getElementById('outVal').textContent = out ? 'ON (1)' : 'OFF (0)';
+    const light = document.getElementById('light');
+    light.classList.toggle('on', !!out);
+    light.textContent = out ? '●' : '○';
+
+    document.getElementById('status').textContent = epoch ?
+      `${gate}: training step ${epoch}. Weights are adjusting.` :
+      `${gate} is selected. Press Train.`;
+  }
+
+  function render() {
+    updateUI();
+    drawNet();
+    drawBoundary();
+    drawLoss();
+  }
+
+  // ---------- TRAINING LOOP ----------
+  function loop() {
+    if (!running) return;
+    const stepsPerFrame = Math.max(1, Math.round(speed / 15));
+    for (let i = 0; i < stepsPerFrame; i++) trainOne();
+    render();
+    const lastLoss = losses.length ? losses[losses.length-1] : 1;
+    if (lastLoss < 0.003) {
+      running = false;
+      document.getElementById('train').textContent = '▶ Train';
+      document.getElementById('status').textContent = `${gate} learned! Try another gate.`;
+    } else {
+      requestAnimationFrame(loop);
+    }
+  }
+
+  // ---------- EVENT BINDING ----------
+  document.querySelectorAll('.gate').forEach(btn => {
+    btn.onclick = () => {
+      gate = btn.dataset.gate;
+      document.querySelectorAll('.gate').forEach(b => b.classList.toggle('active', b === btn));
+      initWeights();
+      render();
+      document.getElementById('status').textContent = `${gate} selected. Press Train.`;
+    };
+  });
+
+  ['swA', 'swB'].forEach(id => {
+    document.getElementById(id).onclick = () => {
+      document.getElementById(id).classList.toggle('on');
+      render();
+    };
+  });
+
+  document.getElementById('train').onclick = () => {
+    running = !running;
+    document.getElementById('train').textContent = running ? '⏸ Pause' : '▶ Train';
+    if (running) loop();
+  };
+
+  document.getElementById('step').onclick = () => {
+    running = false;
+    document.getElementById('train').textContent = '▶ Train';
+    trainOne();
+    render();
+  };
+
+  document.getElementById('ten').onclick = () => {
+    running = false;
+    document.getElementById('train').textContent = '▶ Train';
+    for (let i=0; i<10; i++) trainOne();
+    render();
+  };
+
+  document.getElementById('hundred').onclick = () => {
+    running = false;
+    document.getElementById('train').textContent = '▶ Train';
+    for (let i=0; i<100; i++) trainOne();
+    render();
+  };
+
+  document.getElementById('reset').onclick = () => {
+    running = false;
+    document.getElementById('train').textContent = '▶ Train';
+    initWeights();
+    render();
+    document.getElementById('status').textContent = `${gate} reset. Press Train.`;
+  };
+
+  document.getElementById('lr').oninput = e => {
+    lr = parseFloat(e.target.value);
+    document.getElementById('lrVal').textContent = lr.toFixed(2);
+  };
+
+  document.getElementById('speed').oninput = e => {
+    speed = parseInt(e.target.value, 10);
+    document.getElementById('speedVal').textContent = speed;
+  };
+
+  document.getElementById('hidden').oninput = e => {
+    hiddenN = parseInt(e.target.value, 10);
+    document.getElementById('hiddenVal').textContent = hiddenN;
+    initWeights();
+    render();
+  };
+
+  window.onresize = render;
+
+  // ---------- START ----------
+  initWeights();
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Handwriting demo — 0 vs 1 (Fully Working)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: #0b1020;
+      color: #eef3ff;
+      font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+    }
+    .wrap { max-width: 1300px; margin: 0 auto; }
+    h1 { font-size: 28px; letter-spacing: -0.3px; }
+    .sub { color: #9eabc7; margin-bottom: 16px; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 12px;
+    }
+    .card {
+      background: #121a2e;
+      border: 1px solid #263653;
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+    .title {
+      font-weight: 750;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+    .canvas-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 6px 0;
+      position: relative;
+    }
+    .draw-canvas {
+      background: #0a0f1e;
+      border-radius: 12px;
+      border: 2px solid #345078;
+      touch-action: none;
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 1/1;
+      cursor: crosshair;
+      display: block;
+    }
+    .mode-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #28669d;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid #4b93ce;
+      pointer-events: none;
+    }
+    .mode-badge.test { background: #6d2e3a; border-color: #a5454a; }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 6px;
+    }
+    button {
+      background: #1b2945;
+      color: #eef3ff;
+      border: 1px solid #345078;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+      font-size: 14px;
+    }
+    button:hover { background: #263b60; }
+    button.primary { background: #28669d; border-color: #4b93ce; }
+    button.danger { background: #6d2e3a; border-color: #a5454a; }
+    button.success { background: #1f6d4a; border-color: #3a9d6e; }
+    .status {
+      background: #0f1628;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #9eabc7;
+      border-left: 3px solid #4b93ce;
+      margin: 6px 0 10px;
+      font-size: 14px;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .metric {
+      background: #0f1628;
+      border: 1px solid #263653;
+      padding: 6px 10px;
+      border-radius: 9px;
+    }
+    .metric b { display: block; font-size: 20px; }
+    .metric span { color: #9eabc7; font-size: 11px; }
+    .sample-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 160px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    .sample-item {
+      background: #0a0f1e;
+      border-radius: 6px;
+      border: 1px solid #263653;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 11px;
+      color: #9eabc7;
+    }
+    .sample-item canvas {
+      width: 40px;
+      height: 40px;
+      image-rendering: pixelated;
+      border-radius: 4px;
+      background: #0a0f1e;
+    }
+    .slider-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .slider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9eabc7;
+      flex: 1 1 140px;
+    }
+    input[type=range] { flex: 1; min-width: 60px; }
+    .flex-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .badge { background: #1b2945; padding: 2px 10px; border-radius: 20px; font-size: 13px; }
+    .prediction-box {
+      background: #0a0f1e;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 10px 0;
+      text-align: center;
+      border: 2px solid #345078;
+    }
+    .prediction-box .big { font-size: 48px; font-weight: 900; line-height: 1.2; }
+    .prediction-box .conf { font-size: 18px; color: #9eabc7; }
+    .prediction-box .label { font-size: 14px; color: #9eabc7; margin-bottom: 4px; }
+    .test-result {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .test-result.correct { background: #1f6d4a40; border: 1px solid #3a9d6e; color: #6ee7a2; }
+    .test-result.wrong { background: #6d2e3a40; border: 1px solid #a5454a; color: #ff8d8d; }
+    .small { font-size: 12px; color: #9eabc7; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+    <div>
+      <h1>✍️ Handwriting demo — 0 vs 1</h1>
+      <div class="sub">Draw a digit, label it to train, then switch to Test Mode to see AI predictions.</div>
+    </div>
+    <button id="resetAll" class="danger">↺ Reset all</button>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: drawing area -->
+    <div class="card">
+      <div class="title">1. Draw &amp; label</div>
+      <div class="canvas-wrap">
+        <canvas class="draw-canvas" id="drawCanvas" width="280" height="280"></canvas>
+        <div class="mode-badge" id="modeBadge">📚 TRAIN</div>
+      </div>
+      <div class="btn-group">
+        <button id="labelZero" class="primary">📌 Label as 0</button>
+        <button id="labelOne" class="primary">📌 Label as 1</button>
+        <button id="clearDraw">🗑️ Clear</button>
+        <button id="batchAdd">📥 Add +8 variants</button>
+        <button id="toggleMode" class="success">🎯 Switch to Test</button>
+      </div>
+      <div class="status" id="statusMsg">Draw a digit, then click "Label as 0" or "Label as 1" to add it.</div>
+      <div class="flex-row">
+        <span class="badge">Dataset: <b id="countZero">0</b> zeros · <b id="countOne">0</b> ones</span>
+        <span class="badge">Total: <b id="totalSamples">0</b></span>
+      </div>
+      <div class="sample-grid" id="sampleGallery"></div>
+    </div>
+
+    <!-- RIGHT: training & test -->
+    <div class="card">
+      <div class="title">2. Train &amp; test</div>
+      
+      <div id="testPanel" style="display: none;">
+        <div class="prediction-box">
+          <div class="label">🤖 AI predicts:</div>
+          <div class="big" id="testPrediction">—</div>
+          <div class="conf" id="testConfidence">draw something to test</div>
+        </div>
+        <div id="testResult" class="test-result" style="display: none;"></div>
+        <div style="display: flex; gap: 8px; justify-content: center; margin: 8px 0;">
+          <button id="clearTestResult">Clear result</button>
+          <button id="submitTest" class="primary">✅ Submit as correct</button>
+        </div>
+      </div>
+
+      <div id="trainPanel">
+        <div class="metrics">
+          <div class="metric"><b id="epochDisplay">0</b><span>epochs</span></div>
+          <div class="metric"><b id="lossDisplay">—</b><span>loss</span></div>
+          <div class="metric"><b id="accDisplay">—</b><span>accuracy</span></div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0;">
+          <button id="trainBtn" class="primary">▶ Train</button>
+          <button id="stepBtn">Step ×10</button>
+          <button id="step100Btn">Step ×100</button>
+          <button id="resetWeights">↺ Reset weights</button>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <label class="slider">Learning rate <input id="lrSlider" type="range" min="0.01" max="1.5" step="0.01" value="0.3"><b id="lrVal">0.30</b></label>
+        <label class="slider">Hidden size <input id="hiddenSlider" type="range" min="2" max="12" step="1" value="6"><b id="hiddenVal">6</b></label>
+      </div>
+      <div class="status" id="trainStatus">Ready. Add some labelled samples, then press Train.</div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px;">
+        <div>
+          <div class="small" style="margin-bottom: 2px;">Decision map</div>
+          <canvas id="decisionCanvas" width="200" height="200" style="width:100%; aspect-ratio:1/1; background:#0a0f1e; border-radius:10px; border:1px solid #263653;"></canvas>
+        </div>
+        <div>
+          <div class="small" style="margin-bottom: 2px;">Loss curve</div>
+          <canvas id="lossCanvas" width="200" height="200" style="width:100%; aspect-ratio:1/1; background:#0a0f1e; border-radius:10px; border:1px solid #263653;"></canvas>
+        </div>
+      </div>
+      <div style="margin-top: 8px; font-size: 13px; color: #9eabc7;">
+        <span>Live prediction: <b id="livePred">—</b></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- SETUP ----------
+const drawCanvas = document.getElementById('drawCanvas');
+const ctx = drawCanvas.getContext('2d');
+const decisionCanvas = document.getElementById('decisionCanvas');
+const dctx = decisionCanvas.getContext('2d');
+const lossCanvas = document.getElementById('lossCanvas');
+const lctx = lossCanvas.getContext('2d');
+
+// State
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+let dataset = [];
+let losses = [];
+let epoch = 0;
+let hiddenSize = 6;
+let lr = 0.3;
+let W1 = [], b1 = [], W2 = [], b2 = 0;
+let isTestMode = false;
+let lastTestResult = null;
+
+// ---------- DRAWING ----------
+function initDraw() {
+  ctx.fillStyle = '#0a0f1e';
+  ctx.fillRect(0, 0, 280, 280);
+  ctx.strokeStyle = '#9eabc7';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0, 0, 280, 280);
+}
+initDraw();
+
+function getCoords(e) {
+  const rect = drawCanvas.getBoundingClientRect();
+  const scaleX = drawCanvas.width / rect.width;
+  const scaleY = drawCanvas.height / rect.height;
+  let cx, cy;
+  if (e.touches) {
+    cx = e.touches[0].clientX;
+    cy = e.touches[0].clientY;
+    e.preventDefault();
+  } else {
+    cx = e.clientX;
+    cy = e.clientY;
+  }
+  return { 
+    x: Math.max(0, Math.min(drawCanvas.width, (cx - rect.left) * scaleX)), 
+    y: Math.max(0, Math.min(drawCanvas.height, (cy - rect.top) * scaleY))
+  };
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  isDrawing = true;
+  const pos = getCoords(e);
+  lastX = pos.x; 
+  lastY = pos.y;
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#f0f4ff';
+  ctx.fill();
+  updateAllPredictions();
+}
+
+function doDraw(e) {
+  e.preventDefault();
+  if (!isDrawing) return;
+  const pos = getCoords(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.strokeStyle = '#f0f4ff';
+  ctx.lineWidth = 14;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  lastX = pos.x; 
+  lastY = pos.y;
+  updateAllPredictions();
+}
+
+function stopDraw(e) { 
+  if (e) e.preventDefault(); 
+  isDrawing = false; 
+}
+
+drawCanvas.addEventListener('mousedown', startDraw);
+drawCanvas.addEventListener('mousemove', doDraw);
+drawCanvas.addEventListener('mouseup', stopDraw);
+drawCanvas.addEventListener('mouseleave', stopDraw);
+drawCanvas.addEventListener('touchstart', startDraw, { passive: false });
+drawCanvas.addEventListener('touchmove', doDraw, { passive: false });
+drawCanvas.addEventListener('touchend', stopDraw, { passive: false });
+
+// ---------- PREDICTION UPDATE ----------
+function updateAllPredictions() {
+  // Get fresh pixels from the canvas
+  const pixels = getPixels(drawCanvas);
+  const hasInkFlag = hasInk(pixels);
+  
+  // Update live prediction (always visible)
+  if (dataset.length > 0 && hasInkFlag) {
+    const p = predict(pixels);
+    document.getElementById('livePred').textContent = `${p.toFixed(3)} → ${p > 0.5 ? '1' : '0'}`;
+  } else {
+    document.getElementById('livePred').textContent = hasInkFlag ? '— (train first)' : '—';
+  }
+  
+  // Update test prediction if in test mode
+  if (isTestMode) {
+    const testPredEl = document.getElementById('testPrediction');
+    const testConfEl = document.getElementById('testConfidence');
+    const testResultEl = document.getElementById('testResult');
+    
+    if (dataset.length === 0) {
+      testPredEl.textContent = '⚠️';
+      testConfEl.textContent = 'train the AI first!';
+      testResultEl.style.display = 'none';
+      return;
+    }
+    
+    if (!hasInkFlag) {
+      testPredEl.textContent = '—';
+      testConfEl.textContent = 'draw something to test';
+      testResultEl.style.display = 'none';
+      return;
+    }
+    
+    const p = predict(pixels);
+    const pred = p > 0.5 ? 1 : 0;
+    const conf = p > 0.5 ? p : 1 - p;
+    
+    testPredEl.textContent = pred;
+    testConfEl.textContent = `confidence: ${(conf*100).toFixed(1)}%`;
+    lastTestResult = { prediction: pred, confidence: conf };
+    testResultEl.style.display = 'none';
+  }
+}
+
+// ---------- NEURAL NET ----------
+function sig(x) { return 1 / (1 + Math.exp(-Math.max(-30, Math.min(30, x)))); }
+
+function initWeights() {
+  const h = hiddenSize;
+  W1 = Array.from({ length: h }, () => new Float32Array(784).map(() => (Math.random()*2-1)*0.5));
+  b1 = new Float32Array(h).map(() => (Math.random()*2-1)*0.3);
+  W2 = new Float32Array(h).map(() => (Math.random()*2-1)*0.3);
+  b2 = (Math.random()*2-1)*0.3;
+  epoch = 0;
+  losses = [];
+}
+
+function forward(pixels) {
+  const h = hiddenSize;
+  const a = new Float32Array(h);
+  for (let j = 0; j < h; j++) {
+    let sum = b1[j];
+    for (let i = 0; i < 784; i++) sum += W1[j][i] * pixels[i];
+    a[j] = Math.tanh(sum);
+  }
+  let out = b2;
+  for (let j = 0; j < h; j++) out += W2[j] * a[j];
+  return { a, p: sig(out) };
+}
+
+function trainOne() {
+  if (dataset.length < 2) return;
+  const h = hiddenSize;
+  const gradW1 = Array.from({ length: h }, () => new Float32Array(784));
+  const gradb1 = new Float32Array(h);
+  const gradW2 = new Float32Array(h);
+  let gradb2 = 0, loss = 0;
+  const n = dataset.length;
+
+  for (let idx = 0; idx < n; idx++) {
+    const { pixels, label } = dataset[idx];
+    const f = forward(pixels);
+    const d2 = f.p - label;
+    loss += -(label * Math.log(f.p + 1e-9) + (1 - label) * Math.log(1 - f.p + 1e-9));
+    for (let j = 0; j < h; j++) {
+      gradW2[j] += d2 * f.a[j];
+      const d1 = d2 * W2[j] * (1 - f.a[j] * f.a[j]);
+      gradb1[j] += d1;
+      for (let i = 0; i < 784; i++) gradW1[j][i] += d1 * pixels[i];
+    }
+    gradb2 += d2;
+  }
+
+  for (let j = 0; j < h; j++) {
+    for (let i = 0; i < 784; i++) W1[j][i] -= lr * gradW1[j][i] / n;
+    b1[j] -= lr * gradb1[j] / n;
+    W2[j] -= lr * gradW2[j] / n;
+  }
+  b2 -= lr * gradb2 / n;
+  losses.push(loss / n);
+  if (losses.length > 400) losses.shift();
+  epoch++;
+}
+
+function predict(pixels) { return forward(pixels).p; }
+
+// ---------- IMAGE PROCESSING ----------
+function getPixels(canvas) {
+  const w = 28, h = 28;
+  const temp = document.createElement('canvas');
+  temp.width = w; temp.height = h;
+  const tctx = temp.getContext('2d');
+  tctx.drawImage(canvas, 0, 0, w, h);
+  const data = tctx.getImageData(0, 0, w, h).data;
+  const pixels = new Float32Array(w * h);
+  for (let i = 0; i < w*h; i++) {
+    const idx = i * 4;
+    const r = data[idx], g = data[idx+1], b = data[idx+2];
+    pixels[i] = Math.min(1, Math.max(0, 1 - (0.299*r + 0.587*g + 0.114*b) / 255));
+  }
+  return pixels;
+}
+
+function hasInk(pixels) { 
+  let sum = 0;
+  for (let i = 0; i < pixels.length; i++) {
+    sum += pixels[i];
+    if (sum > 1) return true;
+  }
+  return sum > 0.5;
+}
+
+// ---------- DATASET ----------
+function addSample(label, pixels) {
+  dataset.push({ pixels, label });
+  renderGallery();
+  updateCounts();
+  updateAllPredictions();
+}
+
+function addCurrent(label) {
+  const pixels = getPixels(drawCanvas);
+  if (!hasInk(pixels)) {
+    document.getElementById('statusMsg').textContent = '⚠️ Please draw something first!';
+    return;
+  }
+  addSample(label, pixels);
+  document.getElementById('statusMsg').textContent = `✅ Added ${label}`;
+}
+
+function addVariants(label) {
+  const base = getPixels(drawCanvas);
+  if (!hasInk(base)) {
+    document.getElementById('statusMsg').textContent = '⚠️ Please draw something first!';
+    return;
+  }
+  addSample(label, base);
+  const w = 28, h = 28;
+  for (let v = 0; v < 8; v++) {
+    const ox = (Math.random() - 0.5) * 3;
+    const oy = (Math.random() - 0.5) * 3;
+    const scale = 0.85 + Math.random() * 0.3;
+    const variant = new Float32Array(w*h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const sx = (x - 14) * scale + 14 + ox;
+        const sy = (y - 14) * scale + 14 + oy;
+        if (sx < 0 || sx >= w || sy < 0 || sy >= h) continue;
+        const ix = Math.floor(sx), iy = Math.floor(sy);
+        const fx = sx - ix, fy = sy - iy;
+        const idx = iy * w + ix;
+        if (idx >= 0 && idx < w*h) {
+          const v00 = base[idx] || 0;
+          const v10 = (ix+1 < w) ? base[iy*w + ix+1] : 0;
+          const v01 = (iy+1 < h) ? base[(iy+1)*w + ix] : 0;
+          const v11 = (ix+1 < w && iy+1 < h) ? base[(iy+1)*w + ix+1] : 0;
+          variant[y*w + x] = v00*(1-fx)*(1-fy) + v10*fx*(1-fy) + v01*(1-fx)*fy + v11*fx*fy;
+        }
+      }
+    }
+    addSample(label, variant);
+  }
+  document.getElementById('statusMsg').textContent = `✅ Added ${label} + 8 variants (total ${dataset.length})`;
+}
+
+function clearDataset() {
+  dataset = [];
+  losses = [];
+  epoch = 0;
+  renderGallery();
+  updateCounts();
+  updateAllPredictions();
+  document.getElementById('statusMsg').textContent = '🧹 Dataset cleared.';
+}
+
+function updateCounts() {
+  let z = 0, o = 0;
+  dataset.forEach(d => d.label === 0 ? z++ : o++);
+  document.getElementById('countZero').textContent = z;
+  document.getElementById('countOne').textContent = o;
+  document.getElementById('totalSamples').textContent = dataset.length;
+}
+
+function renderGallery() {
+  const gallery = document.getElementById('sampleGallery');
+  gallery.innerHTML = '';
+  dataset.slice(-30).forEach(d => {
+    const div = document.createElement('div');
+    div.className = 'sample-item';
+    const c = document.createElement('canvas');
+    c.width = 28; c.height = 28;
+    const ct = c.getContext('2d');
+    const img = ct.createImageData(28, 28);
+    for (let j = 0; j < 784; j++) {
+      const v = Math.round(d.pixels[j] * 255);
+      img.data[j*4] = v; img.data[j*4+1] = v; img.data[j*4+2] = v; img.data[j*4+3] = 255;
+    }
+    ct.putImageData(img, 0, 0);
+    div.appendChild(c);
+    const lbl = document.createElement('span');
+    lbl.textContent = d.label;
+    div.appendChild(lbl);
+    gallery.appendChild(div);
+  });
+}
+
+// ---------- TRAINING ----------
+function trainEpochs(n) {
+  if (dataset.length < 2) {
+    document.getElementById('trainStatus').textContent = '⚠️ Need samples of both 0 and 1.';
+    return;
+  }
+  for (let i = 0; i < n; i++) {
+    trainOne();
+    if (losses.length > 0 && losses[losses.length-1] < 0.001) break;
+  }
+  updateUI();
+  renderDecision();
+  renderLoss();
+  document.getElementById('trainStatus').textContent = `✅ Trained ${n} steps. Epoch ${epoch}, loss ${losses.length ? losses[losses.length-1].toFixed(4) : '—'}`;
+  updateAllPredictions();
+}
+
+function updateUI() {
+  document.getElementById('epochDisplay').textContent = epoch;
+  document.getElementById('lossDisplay').textContent = losses.length ? losses[losses.length-1].toFixed(4) : '—';
+  if (dataset.length > 0) {
+    let correct = 0;
+    dataset.forEach(d => {
+      const p = predict(d.pixels);
+      if ((p > 0.5 ? 1 : 0) === d.label) correct++;
+    });
+    document.getElementById('accDisplay').textContent = Math.round(correct/dataset.length*100) + '%';
+  } else {
+    document.getElementById('accDisplay').textContent = '—';
+  }
+  updateAllPredictions();
+}
+
+// ---------- VISUALISATIONS ----------
+function renderDecision() {
+  const w = decisionCanvas.width, h = decisionCanvas.height;
+  const res = 40;
+  dctx.clearRect(0, 0, w, h);
+  for (let i = 0; i < res; i++) {
+    for (let j = 0; j < res; j++) {
+      const px = new Float32Array(784);
+      const cx = i / (res-1) * 27;
+      const cy = j / (res-1) * 27;
+      for (let y = 0; y < 28; y++) {
+        for (let x = 0; x < 28; x++) {
+          const dx = x - cx, dy = y - cy;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          px[y*28 + x] = Math.max(0, Math.min(1, 1 - dist/5));
+        }
+      }
+      const p = predict(px);
+      dctx.fillStyle = p > 0.5 ? `rgb(${255-p*100}, ${120+p*60}, 50)` : `rgb(${50+p*80}, ${100+p*80}, 220)`;
+      dctx.fillRect(i * w/res, j * h/res, w/res+1, h/res+1);
+    }
+  }
+  dataset.forEach(d => {
+    const sum = d.pixels.reduce((a,b) => a+b, 0) + 0.01;
+    const x = d.pixels.reduce((s,v,i) => s + v * (i%28), 0) / sum;
+    const y = d.pixels.reduce((s,v,i) => s + v * Math.floor(i/28), 0) / sum;
+    const px = Math.min(w-4, Math.max(4, x / 27 * w));
+    const py = Math.min(h-4, Math.max(4, y / 27 * h));
+    dctx.beginPath();
+    dctx.arc(px, py, 5, 0, 2*Math.PI);
+    dctx.fillStyle = d.label === 0 ? '#6ee7a2' : '#ffb347';
+    dctx.fill();
+    dctx.strokeStyle = '#fff';
+    dctx.lineWidth = 1;
+    dctx.stroke();
+  });
+}
+
+function renderLoss() {
+  const w = lossCanvas.width, h = lossCanvas.height;
+  lctx.clearRect(0, 0, w, h);
+  lctx.fillStyle = '#0a0f1e';
+  lctx.fillRect(0, 0, w, h);
+  if (losses.length < 2) {
+    lctx.fillStyle = '#9eabc7';
+    lctx.font = '12px system-ui';
+    lctx.textAlign = 'center';
+    lctx.fillText('loss history', w/2, h/2);
+    return;
+  }
+  const pad = 12, W = w - 2*pad, H = h - 2*pad;
+  const maxLoss = Math.max(0.5, ...losses);
+  const minLoss = Math.min(0, ...losses);
+  const range = maxLoss - minLoss || 1;
+  lctx.beginPath();
+  for (let i = 0; i < losses.length; i++) {
+    const x = pad + (i / (losses.length - 1)) * W;
+    const y = pad + (1 - (losses[i] - minLoss) / range) * H;
+    i === 0 ? lctx.moveTo(x, y) : lctx.lineTo(x, y);
+  }
+  lctx.strokeStyle = '#6ee7a2';
+  lctx.lineWidth = 2;
+  lctx.stroke();
+}
+
+// ---------- TEST MODE ----------
+function toggleTestMode() {
+  isTestMode = !isTestMode;
+  const badge = document.getElementById('modeBadge');
+  const testPanel = document.getElementById('testPanel');
+  const trainPanel = document.getElementById('trainPanel');
+  const btn = document.getElementById('toggleMode');
+  
+  if (isTestMode) {
+    badge.textContent = '🎯 TEST';
+    badge.classList.add('test');
+    testPanel.style.display = 'block';
+    trainPanel.style.display = 'none';
+    btn.textContent = '📚 Switch to Train';
+    document.getElementById('statusMsg').textContent = '🎯 Test Mode: Draw a digit and see the AI predict!';
+  } else {
+    badge.textContent = '📚 TRAIN';
+    badge.classList.remove('test');
+    testPanel.style.display = 'none';
+    trainPanel.style.display = 'block';
+    btn.textContent = '🎯 Switch to Test';
+    document.getElementById('statusMsg').textContent = '📚 Train Mode: Draw and label digits.';
+    document.getElementById('testResult').style.display = 'none';
+  }
+  updateAllPredictions();
+}
+
+function submitTestResult() {
+  if (!lastTestResult) { 
+    alert('Draw something first or wait for the AI to predict!'); 
+    return; 
+  }
+  const answer = prompt(`AI predicted: ${lastTestResult.prediction}\nWhat is the correct digit? (0 or 1)`, '');
+  if (answer === null) return;
+  const correct = parseInt(answer);
+  if (correct !== 0 && correct !== 1) { 
+    alert('Please enter 0 or 1.'); 
+    return; 
+  }
+  const isCorrect = correct === lastTestResult.prediction;
+  const resultDiv = document.getElementById('testResult');
+  resultDiv.style.display = 'block';
+  resultDiv.className = `test-result ${isCorrect ? 'correct' : 'wrong'}`;
+  resultDiv.textContent = isCorrect ? '✅ Correct! The AI got it right!' : `❌ Wrong. AI said ${lastTestResult.prediction}, correct was ${correct}.`;
+}
+
+function clearTestResult() {
+  document.getElementById('testResult').style.display = 'none';
+  lastTestResult = null;
+}
+
+// ---------- EVENT BINDING ----------
+document.getElementById('labelZero').onclick = () => addCurrent(0);
+document.getElementById('labelOne').onclick = () => addCurrent(1);
+document.getElementById('clearDraw').onclick = () => { 
+  initDraw(); 
+  updateAllPredictions();
+};
+document.getElementById('batchAdd').onclick = () => {
+  const label = prompt('Label for current + variants (0 or 1):', '0');
+  if (label === '0' || label === '1') addVariants(parseInt(label));
+};
+document.getElementById('toggleMode').onclick = toggleTestMode;
+document.getElementById('submitTest').onclick = submitTestResult;
+document.getElementById('clearTestResult').onclick = clearTestResult;
+
+document.getElementById('trainBtn').onclick = () => trainEpochs(50);
+document.getElementById('stepBtn').onclick = () => trainEpochs(10);
+document.getElementById('step100Btn').onclick = () => trainEpochs(100);
+
+document.getElementById('resetAll').onclick = () => {
+  clearDataset();
+  initWeights();
+  document.getElementById('testResult').style.display = 'none';
+  updateUI();
+  renderDecision();
+  renderLoss();
+  document.getElementById('trainStatus').textContent = '🔄 Reset everything.';
+  updateAllPredictions();
+};
+
+document.getElementById('resetWeights').onclick = () => {
+  initWeights();
+  document.getElementById('testResult').style.display = 'none';
+  updateUI();
+  renderDecision();
+  renderLoss();
+  document.getElementById('trainStatus').textContent = '🔄 Weights reset.';
+  updateAllPredictions();
+};
+
+document.getElementById('lrSlider').oninput = e => {
+  lr = parseFloat(e.target.value);
+  document.getElementById('lrVal').textContent = lr.toFixed(2);
+};
+document.getElementById('hiddenSlider').oninput = e => {
+  hiddenSize = parseInt(e.target.value);
+  document.getElementById('hiddenVal').textContent = hiddenSize;
+  initWeights();
+  updateUI();
+  renderDecision();
+  renderLoss();
+  updateAllPredictions();
+};
+
+// ---------- INIT ----------
+initWeights();
+renderDecision();
+renderLoss();
+updateUI();
+document.getElementById('trainStatus').textContent = '✅ Ready! Draw digits, label them, then train.';
+</script>
+</body>
+</html>
