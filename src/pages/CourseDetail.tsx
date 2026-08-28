@@ -2,17 +2,61 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Calendar, Clock, Globe, Check, Info, AlertCircle, ArrowRight,
-  BookOpen, Users, Compass, Loader2, MailCheck
+  BookOpen, Users, Compass, Loader2, MailCheck,
+  FolderOpen, FileText, Download, Image as ImageIcon, Video, Archive, FileSpreadsheet
 } from 'lucide-react';
 import { getCourseBySlug } from '../courses/courseData';
+import { getCourseMaterials } from '../courses/courseMaterials';
 import { registerParticipant, resendVerificationEmail, getRegistrationById } from '../services/api';
 import { analytics } from '../services/analytics';
 import { RegistrationFormData } from '../types';
 import { setCookie, getCookie, REGISTRATION_COOKIE } from '../services/cookies';
 
+/** Maps a file extension to a lucide icon, badge colors, and a short label. */
+function materialPresentation(ext: string): { icon: typeof FileText; badgeClass: string; label: string } {
+  switch (ext) {
+    case 'pdf':
+      return { icon: FileText, badgeClass: 'bg-rose-50 text-rose-700 border-rose-100', label: 'PDF' };
+    case 'ppt':
+    case 'pptx':
+    case 'key':
+      return { icon: FileText, badgeClass: 'bg-orange-50 text-orange-700 border-orange-100', label: 'Slides' };
+    case 'doc':
+    case 'docx':
+      return { icon: FileText, badgeClass: 'bg-blue-50 text-blue-700 border-blue-100', label: 'Document' };
+    case 'xls':
+    case 'xlsx':
+    case 'csv':
+      return { icon: FileSpreadsheet, badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-100', label: 'Spreadsheet' };
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'gif':
+    case 'svg':
+    case 'webp':
+      return { icon: ImageIcon, badgeClass: 'bg-purple-50 text-purple-700 border-purple-100', label: 'Image' };
+    case 'mp4':
+    case 'mov':
+    case 'webm':
+    case 'mkv':
+      return { icon: Video, badgeClass: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100', label: 'Video' };
+    case 'zip':
+    case 'rar':
+    case '7z':
+      return { icon: Archive, badgeClass: 'bg-amber-50 text-amber-700 border-amber-100', label: 'Archive' };
+    case 'md':
+    case 'txt':
+    case 'rtf':
+      return { icon: FileText, badgeClass: 'bg-slate-100 text-slate-600 border-slate-200', label: 'Text' };
+    default:
+      return { icon: FileText, badgeClass: 'bg-slate-100 text-slate-600 border-slate-200', label: ext.toUpperCase() || 'File' };
+  }
+}
+
 export default function CourseDetail() {
   const { slug } = useParams<{ slug: string }>();
   const course = getCourseBySlug(slug || '');
+  const materials = course ? getCourseMaterials(course.slug) : [];
   const formRef = useRef<HTMLDivElement>(null);
 
   // States
@@ -332,6 +376,41 @@ export default function CourseDetail() {
                 </ul>
               </div>
             </div>
+
+            {/* Course Materials (auto-discovered from the materials folder) */}
+            {materials.length > 0 && (
+              <div className="space-y-5">
+                <h2 className="text-2xl font-bold text-slate-900 flex items-center">
+                  <FolderOpen className="w-5 h-5 text-primary-600 mr-2.5" />
+                  Course Materials
+                </h2>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                  Download the resources for this course.
+                </p>
+                <div className="space-y-3">
+                  {materials.map((material) => {
+                    const { icon: Icon, badgeClass, label } = materialPresentation(material.ext);
+                    return (
+                      <a
+                        key={material.url}
+                        href={material.url}
+                        download={material.name}
+                        className="group flex items-center gap-4 bg-white rounded-xl border border-slate-200/60 p-4 hover:border-primary-300 hover:shadow-sm transition-all focus-ring"
+                      >
+                        <span className={`flex-shrink-0 w-11 h-11 rounded-lg border flex items-center justify-center ${badgeClass}`}>
+                          <Icon className="w-5 h-5" />
+                        </span>
+                        <span className="flex-grow min-w-0">
+                          <span className="block text-sm font-semibold text-slate-800 truncate">{material.name}</span>
+                          <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
+                        </span>
+                        <Download className="w-4 h-4 text-slate-400 group-hover:text-primary-600 flex-shrink-0 transition-colors" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
           </div>
 
