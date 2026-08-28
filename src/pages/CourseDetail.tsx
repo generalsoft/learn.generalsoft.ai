@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import {
   Calendar, Clock, Globe, Check, Info, AlertCircle, ArrowRight,
   BookOpen, Users, Compass, Loader2, MailCheck,
@@ -63,6 +63,7 @@ export default function CourseDetail() {
   const course = getCourseBySlug(slug || '');
   const materials = course ? getCourseMaterials(course.slug) : [];
   const formRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
   const [viewingMaterial, setViewingMaterial] = useState<CourseMaterial | null>(null);
 
   // States
@@ -91,6 +92,18 @@ export default function CourseDetail() {
       analytics.trackCourseView(course.id);
     }
   }, [course]);
+
+  // Scroll to an anchor fragment (e.g. /courses/ai-soup-to-nuts#coursematerial)
+  // after render. React Router does not do this automatically, and the browser's
+  // initial auto-scroll can fire before the element is mounted.
+  useEffect(() => {
+    if (!course) return;
+    if (!location.hash) return;
+    const target = document.getElementById(location.hash.slice(1));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [course, location.hash]);
 
   // On mount, check whether a previously-verified registration document id is
   // stored in a cookie. If it maps to a confirmed registration for this
@@ -400,7 +413,7 @@ export default function CourseDetail() {
 
             {/* Course Materials (auto-discovered from the materials folder) */}
             {materials.length > 0 && (
-              <div className="space-y-5">
+              <div id="coursematerial" className="space-y-5 scroll-mt-24">
                 <h2 className="text-2xl font-bold text-slate-900 flex items-center">
                   <FolderOpen className="w-5 h-5 text-primary-600 mr-2.5" />
                   Course Materials
