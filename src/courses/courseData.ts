@@ -52,8 +52,8 @@ export const courses: Course[] = [
     ],
     deliveryMethod: 'Online',
     dates: 'August 28–29, 2026',
-    time: '09:30 AM – 4:30 PM',
-    breakTime: '12:30 PM – 2:00 PM',
+    time: 'specified in registration email',
+    breakTime: 'specified in registration email',
     timezone: 'UAE time (GST / UTC+4)',
     pricing: {
       individual: 'Free for individuals',
@@ -63,7 +63,7 @@ export const courses: Course[] = [
       currency: 'AED'
     },
     registrationStatus: 'Open',
-    duration: '2 Days (10 hours)',
+    duration: '2 Days (10 hours or less)',
     featured: true
   }
 ];

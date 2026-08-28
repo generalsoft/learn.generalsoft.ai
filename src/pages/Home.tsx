@@ -87,8 +87,8 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Time & Timezone</h4>
-                    <p className="text-sm font-semibold text-slate-800">09:30 AM – 4:30 PM</p>
-                    <p className="text-xs text-slate-500">Break: 12:30 PM – 2:00 PM • UAE time (GST / UTC+4)</p>
+                    <p className="text-sm font-semibold text-slate-800">see registration email</p>
+                    <p className="text-xs text-slate-500">Break: as per email • UAE time (GST / UTC+4)</p>
                   </div>
                 </div>
 
