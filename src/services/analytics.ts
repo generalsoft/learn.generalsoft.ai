@@ -26,6 +26,12 @@ export const analytics = {
   trackRegisterClick: (courseId: string) => {
     trackEvent('register_button_clicked', { course_id: courseId });
   },
+  trackCompanyRequestClick: (courseId: string) => {
+    trackEvent('company_training_request_clicked', { course_id: courseId });
+  },
+  trackCompanyRequestSubmit: (courseId: string, deliveryMethod: 'online' | 'onsite') => {
+    trackEvent('company_training_request_submitted', { course_id: courseId, delivery_method: deliveryMethod });
+  },
   trackRegistrationStart: (courseId: string) => {
     trackEvent('registration_started', { course_id: courseId });
   },

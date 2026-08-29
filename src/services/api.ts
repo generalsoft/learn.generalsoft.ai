@@ -1,4 +1,4 @@
-import { RegistrationFormData, ApiResponse } from '../types';
+import { RegistrationFormData, CompanyTrainingRequestData, ApiResponse } from '../types';
 import { db } from './firebase';
 import {
   doc,
@@ -15,6 +15,7 @@ import {
 
 const REGISTRATIONS_COLLECTION = 'registrations';
 const MESSAGES_COLLECTION = 'messages';
+const TRAINING_REQUESTS_COLLECTION = 'trainingRequests';
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function normalizeEmail(email: string): string {
@@ -223,6 +224,45 @@ export async function sendMessage(
       message: code
         ? `Unable to send your message (${code}). Please try again later.`
         : 'Unable to send your message. Please try again later.',
+    };
+  }
+}
+
+export async function submitCompanyTrainingRequest(
+  courseId: string,
+  formData: CompanyTrainingRequestData
+): Promise<ApiResponse> {
+  try {
+    const requestsRef = collection(db, TRAINING_REQUESTS_COLLECTION);
+    const payload = {
+      courseId,
+      companyName: formData.companyName.trim(),
+      contactName: formData.contactName.trim(),
+      email: formData.email.trim(),
+      emailNormalized: normalizeEmail(formData.email),
+      phone: formData.phone?.trim() || null,
+      country: formData.country?.trim() || null,
+      deliveryMethod: formData.deliveryMethod,
+      employeeCount: formData.employeeCount,
+      message: formData.message?.trim() || null,
+      createdAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(requestsRef, payload);
+
+    return {
+      success: true,
+      message: 'Training request received. Our team will contact you shortly.',
+      data: { id: docRef.id },
+    };
+  } catch (error) {
+    console.error('Firestore training request error:', error);
+    const code = (error as { code?: string })?.code;
+    return {
+      success: false,
+      message: code
+        ? `Unable to submit your request (${code}). Please try again later.`
+        : 'Unable to submit your request. Please try again later.',
     };
   }
 }

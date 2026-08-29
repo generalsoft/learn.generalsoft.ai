@@ -24,7 +24,7 @@ export default function Home() {
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             <div className="inline-flex items-center space-x-2 bg-primary-50 text-primary-700 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-primary-600" />
-              <span>Registration Open</span>
+              <span>Registration Closed</span>
             </div>
             
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
@@ -41,7 +41,7 @@ export default function Home() {
                 onClick={() => analytics.trackRegisterClick('ai-soup-to-nuts')}
                 className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 active:bg-primary-800 transition-all rounded-xl shadow-lg shadow-primary-600/25 focus-ring"
               >
-                Register for AI Soup to Nuts
+                Request for Your Company
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
               <Link
@@ -178,14 +178,14 @@ export default function Home() {
               Ready to harness AI for your business?
             </h2>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Join our live cohort on August 28–29, 2026. Secure your free seat as an individual, or register your company team today.
+              Registration for the public cohort is now closed. Bring AI Soup to Nuts to your team with online or onsite corporate training tailored to your company.
             </p>
             <div className="pt-2">
               <Link
                 to="/courses/ai-soup-to-nuts"
                 className="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-950 font-bold hover:bg-slate-100 rounded-xl transition-all shadow-md focus-ring"
               >
-                Register Now
+                Request for Your Company
                 <ArrowRight className="w-4 h-4 ml-2 text-slate-950" />
               </Link>
             </div>

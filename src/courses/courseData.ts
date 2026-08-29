@@ -62,7 +62,7 @@ export const courses: Course[] = [
       companyPrice: 400,
       currency: 'AED'
     },
-    registrationStatus: 'Open',
+    registrationStatus: 'Closed',
     duration: '2 Days (10 hours or less)',
     featured: true
   }

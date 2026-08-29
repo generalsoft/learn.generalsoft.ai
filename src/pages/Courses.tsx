@@ -97,10 +97,14 @@ export default function Courses() {
                 </Link>
                 <Link
                   to={`/courses/${course.slug}`}
-                  onClick={() => analytics.trackRegisterClick(course.id)}
+                  onClick={() =>
+                    course.registrationStatus === 'Closed'
+                      ? analytics.trackCompanyRequestClick(course.id)
+                      : analytics.trackRegisterClick(course.id)
+                  }
                   className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors rounded-lg focus-ring"
                 >
-                  Register Now
+                  {course.registrationStatus === 'Closed' ? 'Request Course' : 'Register Now'}
                   <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Link>
               </div>

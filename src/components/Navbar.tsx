@@ -74,7 +74,7 @@ export default function Navbar() {
               to="/courses/ai-soup-to-nuts"
               className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors shadow-sm hover:shadow shadow-primary-500/10 rounded-lg focus-ring"
             >
-              Register
+              Request Course
             </Link>
           </div>
 
@@ -115,7 +115,7 @@ export default function Navbar() {
               to="/courses/ai-soup-to-nuts"
               className="block w-full text-center px-4 py-3 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors shadow-sm rounded-lg"
             >
-              Register for AI Course
+              Request AI Course
             </Link>
           </div>
         </div>

@@ -10,6 +10,7 @@ describe('Course Catalog and Configuration', () => {
     expect(aiCourse.slug).toBe('ai-soup-to-nuts');
     expect(aiCourse.pricing.individualPrice).toBe(0);
     expect(aiCourse.pricing.companyPrice).toBe(400);
+    expect(aiCourse.registrationStatus).toBe('Closed');
   });
 
   it('should load correctly by slug and ID helpers', () => {

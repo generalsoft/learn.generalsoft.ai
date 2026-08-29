@@ -47,6 +47,19 @@ export interface RegistrationFormData {
   website?: string;
 }
 
+export interface CompanyTrainingRequestData {
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  country?: string;
+  deliveryMethod: 'online' | 'onsite';
+  employeeCount: number;
+  message?: string;
+  // Bot protection honeypot (should remain blank)
+  website?: string;
+}
+
 export interface Registration {
   id: string;
   courseId: string;

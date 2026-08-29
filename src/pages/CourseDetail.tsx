@@ -13,6 +13,7 @@ import { registerParticipant, resendVerificationEmail, getRegistrationById } fro
 import { analytics } from '../services/analytics';
 import { RegistrationFormData } from '../types';
 import { setCookie, getCookie, REGISTRATION_COOKIE } from '../services/cookies';
+import CompanyTrainingRequestForm from '../components/CompanyTrainingRequestForm';
 
 /** Maps a file extension to a lucide icon, badge colors, and a short label. */
 function materialPresentation(ext: string): { icon: typeof FileText; badgeClass: string; label: string } {
@@ -165,7 +166,11 @@ export default function CourseDetail() {
 
   const handleScrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
-    analytics.trackRegisterClick(course.id);
+    if (course.registrationStatus === 'Closed') {
+      analytics.trackCompanyRequestClick(course.id);
+    } else {
+      analytics.trackRegisterClick(course.id);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -291,7 +296,7 @@ export default function CourseDetail() {
                   onClick={handleScrollToForm}
                   className="px-6 py-3.5 bg-primary-600 hover:bg-primary-500 text-white font-bold transition-all rounded-xl shadow-lg shadow-primary-600/20 focus-ring"
                 >
-                  Register Now
+                  {course.registrationStatus === 'Closed' ? 'Request for Your Company' : 'Register Now'}
                 </button>
               </div>
             </div>
@@ -475,8 +480,12 @@ export default function CourseDetail() {
           <div className="lg:col-span-5" ref={formRef}>
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-lg p-6 sm:p-8 sticky top-24">
               
-              {/* Form header based on status */}
-              {regStatus === 'idle' && (
+              {course.registrationStatus === 'Closed' ? (
+                <CompanyTrainingRequestForm course={course} />
+              ) : (
+                <>
+                  {/* Form header based on status */}
+                  {regStatus === 'idle' && (
                 <>
                   <h2 className="text-2xl font-bold text-slate-900 mb-2">Register Now</h2>
                   <p className="text-xs text-slate-500 mb-6">
@@ -870,6 +879,8 @@ export default function CourseDetail() {
                 </div>
               )}
 
+                </>
+              )}
             </div>
           </div>
 
