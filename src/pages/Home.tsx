@@ -60,7 +60,7 @@ export default function Home() {
               
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Next Cohort</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Last Cohort</span>
                   <span className="text-2xl font-bold text-slate-800">August 2026</span>
                 </div>
                 <div className="bg-primary-50 text-primary-700 px-3 py-1 rounded-lg text-xs font-bold border border-primary-100">
