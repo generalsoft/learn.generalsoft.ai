@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Globe, ArrowRight, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, Globe, ArrowRight, CheckCircle, FolderOpen } from 'lucide-react';
 import { courses } from '../courses/courseData';
+import { getCourseMaterials } from '../courses/courseMaterials';
 import { analytics } from '../services/analytics';
 
 export default function Courses() {
@@ -23,7 +24,9 @@ export default function Courses() {
 
       {/* Courses Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {courses.map((course) => (
+        {courses.map((course) => {
+          const hasMaterials = getCourseMaterials(course.slug).length > 0;
+          return (
           <div
             key={course.id}
             className="bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden"
@@ -88,7 +91,16 @@ export default function Courses() {
                 </div>
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex flex-wrap gap-3">
+                {hasMaterials && (
+                  <Link
+                    to={`/courses/${course.slug}#coursematerial`}
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-100 transition-colors rounded-lg focus-ring"
+                  >
+                    <FolderOpen className="w-4 h-4 mr-1.5" />
+                    View Materials
+                  </Link>
+                )}
                 <Link
                   to={`/courses/${course.slug}`}
                   className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors rounded-lg focus-ring"
@@ -110,7 +122,8 @@ export default function Courses() {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

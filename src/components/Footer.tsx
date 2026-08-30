@@ -31,6 +31,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link to="/courses/ai-soup-to-nuts#coursematerial" className="hover:text-white transition-colors">
+                  Course Materials
+                </Link>
+              </li>
+              <li>
                 <Link to="/courses" className="hover:text-white transition-colors">
                   All Courses
                 </Link>
