@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
+
 import {
   Calendar, Clock, Globe, Check, Info, AlertCircle, ArrowRight,
   BookOpen, Users, Compass, Loader2, MailCheck,
@@ -93,6 +94,17 @@ export default function CourseDetail() {
       analytics.trackCourseView(course.id);
     }
   }, [course]);
+
+  useEffect(() => {
+    if (!course) return;
+    if (!location.hash) return;
+
+    const target = document.getElementById(location.hash.slice(1));
+
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [course, location.hash]);
 
   // Scroll to an anchor fragment (e.g. /courses/ai-soup-to-nuts#coursematerial)
   // after render. React Router does not do this automatically, and the browser's
@@ -265,7 +277,7 @@ export default function CourseDetail() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(12,130,235,0.15),transparent_55%)]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
+
             {/* Left Content */}
             <div className="lg:col-span-8 space-y-6">
               <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold bg-primary-500/10 text-primary-400 border border-primary-500/20">
@@ -335,10 +347,10 @@ export default function CourseDetail() {
       {/* Main Grid Details */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
+
           {/* Left Column: Course Overview */}
           <div className="lg:col-span-7 space-y-12">
-            
+
             {/* Overview */}
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-slate-900 flex items-center">
@@ -374,7 +386,7 @@ export default function CourseDetail() {
                 <Calendar className="w-5.5 h-5.5 text-primary-600 mr-2.5" />
                 Course Schedule & Curriculum
               </h2>
-              
+
               <div className="space-y-6">
                 {course.outline.map((section, idx) => (
                   <div key={idx} className="bg-white rounded-xl border border-slate-200/50 p-6 space-y-4">
@@ -400,7 +412,7 @@ export default function CourseDetail() {
                 <Users className="w-5.5 h-5.5 text-primary-600 mr-2.5" />
                 Who Should Attend?
               </h2>
-              
+
               <div className="bg-slate-100 border border-slate-200/40 p-6 rounded-2xl space-y-4">
                 <p className="text-sm font-semibold text-slate-700">
                   This course requires absolutely NO programming, coding, or prior technical knowledge. It is built from the ground up for:
@@ -457,11 +469,10 @@ export default function CourseDetail() {
                             download={material.name}
                             title="Download"
                             aria-label={`Download ${material.name}`}
-                            className={`inline-flex items-center gap-1.5 rounded-lg transition-colors focus-ring ${
-                              viewable
+                            className={`inline-flex items-center gap-1.5 rounded-lg transition-colors focus-ring ${viewable
                                 ? 'p-2 text-slate-400 hover:text-primary-600 border border-slate-200 hover:border-primary-200'
                                 : 'px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200'
-                            }`}
+                              }`}
                           >
                             <Download className="w-4 h-4" />
                             {!viewable && 'Download'}
@@ -479,405 +490,403 @@ export default function CourseDetail() {
           {/* Right Column: Registration Form Container */}
           <div className="lg:col-span-5" ref={formRef}>
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-lg p-6 sm:p-8 sticky top-24">
-              
+
               {course.registrationStatus === 'Closed' ? (
                 <CompanyTrainingRequestForm course={course} />
               ) : (
                 <>
                   {/* Form header based on status */}
                   {regStatus === 'idle' && (
-                <>
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">Register Now</h2>
-                  <p className="text-xs text-slate-500 mb-6">
-                    Fill out the form below. Seat confirmation requires a verified email address.
-                  </p>
-                  
-                  {errorMsg && (
-                    <div className="bg-rose-50 border border-rose-200/60 rounded-xl p-3.5 flex items-start space-x-2 text-rose-800 text-xs sm:text-sm mb-5">
-                      <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" />
-                      <span>{errorMsg}</span>
+                    <>
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2">Register Now</h2>
+                      <p className="text-xs text-slate-500 mb-6">
+                        Fill out the form below. Seat confirmation requires a verified email address.
+                      </p>
+
+                      {errorMsg && (
+                        <div className="bg-rose-50 border border-rose-200/60 rounded-xl p-3.5 flex items-start space-x-2 text-rose-800 text-xs sm:text-sm mb-5">
+                          <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" />
+                          <span>{errorMsg}</span>
+                        </div>
+                      )}
+
+                      {/* FORM */}
+                      <form onSubmit={handleSubmit} className="space-y-4.5">
+                        {/* Bot Honeypot (hidden with CSS) */}
+                        <div className="hidden" aria-hidden="true">
+                          <label htmlFor="website">Leave this field blank</label>
+                          <input
+                            type="text"
+                            id="website"
+                            name="website"
+                            value={formData.website}
+                            onChange={handleInputChange}
+                            tabIndex={-1}
+                            autoComplete="off"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3.5">
+                          <div>
+                            <label htmlFor="firstName" className="block text-xs font-bold text-slate-700 mb-1">
+                              First Name <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="firstName"
+                              name="firstName"
+                              required
+                              value={formData.firstName}
+                              onChange={handleInputChange}
+                              className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="lastName" className="block text-xs font-bold text-slate-700 mb-1">
+                              Last Name <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="lastName"
+                              name="lastName"
+                              required
+                              value={formData.lastName}
+                              onChange={handleInputChange}
+                              className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="email" className="block text-xs font-bold text-slate-700 mb-1">
+                            Email Address <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          />
+                        </div>
+
+                        {/* Registration Type selection */}
+                        <div>
+                          <span className="block text-xs font-bold text-slate-700 mb-2">
+                            Registration Type <span className="text-rose-500">*</span>
+                          </span>
+                          <div className="grid grid-cols-2 gap-3">
+                            <label className={`flex items-center justify-center p-3 rounded-lg border text-sm font-semibold cursor-pointer select-none transition-all ${formData.registrationType === 'individual'
+                                ? 'border-primary-600 bg-primary-50/40 text-primary-700'
+                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                              }`}>
+                              <input
+                                type="radio"
+                                name="registrationType"
+                                value="individual"
+                                checked={formData.registrationType === 'individual'}
+                                onChange={handleInputChange}
+                                className="sr-only"
+                              />
+                              <span>Individual (Free)</span>
+                            </label>
+
+                            <label className={`flex items-center justify-center p-3 rounded-lg border text-sm font-semibold cursor-pointer select-none transition-all ${formData.registrationType === 'company'
+                                ? 'border-primary-600 bg-primary-50/40 text-primary-700'
+                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                              }`}>
+                              <input
+                                type="radio"
+                                name="registrationType"
+                                value="company"
+                                checked={formData.registrationType === 'company'}
+                                onChange={handleInputChange}
+                                className="sr-only"
+                              />
+                              <span>Company (AED 400)</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Company Conditional Fields */}
+                        {formData.registrationType === 'company' && (
+                          <div className="space-y-4 p-4.5 bg-slate-50 rounded-xl border border-slate-100 animate-fadeIn">
+                            <div>
+                              <label htmlFor="companyName" className="block text-xs font-bold text-slate-700 mb-1">
+                                Company Name <span className="text-rose-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                id="companyName"
+                                name="companyName"
+                                required={formData.registrationType === 'company'}
+                                value={formData.companyName}
+                                onChange={handleInputChange}
+                                className="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor="jobTitle" className="block text-xs font-bold text-slate-700 mb-1">
+                                Job Title / Role <span className="text-rose-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                id="jobTitle"
+                                name="jobTitle"
+                                required={formData.registrationType === 'company'}
+                                value={formData.jobTitle}
+                                onChange={handleInputChange}
+                                className="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Optional Fields toggle/inputs */}
+                        <div className="grid grid-cols-2 gap-3.5">
+                          <div>
+                            <label htmlFor="phone" className="block text-xs font-bold text-slate-700 mb-1">
+                              Phone Number <span className="text-slate-400 font-normal">(Optional)</span>
+                            </label>
+                            <input
+                              type="tel"
+                              id="phone"
+                              name="phone"
+                              value={formData.phone}
+                              onChange={handleInputChange}
+                              placeholder="+971"
+                              className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="country" className="block text-xs font-bold text-slate-700 mb-1">
+                              Country <span className="text-slate-400 font-normal">(Optional)</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="country"
+                              name="country"
+                              value={formData.country}
+                              onChange={handleInputChange}
+                              placeholder="e.g. UAE"
+                              className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="howDidYouHear" className="block text-xs font-bold text-slate-700 mb-1">
+                            How did you hear about us? <span className="text-slate-400 font-normal">(Optional)</span>
+                          </label>
+                          <select
+                            id="howDidYouHear"
+                            name="howDidYouHear"
+                            value={formData.howDidYouHear}
+                            onChange={handleInputChange}
+                            className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          >
+                            <option value="">Select an option</option>
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="search">Search Engine</option>
+                            <option value="colleague">Colleague or Friend</option>
+                            <option value="email">Email Newsletter</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+
+                        {/* Marketing Consent & Disclaimers */}
+                        <div className="space-y-3 pt-2">
+                          <label className="flex items-start cursor-pointer select-none text-xs text-slate-600">
+                            <input
+                              type="checkbox"
+                              name="marketingConsent"
+                              checked={formData.marketingConsent}
+                              onChange={handleInputChange}
+                              className="mt-0.5 mr-2 h-4 w-4 text-primary-600 focus:ring-primary-500 border-slate-300 rounded"
+                            />
+                            <span>I agree to receive course-related communications about my registration.</span>
+                          </label>
+
+                          <p className="text-[10px] text-slate-400 leading-normal">
+                            By submitting this form, you agree to our{' '}
+                            <Link to="/privacy" className="text-primary-600 hover:underline">
+                              Privacy Policy
+                            </Link>{' '}
+                            and{' '}
+                            <Link to="/terms" className="text-primary-600 hover:underline">
+                              Terms of Service
+                            </Link>. Communications are handled in accordance with GDPR and UAE regulations.
+                          </p>
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full flex items-center justify-center py-3 px-4 font-bold text-white bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 transition-colors rounded-xl shadow-md focus-ring mt-6"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                              Processing Registration...
+                            </>
+                          ) : (
+                            'Submit Registration'
+                          )}
+                        </button>
+                      </form>
+                    </>
+                  )}
+
+                  {/* PENDING EMAIL VERIFICATION STATE */}
+                  {regStatus === 'pending_verification' && (
+                    <div className="text-center py-8 space-y-5">
+                      <div className="w-16 h-16 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto border border-primary-100 shadow-inner">
+                        <MailCheck className="w-8 h-8" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <h3 className="text-2xl font-bold text-slate-900">Verify Your Email</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          We have sent a verification link to <span className="font-semibold text-slate-900">{formData.email}</span>.
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-50 border border-slate-100 rounded-xl p-4.5 text-xs text-slate-500 leading-relaxed text-left">
+                        <p className="font-semibold text-slate-700 mb-1">What's next?</p>
+                        <ol className="list-decimal pl-4 space-y-1">
+                          <li>Open your email inbox.</li>
+                          <li>Click the <strong className="text-primary-600">Confirm Registration</strong> link.</li>
+                          <li>Your registration status will become confirmed instantly.</li>
+                        </ol>
+                      </div>
+
+                      <div className="border-t border-slate-100 pt-6">
+                        {resendStatus === 'success' ? (
+                          <p className="text-xs text-emerald-700 font-semibold bg-emerald-50 py-2.5 px-3 rounded-lg border border-emerald-100 inline-block">
+                            Verification email resent successfully!
+                          </p>
+                        ) : (
+                          <div className="space-y-3">
+                            <p className="text-xs text-slate-500">Didn't receive the verification email?</p>
+                            <button
+                              onClick={handleResendToken}
+                              disabled={resendStatus === 'loading'}
+                              className="text-xs font-bold text-primary-600 hover:text-primary-700 disabled:text-slate-400 focus-ring px-3 py-1.5 rounded-lg border border-slate-200"
+                            >
+                              {resendStatus === 'loading' ? 'Resending...' : 'Resend Verification Email'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
-                  {/* FORM */}
-                  <form onSubmit={handleSubmit} className="space-y-4.5">
-                    {/* Bot Honeypot (hidden with CSS) */}
-                    <div className="hidden" aria-hidden="true">
-                      <label htmlFor="website">Leave this field blank</label>
-                      <input
-                        type="text"
-                        id="website"
-                        name="website"
-                        value={formData.website}
-                        onChange={handleInputChange}
-                        tabIndex={-1}
-                        autoComplete="off"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3.5">
-                      <div>
-                        <label htmlFor="firstName" className="block text-xs font-bold text-slate-700 mb-1">
-                          First Name <span className="text-rose-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="firstName"
-                          name="firstName"
-                          required
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                          className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
+                  {/* DUPLICATE PENDING REGISTRATION STATE */}
+                  {regStatus === 'duplicate_pending' && (
+                    <div className="text-center py-8 space-y-5">
+                      <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto border border-amber-100">
+                        <Info className="w-8 h-8" />
                       </div>
-                      <div>
-                        <label htmlFor="lastName" className="block text-xs font-bold text-slate-700 mb-1">
-                          Last Name <span className="text-rose-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="lastName"
-                          name="lastName"
-                          required
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
+
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-bold text-slate-900">Email Registration Pending</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          A pending registration already exists for <span className="font-semibold text-slate-800">{formData.email}</span>.
+                        </p>
                       </div>
-                    </div>
 
-                    <div>
-                      <label htmlFor="email" className="block text-xs font-bold text-slate-700 mb-1">
-                        Email Address <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        required
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Registration Type selection */}
-                    <div>
-                      <span className="block text-xs font-bold text-slate-700 mb-2">
-                        Registration Type <span className="text-rose-500">*</span>
-                      </span>
-                      <div className="grid grid-cols-2 gap-3">
-                        <label className={`flex items-center justify-center p-3 rounded-lg border text-sm font-semibold cursor-pointer select-none transition-all ${
-                          formData.registrationType === 'individual'
-                            ? 'border-primary-600 bg-primary-50/40 text-primary-700'
-                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="registrationType"
-                            value="individual"
-                            checked={formData.registrationType === 'individual'}
-                            onChange={handleInputChange}
-                            className="sr-only"
-                          />
-                          <span>Individual (Free)</span>
-                        </label>
-                        
-                        <label className={`flex items-center justify-center p-3 rounded-lg border text-sm font-semibold cursor-pointer select-none transition-all ${
-                          formData.registrationType === 'company'
-                            ? 'border-primary-600 bg-primary-50/40 text-primary-700'
-                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="registrationType"
-                            value="company"
-                            checked={formData.registrationType === 'company'}
-                            onChange={handleInputChange}
-                            className="sr-only"
-                          />
-                          <span>Company (AED 400)</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Company Conditional Fields */}
-                    {formData.registrationType === 'company' && (
-                      <div className="space-y-4 p-4.5 bg-slate-50 rounded-xl border border-slate-100 animate-fadeIn">
-                        <div>
-                          <label htmlFor="companyName" className="block text-xs font-bold text-slate-700 mb-1">
-                            Company Name <span className="text-rose-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            id="companyName"
-                            name="companyName"
-                            required={formData.registrationType === 'company'}
-                            value={formData.companyName}
-                            onChange={handleInputChange}
-                            className="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="jobTitle" className="block text-xs font-bold text-slate-700 mb-1">
-                            Job Title / Role <span className="text-rose-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            id="jobTitle"
-                            name="jobTitle"
-                            required={formData.registrationType === 'company'}
-                            value={formData.jobTitle}
-                            onChange={handleInputChange}
-                            className="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Optional Fields toggle/inputs */}
-                    <div className="grid grid-cols-2 gap-3.5">
-                      <div>
-                        <label htmlFor="phone" className="block text-xs font-bold text-slate-700 mb-1">
-                          Phone Number <span className="text-slate-400 font-normal">(Optional)</span>
-                        </label>
-                        <input
-                          type="tel"
-                          id="phone"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          placeholder="+971"
-                          className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="country" className="block text-xs font-bold text-slate-700 mb-1">
-                          Country <span className="text-slate-400 font-normal">(Optional)</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="country"
-                          name="country"
-                          value={formData.country}
-                          onChange={handleInputChange}
-                          placeholder="e.g. UAE"
-                          className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="howDidYouHear" className="block text-xs font-bold text-slate-700 mb-1">
-                        How did you hear about us? <span className="text-slate-400 font-normal">(Optional)</span>
-                      </label>
-                      <select
-                        id="howDidYouHear"
-                        name="howDidYouHear"
-                        value={formData.howDidYouHear}
-                        onChange={handleInputChange}
-                        className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      >
-                        <option value="">Select an option</option>
-                        <option value="linkedin">LinkedIn</option>
-                        <option value="search">Search Engine</option>
-                        <option value="colleague">Colleague or Friend</option>
-                        <option value="email">Email Newsletter</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-
-                    {/* Marketing Consent & Disclaimers */}
-                    <div className="space-y-3 pt-2">
-                      <label className="flex items-start cursor-pointer select-none text-xs text-slate-600">
-                        <input
-                          type="checkbox"
-                          name="marketingConsent"
-                          checked={formData.marketingConsent}
-                          onChange={handleInputChange}
-                          className="mt-0.5 mr-2 h-4 w-4 text-primary-600 focus:ring-primary-500 border-slate-300 rounded"
-                        />
-                        <span>I agree to receive course-related communications about my registration.</span>
-                      </label>
-                      
-                      <p className="text-[10px] text-slate-400 leading-normal">
-                        By submitting this form, you agree to our{' '}
-                        <Link to="/privacy" className="text-primary-600 hover:underline">
-                          Privacy Policy
-                        </Link>{' '}
-                        and{' '}
-                        <Link to="/terms" className="text-primary-600 hover:underline">
-                          Terms of Service
-                        </Link>. Communications are handled in accordance with GDPR and UAE regulations.
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Please verify your email address to confirm your registration. If you didn't receive the link, click below to resend it.
                       </p>
-                    </div>
 
-                    {/* Submit Button */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full flex items-center justify-center py-3 px-4 font-bold text-white bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 transition-colors rounded-xl shadow-md focus-ring mt-6"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          Processing Registration...
-                        </>
-                      ) : (
-                        'Submit Registration'
-                      )}
-                    </button>
-                  </form>
-                </>
-              )}
-
-              {/* PENDING EMAIL VERIFICATION STATE */}
-              {regStatus === 'pending_verification' && (
-                <div className="text-center py-8 space-y-5">
-                  <div className="w-16 h-16 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto border border-primary-100 shadow-inner">
-                    <MailCheck className="w-8 h-8" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <h3 className="text-2xl font-bold text-slate-900">Verify Your Email</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      We have sent a verification link to <span className="font-semibold text-slate-900">{formData.email}</span>.
-                    </p>
-                  </div>
-
-                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-4.5 text-xs text-slate-500 leading-relaxed text-left">
-                    <p className="font-semibold text-slate-700 mb-1">What's next?</p>
-                    <ol className="list-decimal pl-4 space-y-1">
-                      <li>Open your email inbox.</li>
-                      <li>Click the <strong className="text-primary-600">Confirm Registration</strong> link.</li>
-                      <li>Your registration status will become confirmed instantly.</li>
-                    </ol>
-                  </div>
-
-                  <div className="border-t border-slate-100 pt-6">
-                    {resendStatus === 'success' ? (
-                      <p className="text-xs text-emerald-700 font-semibold bg-emerald-50 py-2.5 px-3 rounded-lg border border-emerald-100 inline-block">
-                        Verification email resent successfully!
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        <p className="text-xs text-slate-500">Didn't receive the verification email?</p>
+                      <div className="pt-4 space-y-4">
+                        {resendStatus === 'success' ? (
+                          <p className="text-xs text-emerald-700 font-semibold bg-emerald-50 py-2.5 px-3 rounded-lg border border-emerald-100 inline-block">
+                            Verification email resent!
+                          </p>
+                        ) : (
+                          <button
+                            onClick={handleResendToken}
+                            disabled={resendStatus === 'loading'}
+                            className="w-full py-2.5 text-xs font-bold text-primary-700 bg-primary-50 border border-primary-200 rounded-xl hover:bg-primary-100 focus-ring"
+                          >
+                            {resendStatus === 'loading' ? 'Resending...' : 'Resend Verification Email'}
+                          </button>
+                        )}
                         <button
-                          onClick={handleResendToken}
-                          disabled={resendStatus === 'loading'}
-                          className="text-xs font-bold text-primary-600 hover:text-primary-700 disabled:text-slate-400 focus-ring px-3 py-1.5 rounded-lg border border-slate-200"
+                          onClick={() => setRegStatus('idle')}
+                          className="text-xs text-slate-500 hover:text-slate-800 block mx-auto underline"
                         >
-                          {resendStatus === 'loading' ? 'Resending...' : 'Resend Verification Email'}
+                          Use a different email address
                         </button>
                       </div>
-                    )}
-                  </div>
-                </div>
-              )}
+                    </div>
+                  )}
 
-              {/* DUPLICATE PENDING REGISTRATION STATE */}
-              {regStatus === 'duplicate_pending' && (
-                <div className="text-center py-8 space-y-5">
-                  <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto border border-amber-100">
-                    <Info className="w-8 h-8" />
-                  </div>
+                  {/* DUPLICATE CONFIRMED REGISTRATION STATE */}
+                  {regStatus === 'duplicate_confirmed' && (
+                    <div className="text-center py-8 space-y-5">
+                      <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
+                        <Check className="w-8 h-8" />
+                      </div>
 
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-slate-900">Email Registration Pending</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      A pending registration already exists for <span className="font-semibold text-slate-800">{formData.email}</span>.
-                    </p>
-                  </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-bold text-slate-900">Already Registered</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          Your registration for <span className="font-semibold text-slate-850">{formData.email}</span> has already been confirmed.
+                        </p>
+                      </div>
 
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Please verify your email address to confirm your registration. If you didn't receive the link, click below to resend it.
-                  </p>
-
-                  <div className="pt-4 space-y-4">
-                    {resendStatus === 'success' ? (
-                      <p className="text-xs text-emerald-700 font-semibold bg-emerald-50 py-2.5 px-3 rounded-lg border border-emerald-100 inline-block">
-                        Verification email resent!
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        You're set for the course. Joining links and reminder schedules will be sent separately. If you need support, please contact us.
                       </p>
-                    ) : (
-                      <button
-                        onClick={handleResendToken}
-                        disabled={resendStatus === 'loading'}
-                        className="w-full py-2.5 text-xs font-bold text-primary-700 bg-primary-50 border border-primary-200 rounded-xl hover:bg-primary-100 focus-ring"
-                      >
-                        {resendStatus === 'loading' ? 'Resending...' : 'Resend Verification Email'}
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setRegStatus('idle')}
-                      className="text-xs text-slate-500 hover:text-slate-800 block mx-auto underline"
-                    >
-                      Use a different email address
-                    </button>
-                  </div>
-                </div>
-              )}
 
-              {/* DUPLICATE CONFIRMED REGISTRATION STATE */}
-              {regStatus === 'duplicate_confirmed' && (
-                <div className="text-center py-8 space-y-5">
-                  <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
-                    <Check className="w-8 h-8" />
-                  </div>
+                      <div className="pt-4">
+                        <button
+                          onClick={() => setRegStatus('idle')}
+                          className="w-full py-2.5 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl focus-ring"
+                        >
+                          Register another participant
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-slate-900">Already Registered</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      Your registration for <span className="font-semibold text-slate-850">{formData.email}</span> has already been confirmed.
-                    </p>
-                  </div>
+                  {/* ALREADY VERIFIED (COOKIE) STATE */}
+                  {regStatus === 'already_verified' && (
+                    <div className="text-center py-8 space-y-5">
+                      <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
+                        <Check className="w-8 h-8" />
+                      </div>
 
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    You're set for the course. Joining links and reminder schedules will be sent separately. If you need support, please contact us.
-                  </p>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-bold text-slate-900">You're Registered</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          {verifiedEmail ? (
+                            <>Your registration for <span className="font-semibold text-slate-800">{verifiedEmail}</span> has been confirmed.</>
+                          ) : (
+                            <>Your registration for this course has been confirmed.</>
+                          )}
+                        </p>
+                      </div>
 
-                  <div className="pt-4">
-                    <button
-                      onClick={() => setRegStatus('idle')}
-                      className="w-full py-2.5 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl focus-ring"
-                    >
-                      Register another participant
-                    </button>
-                  </div>
-                </div>
-              )}
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        You're set for the course. Joining links and reminder schedules will be sent separately. If you need support, please contact us.
+                      </p>
 
-              {/* ALREADY VERIFIED (COOKIE) STATE */}
-              {regStatus === 'already_verified' && (
-                <div className="text-center py-8 space-y-5">
-                  <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
-                    <Check className="w-8 h-8" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-slate-900">You're Registered</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      {verifiedEmail ? (
-                        <>Your registration for <span className="font-semibold text-slate-800">{verifiedEmail}</span> has been confirmed.</>
-                      ) : (
-                        <>Your registration for this course has been confirmed.</>
-                      )}
-                    </p>
-                  </div>
-
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    You're set for the course. Joining links and reminder schedules will be sent separately. If you need support, please contact us.
-                  </p>
-
-                  <div className="pt-4">
-                    <button
-                      onClick={() => setRegStatus('idle')}
-                      className="w-full py-2.5 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl focus-ring"
-                    >
-                      Register another participant
-                    </button>
-                  </div>
-                </div>
-              )}
+                      <div className="pt-4">
+                        <button
+                          onClick={() => setRegStatus('idle')}
+                          className="w-full py-2.5 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl focus-ring"
+                        >
+                          Register another participant
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                 </>
               )}
