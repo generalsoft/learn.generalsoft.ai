@@ -8,6 +8,7 @@ import { verifyEmailToken, resendVerificationEmail } from '../services/api';
 import { analytics } from '../services/analytics';
 import { courses } from '../courses/courseData';
 import { setCookie, REGISTRATION_COOKIE } from '../services/cookies';
+import { isValidEmail } from '../services/validation';
 
 type VerificationState = 'loading' | 'confirmed' | 'expired' | 'invalid' | 'error';
 
@@ -111,6 +112,12 @@ export default function VerifyRegistration() {
   const handleResend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resendEmail) return;
+
+    if (!isValidEmail(resendEmail)) {
+      setResendStatus('error');
+      setErrorMsg('Please enter a valid email address.');
+      return;
+    }
 
     setResendStatus('loading');
     try {

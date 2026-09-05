@@ -19,6 +19,7 @@ export interface Course {
   shortDescription: string;
   longDescription: string;
   audience: string[];
+  audienceSummary?: string;
   learningOutcomes: string[];
   outline: CourseOutlineSection[];
   deliveryMethod: 'Online' | 'In-Class' | 'Hybrid';
@@ -30,6 +31,8 @@ export interface Course {
   registrationStatus: 'Open' | 'Closed' | 'Upcoming' | 'Full';
   duration: string;
   featured: boolean;
+  /** Short note shown in the course quick-info card (e.g. prerequisites). */
+  infoNote?: string;
 }
 
 export interface RegistrationFormData {
@@ -84,4 +87,30 @@ export interface ApiResponse<T = any> {
   success: boolean;
   message: string;
   data?: T;
+}
+
+export interface CourseInterestData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  marketingConsent: boolean;
+  // Bot protection honeypot (should remain blank)
+  website?: string;
+}
+
+export interface CourseInterest {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  emailNormalized: string;
+  status: 'pending' | 'confirmed';
+  token?: string | null;
+  tokenCreatedAt?: string | null;
+  emailSentAt?: string | null;
+  marketingConsent: boolean;
+  createdAt: string;
+  verifiedAt: string | null;
 }

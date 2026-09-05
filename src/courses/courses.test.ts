@@ -56,3 +56,24 @@ describe('Material classification', () => {
     expect(classifyMaterial('')).toBe('other');
   });
 });
+
+describe('AI Under the Hood (upcoming) course', () => {
+  it('is registered as an upcoming course with details to be announced', () => {
+    const course = getCourseBySlug('ai-under-the-hood');
+    expect(course).toBeDefined();
+    expect(course?.registrationStatus).toBe('Upcoming');
+    expect(course?.dates).toBe('To be announced');
+    expect(course?.time).toBe('To be announced');
+    expect(course?.pricing.individual).toBe('To be announced');
+    expect(course?.pricing.company).toBe('To be announced');
+  });
+
+  it('auto-discovers the uploaded materials for the course', () => {
+    const materials = getCourseMaterials('ai-under-the-hood');
+    expect(materials.length).toBeGreaterThan(0);
+    for (const material of materials) {
+      expect(material.slug).toBe('ai-under-the-hood');
+      expect(material.url).toBeTruthy();
+    }
+  });
+});

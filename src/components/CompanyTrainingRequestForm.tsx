@@ -6,6 +6,7 @@ import {
 import { submitCompanyTrainingRequest } from '../services/api';
 import { analytics } from '../services/analytics';
 import type { Course, CompanyTrainingRequestData } from '../types';
+import { isValidEmail } from '../services/validation';
 
 const initialFormData: CompanyTrainingRequestData = {
   companyName: '',
@@ -49,6 +50,12 @@ export default function CompanyTrainingRequestForm({ course }: { course: Course 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isValidEmail(formData.email)) {
+      setErrorMsg('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMsg(null);
 

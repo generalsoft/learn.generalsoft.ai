@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Globe, ArrowRight, ShieldCheck, Sparkles, Zap, Users } from 'lucide-react';
+import { Calendar, Clock, Globe, ArrowRight, ShieldCheck, Sparkles, Zap, Users, Bell } from 'lucide-react';
 import { analytics } from '../services/analytics';
+import { courses } from '../courses/courseData';
 
 export default function Home() {
+  const upcomingCourses = courses.filter((c) => c.registrationStatus === 'Upcoming');
+
   useEffect(() => {
     // Track page view
     analytics.trackCourseView('home');
@@ -168,6 +171,58 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Upcoming Course */}
+      {upcomingCourses.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {upcomingCourses.map((course) => (
+            <div key={course.id} className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
+                <div className="lg:col-span-7 p-8 sm:p-12 space-y-5">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-100">
+                    <Bell className="w-3.5 h-3.5 mr-1.5" />
+                    Upcoming Course
+                  </span>
+                  <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    {course.title}
+                  </h2>
+                  <p className="text-base text-slate-600 leading-relaxed">{course.shortDescription}</p>
+                  <p className="text-sm text-slate-500">
+                    Details, dates, and pricing will be announced soon. Be the first to know.
+                  </p>
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    <Link
+                      to={`/courses/${course.slug}`}
+                      onClick={() => analytics.trackInterestClick(course.id)}
+                      className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-all rounded-xl shadow-lg shadow-primary-600/25 focus-ring"
+                    >
+                      Notify Me
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                    <Link
+                      to={`/courses/${course.slug}#coursematerial`}
+                      className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all rounded-xl focus-ring"
+                    >
+                      View Materials
+                    </Link>
+                  </div>
+                </div>
+                <div className="lg:col-span-5 bg-gradient-to-tr from-slate-900 to-indigo-950 p-8 sm:p-12 text-white flex flex-col justify-center space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-widest text-indigo-300">What you'll learn</span>
+                  <ul className="space-y-2.5">
+                    {course.learningOutcomes.slice(0, 4).map((outcome) => (
+                      <li key={outcome} className="flex items-start gap-2.5 text-sm text-slate-200">
+                        <Sparkles className="w-4 h-4 text-primary-400 mt-0.5 flex-shrink-0" />
+                        <span>{outcome}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
       {/* CTA Highlight Banner */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">

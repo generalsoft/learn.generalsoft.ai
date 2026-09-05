@@ -14,7 +14,9 @@ import { registerParticipant, resendVerificationEmail, getRegistrationById } fro
 import { analytics } from '../services/analytics';
 import { RegistrationFormData } from '../types';
 import { setCookie, getCookie, REGISTRATION_COOKIE } from '../services/cookies';
+import { isValidEmail } from '../services/validation';
 import CompanyTrainingRequestForm from '../components/CompanyTrainingRequestForm';
+import CourseInterestForm from '../components/CourseInterestForm';
 
 /** Maps a file extension to a lucide icon, badge colors, and a short label. */
 function materialPresentation(ext: string): { icon: typeof FileText; badgeClass: string; label: string } {
@@ -180,6 +182,8 @@ export default function CourseDetail() {
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
     if (course.registrationStatus === 'Closed') {
       analytics.trackCompanyRequestClick(course.id);
+    } else if (course.registrationStatus === 'Upcoming') {
+      analytics.trackInterestClick(course.id);
     } else {
       analytics.trackRegisterClick(course.id);
     }
@@ -197,6 +201,12 @@ export default function CourseDetail() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isValidEmail(formData.email)) {
+      setErrorMsg('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMsg(null);
     setResendStatus('idle');
@@ -270,6 +280,13 @@ export default function CourseDetail() {
     }
   };
 
+  const ctaLabel =
+    course.registrationStatus === 'Closed'
+      ? 'Request for Your Company'
+      : course.registrationStatus === 'Upcoming'
+      ? 'Notify Me'
+      : 'Register Now';
+
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Course Hero Banner */}
@@ -281,7 +298,7 @@ export default function CourseDetail() {
             {/* Left Content */}
             <div className="lg:col-span-8 space-y-6">
               <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold bg-primary-500/10 text-primary-400 border border-primary-500/20">
-                Live Interactive Course
+                {course.registrationStatus === 'Upcoming' ? 'Upcoming Course' : 'Live Interactive Course'}
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5.5xl font-extrabold tracking-tight leading-tight">
                 {course.title}
@@ -296,7 +313,9 @@ export default function CourseDetail() {
                 </span>
                 <span className="flex items-center">
                   <Clock className="w-4.5 h-4.5 text-primary-400 mr-2" />
-                  {course.time} ({course.timezone})
+                  {course.time === 'To be announced'
+                    ? 'To be announced'
+                    : `${course.time} (${course.timezone})`}
                 </span>
                 <span className="flex items-center">
                   <Globe className="w-4.5 h-4.5 text-primary-400 mr-2" />
@@ -308,7 +327,7 @@ export default function CourseDetail() {
                   onClick={handleScrollToForm}
                   className="px-6 py-3.5 bg-primary-600 hover:bg-primary-500 text-white font-bold transition-all rounded-xl shadow-lg shadow-primary-600/20 focus-ring"
                 >
-                  {course.registrationStatus === 'Closed' ? 'Request for Your Company' : 'Register Now'}
+                  {ctaLabel}
                 </button>
               </div>
             </div>
@@ -323,21 +342,23 @@ export default function CourseDetail() {
                 </li>
                 <li className="flex justify-between py-1.5 border-b border-slate-700/50">
                   <span>Audience</span>
-                  <span className="font-semibold text-white">Non-Technical / Professionals</span>
+                  <span className="font-semibold text-white">{course.audienceSummary || course.audience[0]}</span>
                 </li>
                 <li className="flex justify-between py-1.5 border-b border-slate-700/50">
                   <span>Individuals Fee</span>
-                  <span className="font-semibold text-emerald-400">AED 0 (Free)</span>
+                  <span className="font-semibold text-white">{course.pricing.individual}</span>
                 </li>
                 <li className="flex justify-between py-1.5">
                   <span>Corporate Fee</span>
-                  <span className="font-semibold text-white">AED 400 / attendee</span>
+                  <span className="font-semibold text-white">{course.pricing.company}</span>
                 </li>
               </ul>
-              <div className="p-3 bg-slate-700/30 rounded-xl text-[11px] text-slate-400 border border-slate-700/30">
-                <Info className="w-3.5 h-3.5 text-primary-400 inline mr-1.5 -mt-0.5" />
-                No technical or coding background is required to participate in this training.
-              </div>
+              {course.infoNote && (
+                <div className="p-3 bg-slate-700/30 rounded-xl text-[11px] text-slate-400 border border-slate-700/30">
+                  <Info className="w-3.5 h-3.5 text-primary-400 inline mr-1.5 -mt-0.5" />
+                  {course.infoNote}
+                </div>
+              )}
             </div>
 
           </div>
@@ -493,6 +514,8 @@ export default function CourseDetail() {
 
               {course.registrationStatus === 'Closed' ? (
                 <CompanyTrainingRequestForm course={course} />
+              ) : course.registrationStatus === 'Upcoming' ? (
+                <CourseInterestForm course={course} />
               ) : (
                 <>
                   {/* Form header based on status */}

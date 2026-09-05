@@ -1,4 +1,4 @@
-import { RegistrationFormData, CompanyTrainingRequestData, ApiResponse } from '../types';
+import { RegistrationFormData, CompanyTrainingRequestData, CourseInterestData, ApiResponse } from '../types';
 import { db } from './firebase';
 import {
   doc,
@@ -16,6 +16,7 @@ import {
 const REGISTRATIONS_COLLECTION = 'registrations';
 const MESSAGES_COLLECTION = 'messages';
 const TRAINING_REQUESTS_COLLECTION = 'trainingRequests';
+const COURSE_INTERESTS_COLLECTION = 'courseInterests';
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function normalizeEmail(email: string): string {
@@ -305,6 +306,115 @@ export async function resendVerificationEmail(
     return {
       success: false,
       message: 'Failed to resend verification email. Please try again.',
+    };
+  }
+}
+
+function interestDocId(courseId: string, email: string): string {
+  return `${courseId}__${normalizeEmail(email)}`;
+}
+
+export async function submitCourseInterest(
+  courseId: string,
+  courseTitle: string,
+  formData: CourseInterestData
+): Promise<ApiResponse> {
+  const emailNormalized = normalizeEmail(formData.email);
+  const interestRef = doc(db, COURSE_INTERESTS_COLLECTION, interestDocId(courseId, emailNormalized));
+
+  try {
+    const existingSnap = await getDoc(interestRef);
+
+    // Duplication handling: one interest record per email per course.
+    if (existingSnap.exists()) {
+      const existing = existingSnap.data();
+      if (existing.status === 'confirmed') {
+        return {
+          success: true,
+          message: 'You are already on the interest list for this course.',
+          data: { id: existingSnap.id, status: 'confirmed' },
+        };
+      }
+      return {
+        success: true,
+        message: 'You are already on the interest list. Please check your inbox to confirm your email.',
+        data: { id: existingSnap.id, status: 'pending' },
+      };
+    }
+
+    const payload = {
+      courseId,
+      courseTitle: courseTitle.trim(),
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
+      emailNormalized,
+      marketingConsent: formData.marketingConsent,
+      status: 'pending',
+      token: generateToken(),
+      tokenCreatedAt: serverTimestamp(),
+      emailSentAt: null,
+      createdAt: serverTimestamp(),
+      verifiedAt: null,
+    };
+
+    await setDoc(interestRef, payload);
+
+    return {
+      success: true,
+      message: 'Thanks! Check your email to confirm your interest.',
+      data: { id: interestRef.id, status: 'created' },
+    };
+  } catch (error) {
+    console.error('Firestore course interest error:', error);
+    const code = (error as { code?: string })?.code;
+    return {
+      success: false,
+      message: code
+        ? `Unable to record your interest (${code}). Please try again later.`
+        : 'Unable to record your interest. Please try again later.',
+    };
+  }
+}
+
+export async function resendInterestVerification(
+  email: string,
+  courseId: string
+): Promise<ApiResponse> {
+  const interestRef = doc(db, COURSE_INTERESTS_COLLECTION, interestDocId(courseId, email));
+
+  try {
+    const existingSnap = await getDoc(interestRef);
+
+    if (!existingSnap.exists()) {
+      return {
+        success: false,
+        message: 'No interest record found for this email.',
+      };
+    }
+
+    const existing = existingSnap.data();
+    if (existing.status === 'confirmed') {
+      return {
+        success: true,
+        message: 'Your interest is already confirmed.',
+      };
+    }
+
+    await updateDoc(interestRef, {
+      token: generateToken(),
+      tokenCreatedAt: serverTimestamp(),
+    });
+
+    return {
+      success: true,
+      message: 'A new confirmation link has been sent.',
+    };
+  } catch (error) {
+    console.error('Firestore interest resend error:', error);
+    return {
+      success: false,
+      message: 'Failed to resend confirmation email. Please try again.',
     };
   }
 }

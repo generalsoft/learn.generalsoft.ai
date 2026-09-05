@@ -26,6 +26,15 @@ export default function Courses() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {courses.map((course) => {
           const hasMaterials = getCourseMaterials(course.slug).length > 0;
+          const isClosed = course.registrationStatus === 'Closed';
+          const isUpcoming = course.registrationStatus === 'Upcoming';
+          const StatusIcon = isUpcoming ? Clock : CheckCircle;
+          const statusStyles = isUpcoming
+            ? 'bg-amber-50 text-amber-700 border-amber-100'
+            : isClosed
+            ? 'bg-slate-50 text-slate-600 border-slate-200'
+            : 'bg-emerald-50 text-emerald-700 border-emerald-100';
+          const ctaLabel = isClosed ? 'Request Course' : isUpcoming ? 'Register Interest' : 'Register Now';
           return (
           <div
             key={course.id}
@@ -34,8 +43,8 @@ export default function Courses() {
             {/* Header info */}
             <div className="p-6 sm:p-8 flex-grow space-y-4">
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                  <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border ${statusStyles}`}>
+                  <StatusIcon className="w-3.5 h-3.5 mr-1" />
                   Status: {course.registrationStatus}
                 </span>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -109,14 +118,14 @@ export default function Courses() {
                 </Link>
                 <Link
                   to={`/courses/${course.slug}`}
-                  onClick={() =>
-                    course.registrationStatus === 'Closed'
-                      ? analytics.trackCompanyRequestClick(course.id)
-                      : analytics.trackRegisterClick(course.id)
-                  }
+                  onClick={() => {
+                    if (isClosed) analytics.trackCompanyRequestClick(course.id);
+                    else if (isUpcoming) analytics.trackInterestClick(course.id);
+                    else analytics.trackRegisterClick(course.id);
+                  }}
                   className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors rounded-lg focus-ring"
                 >
-                  {course.registrationStatus === 'Closed' ? 'Request Course' : 'Register Now'}
+                  {ctaLabel}
                   <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Link>
               </div>

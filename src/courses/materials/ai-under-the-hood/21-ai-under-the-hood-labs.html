@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Under the Hood: Meaning, Use, and Understanding</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12161c;
+    --panel:#1a2029;
+    --panel-2:#20272f;
+    --border:#2b333d;
+    --ink:#e9e6dd;
+    --ink-dim:#9aa5b1;
+    --sage:#84ab8f;
+    --sage-dim:#4d5f52;
+    --amber:#d9a94f;
+    --rose:#c96a6f;
+    --blue:#7099c4;
+    --serif: 'Lora', Georgia, serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--sage-dim);color:var(--ink)}
+  .serif{font-family:var(--serif)}
+  .mono{font-family:var(--mono)}
+
+  a{color:var(--sage)}
+
+  .wrap{max-width:1040px;margin:0 auto;padding:2.25rem 1.5rem 4rem}
+
+  header.masthead{
+    border-bottom:1px solid var(--border);
+    padding-bottom:1.5rem;
+    margin-bottom:1.75rem;
+  }
+  header.masthead .kicker{
+    font-family:var(--mono);
+    font-size:0.72rem;
+    letter-spacing:0.04em;
+    color:var(--ink-dim);
+    margin-bottom:0.6rem;
+  }
+  header.masthead h1{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(1.6rem,3vw,2.15rem);
+    margin:0 0 0.5rem;
+    color:var(--ink);
+  }
+  header.masthead p{
+    color:var(--ink-dim);
+    max-width:62ch;
+    margin:0;
+    font-size:0.98rem;
+  }
+
+  nav.tabs{
+    display:flex;
+    gap:0.35rem;
+    margin-bottom:1.5rem;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    font-family:var(--sans);
+    font-size:0.88rem;
+    font-weight:500;
+    color:var(--ink-dim);
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-bottom:none;
+    padding:0.65rem 1rem 0.6rem;
+    border-radius:8px 8px 0 0;
+    cursor:pointer;
+    position:relative;
+    top:1px;
+    transition:color .15s ease, background .15s ease;
+  }
+  .tab-btn .num{font-family:var(--mono);color:var(--ink-dim);margin-right:0.5em;font-size:0.82em}
+  .tab-btn:hover{color:var(--ink)}
+  .tab-btn.active{
+    color:var(--ink);
+    background:var(--panel-2);
+    border-color:var(--border);
+    border-bottom:1px solid var(--panel-2);
+  }
+  .tab-btn.active .num{color:var(--sage)}
+
+  .panel{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:0 10px 10px 10px;
+    padding:1.75rem;
+  }
+  @media (max-width:640px){ .panel{padding:1.1rem} }
+
+  .lab-hidden{display:none}
+
+  h2.lab-title{
+    font-family:var(--serif);
+    font-size:1.35rem;
+    font-weight:600;
+    margin:0 0 0.35rem;
+  }
+  .lab-sub{color:var(--ink-dim);font-size:0.92rem;margin:0 0 1.5rem;max-width:68ch}
+
+  label.field-label{
+    display:block;
+    font-size:0.8rem;
+    color:var(--ink-dim);
+    margin-bottom:0.35rem;
+  }
+  input[type="text"], select, textarea{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--ink);
+    border-radius:7px;
+    padding:0.6rem 0.75rem;
+    font-family:var(--sans);
+    font-size:0.92rem;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus{border-color:var(--sage)}
+
+  .btn{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:0.88rem;
+    padding:0.6rem 1.1rem;
+    border-radius:7px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:filter .15s ease, transform .05s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--sage);color:#0f1712}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-primary:disabled{opacity:0.45;cursor:not-allowed;filter:none}
+  .btn-ghost{background:transparent;border-color:var(--border);color:var(--ink-dim)}
+  .btn-ghost:hover{color:var(--ink);border-color:var(--ink-dim)}
+  .btn-danger{background:var(--rose);color:#2a0f10}
+  .btn-danger:hover{filter:brightness(1.08)}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+  @media (max-width:760px){.grid-2{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:1rem 1.1rem;
+  }
+
+  .stat-pill{
+    display:inline-flex;
+    align-items:baseline;
+    gap:0.4rem;
+    font-family:var(--mono);
+    font-size:0.85rem;
+    color:var(--ink-dim);
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:0.35rem 0.85rem;
+  }
+  .stat-pill strong{font-size:1rem;color:var(--ink);font-weight:600}
+
+  .legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:0.4em}
+
+  /* Speech act cases */
+  .case-btn{
+    text-align:left;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:0.8rem 1rem;
+    cursor:pointer;
+    width:100%;
+    color:var(--ink);
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:1rem;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .case-btn:hover{border-color:var(--sage-dim)}
+  .case-btn.active{border-color:var(--sage);background:#1f2a24}
+
+  .breakdown-row{
+    display:grid;
+    grid-template-columns:140px 1fr;
+    gap:0.9rem;
+    padding:0.85rem 0;
+    border-bottom:1px solid var(--border);
+  }
+  .breakdown-row:last-child{border-bottom:none}
+  .breakdown-row .label{
+    font-family:var(--mono);
+    font-size:0.75rem;
+    color:var(--sage);
+    padding-top:0.15rem;
+  }
+  .breakdown-row .content{font-size:0.94rem;color:var(--ink)}
+  .breakdown-row .content .sub{color:var(--ink-dim);font-size:0.85rem;margin-top:0.25rem}
+
+  /* Terminal */
+  .terminal{
+    background:#0c0f13;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:1rem 1.1rem;
+    font-family:var(--mono);
+    font-size:0.83rem;
+    height:340px;
+    overflow-y:auto;
+    line-height:1.65;
+  }
+  .terminal .ln{margin:0 0 0.15rem;white-space:pre-wrap;word-break:break-word}
+  .terminal .thought{color:#8fb4d9}
+  .terminal .action{color:var(--amber)}
+  .terminal .observation{color:var(--ink-dim)}
+  .terminal .success{color:var(--sage)}
+  .terminal .error{color:var(--rose)}
+  .terminal .system{color:#6b7683;font-style:italic}
+  .terminal .tag{opacity:0.65;margin-right:0.4em}
+
+  .gate-box{
+    margin:0.5rem 0;
+    padding:0.75rem 0.9rem;
+    border:1px solid var(--amber);
+    border-radius:6px;
+    background:#241d10;
+  }
+  .gate-box .gate-title{color:var(--amber);font-weight:600;margin-bottom:0.5rem;display:block}
+  .gate-btns{display:flex;gap:0.5rem;margin-top:0.6rem}
+  .gate-btns button{
+    font-family:var(--mono);font-size:0.78rem;padding:0.35rem 0.8rem;border-radius:5px;cursor:pointer;border:1px solid var(--border);
+  }
+  .approve-btn{background:var(--sage);color:#0f1712;border-color:var(--sage)}
+  .deny-btn{background:transparent;color:var(--rose);border-color:var(--rose)}
+
+  .footnote{font-size:0.78rem;color:var(--ink-dim);margin-top:1.25rem;border-top:1px solid var(--border);padding-top:0.85rem}
+  .footnote code{font-family:var(--mono);background:var(--panel);padding:0.1em 0.35em;border-radius:4px;font-size:0.78rem}
+
+  .badge{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:0.7rem;
+    padding:0.15em 0.55em;
+    border-radius:4px;
+    border:1px solid currentColor;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="kicker">AI UNDER THE HOOD — INTERACTIVE LAB NOTEBOOK</div>
+    <h1>Meaning, Use, and Understanding</h1>
+    <p>Four short experiments connecting philosophy of language to what actually happens inside a language model: representation as geometry, meaning as use, speech acts as pragmatics, and autonomy as a governed loop.</p>
+  </header>
+
+  <nav class="tabs" id="tabNav">
+    <button class="tab-btn active" data-tab="lab1"><span class="num">01</span>Frege</button>
+    <button class="tab-btn" data-tab="lab2"><span class="num">02</span>Wittgenstein</button>
+    <button class="tab-btn" data-tab="lab3"><span class="num">03</span>Searle</button>
+    <button class="tab-btn" data-tab="lab4"><span class="num">04</span>Harness</button>
+  </nav>
+
+  <div class="panel">
+
+    <!-- ============ LAB 1: FREGE ============ -->
+    <section id="lab1" class="lab-section">
+      <h2 class="lab-title">Representation &amp; Vector Geometry</h2>
+      <p class="lab-sub">Frege distinguished a word's <em>sense</em> (how it is presented) from its <em>reference</em> (what it points to). A model has no reference at all &mdash; only position in a learned geometric space. Type the same ambiguous word into two different sentences and watch its coordinates move.</p>
+
+      <div class="grid-2" style="margin-bottom:1.25rem">
+        <div>
+          <label class="field-label">Sentence A</label>
+          <input type="text" id="f1-sentA" value="I deposited the check at the bank">
+        </div>
+        <div>
+          <label class="field-label">Sentence B</label>
+          <input type="text" id="f1-sentB" value="We sat on the bank of the river">
+        </div>
+      </div>
+      <div class="grid-2" style="margin-bottom:1.25rem;align-items:end">
+        <div>
+          <label class="field-label">Ambiguous word to track</label>
+          <input type="text" id="f1-target" value="bank">
+        </div>
+        <div style="display:flex;gap:0.6rem">
+          <button class="btn btn-primary" id="f1-run">Compute vectors</button>
+          <button class="btn btn-ghost" id="f1-example">Try another example</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <canvas id="f1-chart" height="260"></canvas>
+        </div>
+        <div class="card" id="f1-stats">
+          <div class="stat-pill" style="margin-bottom:0.75rem">
+            cosine(A,B) = <strong id="f1-cos">&mdash;</strong>
+          </div>
+          <p style="font-size:0.88rem;color:var(--ink-dim);margin:0 0 0.9rem">
+            <span class="legend-dot" style="background:#7099c4"></span> word "<span id="f1-word-a">bank</span>" in Sentence A
+            &nbsp;&nbsp;
+            <span class="legend-dot" style="background:#c96a6f"></span> word "<span id="f1-word-b">bank</span>" in Sentence B
+            &nbsp;&nbsp;
+            <span class="legend-dot" style="background:#4d5f52"></span> surrounding context words
+          </p>
+          <p id="f1-explain" style="font-size:0.88rem;color:var(--ink-dim);margin:0"></p>
+        </div>
+      </div>
+      <p class="footnote">This is a <strong>pedagogical simulation</strong>, not a real embedding model. Each word is mapped to a deterministic pseudo-vector, then nudged toward its neighboring words to imitate how contextual embeddings (e.g. in a transformer) shift a token's representation based on surrounding context. The 2D plot is a fixed projection of a higher-dimensional space, used here only to make the shift visible &mdash; low cosine similarity between the two highlighted points is the geometric picture of polysemy.</p>
+    </section>
+
+    <!-- ============ LAB 2: WITTGENSTEIN ============ -->
+    <section id="lab2" class="lab-section lab-hidden">
+      <h2 class="lab-title">Use, Language Games &amp; Logits</h2>
+      <p class="lab-sub">"The meaning of a word is its use in the language." &mdash; Wittgenstein. The same prompt, handed to a different persona (a different <em>language game</em>), reshapes the entire probability distribution the model samples its next word from.</p>
+
+      <div class="grid-2" style="margin-bottom:1.25rem;align-items:end">
+        <div>
+          <label class="field-label">Language game (system persona)</label>
+          <select id="f2-persona">
+            <option value="academic">Academic Register</option>
+            <option value="pirate">Pirate Speech</option>
+            <option value="json">JSON Engine</option>
+            <option value="poet">Romantic Poet</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Prompt</label>
+          <input type="text" id="f2-prompt" value="The old sailor said the treasure was..." disabled>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem">
+        <canvas id="f2-chart" height="220"></canvas>
+      </div>
+      <div class="card">
+        <span class="field-label" style="margin-bottom:0.4rem">Sampled continuation</span>
+        <p class="mono" id="f2-sample" style="font-size:0.95rem;margin:0;color:var(--sage)">&mdash;</p>
+      </div>
+      <p class="footnote">Bars show a simulated next-token probability distribution (softmax over illustrative logits) for the same prompt prefix under four different system personas. Switching the "language game" doesn't change the vocabulary available to the model &mdash; it changes which region of that vocabulary carries probability mass. Click <span class="badge" style="color:var(--sage)">Resample</span> to draw a new continuation from the current distribution.</p>
+      <button class="btn btn-ghost" id="f2-resample" style="margin-top:0.9rem">Resample</button>
+    </section>
+
+    <!-- ============ LAB 3: SEARLE ============ -->
+    <section id="lab3" class="lab-section lab-hidden">
+      <h2 class="lab-title">Speech Acts &amp; Pragmatics</h2>
+      <p class="lab-sub">Searle argued that an utterance performs several acts at once: what it literally says, what it's actually doing, and what it brings about in the hearer. Click a case to pull it apart.</p>
+
+      <div id="f3-cases" style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.25rem"></div>
+
+      <div class="card" id="f3-breakdown"></div>
+      <p class="footnote">The <span class="badge" style="color:var(--blue)">intentionality</span> row reflects Searle's felicity conditions: the propositional content, the preparatory conditions that must hold, the sincerity condition (the speaker's actual mental state), and the essential condition (what the utterance counts as). A language model can reproduce the surface form of any of these acts without satisfying the sincerity condition &mdash; it has no belief that it's cold, no intention to call tomorrow.</p>
+    </section>
+
+    <!-- ============ LAB 4: AGENTIC HARNESS ============ -->
+    <section id="lab4" class="lab-section lab-hidden">
+      <h2 class="lab-title">Agentic Harness: Governance &amp; Sandboxing</h2>
+      <p class="lab-sub">An agent loop (Thought &rarr; Action &rarr; Observation, repeated) is only as safe as the harness around it. Run three scenarios and watch where the guardrails intervene.</p>
+
+      <div class="grid-2" style="margin-bottom:1.25rem;align-items:end">
+        <div>
+          <label class="field-label">Scenario</label>
+          <select id="f4-task">
+            <option value="safe">Safe task &mdash; summarize a report</option>
+            <option value="unsafe">Unsafe task &mdash; destructive SQL statement</option>
+            <option value="loop">Runaway task &mdash; infinite retry loop</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.6rem">
+          <button class="btn btn-primary" id="f4-run">Run agent</button>
+          <button class="btn btn-ghost" id="f4-reset">Reset</button>
+        </div>
+      </div>
+
+      <div class="terminal" id="f4-term"></div>
+
+      <div style="display:flex;gap:1rem;margin-top:0.9rem;flex-wrap:wrap">
+        <span class="stat-pill">status: <strong id="f4-status">idle</strong></span>
+        <span class="stat-pill">iterations: <strong id="f4-iters">0</strong></span>
+        <span class="stat-pill">circuit breaker: <strong id="f4-breaker">armed</strong></span>
+      </div>
+      <p class="footnote">This is a scripted simulation of a ReAct-style loop, not a live model call. The <strong>human-in-the-loop gate</strong> blocks execution of any action tagged as irreversible or destructive until a person approves it. The <strong>circuit breaker</strong> halts the loop after a fixed number of iterations without a terminating observation, regardless of how confident the agent's own reasoning sounds &mdash; the harness doesn't trust the model to know when it's stuck.</p>
+    </section>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.lab-section').forEach(s=>s.classList.add('lab-hidden'));
+    document.getElementById(btn.dataset.tab).classList.remove('lab-hidden');
+  });
+});
+
+/* ============================================================
+   LAB 1 — FREGE: mock contextual embeddings
+   ============================================================ */
+(function(){
+  const DIMS = 32;
+
+  function hashStr(str){
+    let h = 2166136261;
+    for(let i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function wordVector(word){
+    const rng = mulberry32(hashStr(word.toLowerCase()));
+    const v = [];
+    for(let i=0;i<DIMS;i++) v.push(rng()*2-1);
+    return v;
+  }
+  // fixed projection matrix DIMS -> 2, seeded once
+  const projRng = mulberry32(42);
+  const PROJ = [[],[]];
+  for(let d=0; d<DIMS; d++){ PROJ[0].push(projRng()*2-1); PROJ[1].push(projRng()*2-1); }
+
+  function project(v){
+    let x=0, y=0;
+    for(let i=0;i<DIMS;i++){ x += v[i]*PROJ[0][i]; y += v[i]*PROJ[1][i]; }
+    return [x/Math.sqrt(DIMS), y/Math.sqrt(DIMS)];
+  }
+  function addScaled(a,b,scale){ return a.map((val,i)=>val + b[i]*scale); }
+  function normalize(v){
+    const norm = Math.sqrt(v.reduce((s,x)=>s+x*x,0)) || 1;
+    return v.map(x=>x/norm);
+  }
+  function cosine(a,b){
+    let dot=0, na=0, nb=0;
+    for(let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; }
+    return dot/(Math.sqrt(na)*Math.sqrt(nb) || 1);
+  }
+  function tokenize(sentence){
+    return sentence.toLowerCase().replace(/[^a-z0-9' ]/g,'').split(/\s+/).filter(Boolean);
+  }
+  // contextualize target word: blend its base vector with the mean of the OTHER words in the sentence
+  function contextualize(target, allWords){
+    const base = normalize(wordVector(target));
+    const others = allWords.filter(w=>w!==target);
+    if(others.length===0) return base;
+    let ctx = new Array(DIMS).fill(0);
+    others.forEach(w=>{ ctx = addScaled(ctx, normalize(wordVector(w)), 1/others.length); });
+    ctx = normalize(ctx);
+    // 55% held by the word's own identity, 45% pulled toward context — mimics contextual blending
+    const blended = base.map((v,i)=> v*0.55 + ctx[i]*0.45);
+    return normalize(blended);
+  }
+
+  let f1chart = null;
+  function drawLabelPlugin(){
+    return {
+      id:'wordLabels',
+      afterDatasetsDraw(chart){
+        const {ctx} = chart;
+        chart.data.datasets.forEach((ds, dsIndex)=>{
+          const meta = chart.getDatasetMeta(dsIndex);
+          meta.data.forEach((point, i)=>{
+            const label = ds.labels ? ds.labels[i] : null;
+            if(!label) return;
+            ctx.save();
+            ctx.font = (ds.emph ? '600 12px Inter' : '11px Inter');
+            ctx.fillStyle = ds.emph ? ds.borderColor : '#9aa5b1';
+            ctx.fillText(label, point.x + 7, point.y + 4);
+            ctx.restore();
+          });
+        });
+      }
+    };
+  }
+
+  function runFrege(){
+    const sentA = document.getElementById('f1-sentA').value.trim();
+    const sentB = document.getElementById('f1-sentB').value.trim();
+    const target = document.getElementById('f1-target').value.trim().toLowerCase();
+    const wordsA = tokenize(sentA);
+    const wordsB = tokenize(sentB);
+
+    if(!wordsA.includes(target) || !wordsB.includes(target)){
+      document.getElementById('f1-explain').textContent =
+        `The word "${target}" needs to appear in both sentences. Try adjusting the sentences or the target word.`;
+      return;
+    }
+
+    const vecA = contextualize(target, wordsA);
+    const vecB = contextualize(target, wordsB);
+    const cos = cosine(vecA, vecB);
+
+    document.getElementById('f1-cos').textContent = cos.toFixed(3);
+    document.getElementById('f1-word-a').textContent = target;
+    document.getElementById('f1-word-b').textContent = target;
+
+    let verdict;
+    if(cos < 0.55) verdict = `Low similarity (${cos.toFixed(2)}): the two contexts have pulled "${target}" into noticeably different regions of the space — consistent with the word carrying two distinct senses.`;
+    else if(cos < 0.8) verdict = `Moderate similarity (${cos.toFixed(2)}): the contexts overlap somewhat, so the shift is real but not dramatic.`;
+    else verdict = `High similarity (${cos.toFixed(2)}): the two contexts are pulling "${target}" toward similar neighbors — try a more contrastive pair of sentences.`;
+    document.getElementById('f1-explain').textContent = verdict;
+
+    const otherPointsA = wordsA.filter(w=>w!==target).map(w=>{
+      const [x,y] = project(normalize(wordVector(w)));
+      return {x,y,label:w};
+    });
+    const otherPointsB = wordsB.filter(w=>w!==target).map(w=>{
+      const [x,y] = project(normalize(wordVector(w)));
+      return {x,y,label:w};
+    });
+    const [ax,ay] = project(vecA);
+    const [bx,by] = project(vecB);
+
+    const data = {
+      datasets: [
+        { label:'context words (A)', data: otherPointsA, backgroundColor:'#4d5f5299', pointRadius:4, labels:otherPointsA.map(p=>p.label) },
+        { label:'context words (B)', data: otherPointsB, backgroundColor:'#4d5f5266', pointRadius:4, labels:otherPointsB.map(p=>p.label) },
+        { label:`"${target}" in A`, data:[{x:ax,y:ay}], backgroundColor:'#7099c4', borderColor:'#7099c4', pointRadius:8, emph:true, labels:[target] },
+        { label:`"${target}" in B`, data:[{x:bx,y:by}], backgroundColor:'#c96a6f', borderColor:'#c96a6f', pointRadius:8, emph:true, labels:[target] },
+      ]
+    };
+
+    if(f1chart) f1chart.destroy();
+    f1chart = new Chart(document.getElementById('f1-chart'), {
+      type:'scatter',
+      data,
+      plugins:[drawLabelPlugin()],
+      options:{
+        responsive:true,
+        animation:{duration:500},
+        plugins:{
+          legend:{display:false},
+          tooltip:{ callbacks:{ label:(ctx)=> ctx.dataset.labels ? ctx.dataset.labels[ctx.dataIndex] : '' } }
+        },
+        scales:{
+          x:{ grid:{color:'#2b333d'}, ticks:{color:'#9aa5b1', font:{size:10}}, title:{display:true,text:'projected dim 1',color:'#9aa5b1',font:{size:10}} },
+          y:{ grid:{color:'#2b333d'}, ticks:{color:'#9aa5b1', font:{size:10}}, title:{display:true,text:'projected dim 2',color:'#9aa5b1',font:{size:10}} }
+        }
+      }
+    });
+  }
+
+  const examples = [
+    { a:"I deposited the check at the bank", b:"We sat on the bank of the river", t:"bank" },
+    { a:"The bat flew out of the cave at dusk", b:"He swung the bat and hit a home run", t:"bat" },
+    { a:"She will spring into action tomorrow", b:"Water bubbled up from the spring", t:"spring" },
+    { a:"The judge will seal the court records", b:"A seal barked on the rocky shore", t:"seal" },
+  ];
+  let exIdx = 0;
+  document.getElementById('f1-example').addEventListener('click', ()=>{
+    exIdx = (exIdx+1) % examples.length;
+    document.getElementById('f1-sentA').value = examples[exIdx].a;
+    document.getElementById('f1-sentB').value = examples[exIdx].b;
+    document.getElementById('f1-target').value = examples[exIdx].t;
+    runFrege();
+  });
+  document.getElementById('f1-run').addEventListener('click', runFrege);
+  runFrege();
+})();
+
+/* ============================================================
+   LAB 2 — WITTGENSTEIN: personas & logits
+   ============================================================ */
+(function(){
+  const personas = {
+    academic: {
+      tokens: ["located","situated","hypothesized","approximately","documented","the aforementioned","substantial","allegedly","previously","noted"],
+      weights: [5.2, 4.6, 3.9, 3.3, 2.8, 2.4, 2.1, 1.7, 1.4, 1.1]
+    },
+    pirate: {
+      tokens: ["buried","yer","arrr","booty","hidden","cursed","under","stolen","guarded","sunk"],
+      weights: [5.6, 4.8, 4.5, 4.0, 3.2, 2.9, 2.3, 1.9, 1.5, 1.1]
+    },
+    json: {
+      tokens: ['{', '"location":', '"status":', 'null', '"unknown"', '}', '"value":', '0,', 'true,', '"unit":'],
+      weights: [5.9, 5.1, 4.2, 3.6, 3.1, 2.6, 2.2, 1.8, 1.4, 1.0]
+    },
+    poet: {
+      tokens: ["lost","aching","somewhere","beneath","whispering","forever","fading","yearning","gilded","adrift"],
+      weights: [5.0, 4.4, 4.0, 3.5, 3.0, 2.6, 2.2, 1.8, 1.4, 1.1]
+    }
+  };
+  function softmax(arr){
+    const max = Math.max(...arr);
+    const exps = arr.map(x=>Math.exp(x-max));
+    const sum = exps.reduce((a,b)=>a+b,0);
+    return exps.map(x=>x/sum);
+  }
+  let f2chart = null;
+  function render(){
+    const key = document.getElementById('f2-persona').value;
+    const p = personas[key];
+    const probs = softmax(p.weights);
+    const sorted = p.tokens.map((t,i)=>({t, p:probs[i]})).sort((a,b)=>b.p-a.p);
+
+    if(f2chart) f2chart.destroy();
+    f2chart = new Chart(document.getElementById('f2-chart'), {
+      type:'bar',
+      data:{
+        labels: sorted.map(s=>s.t),
+        datasets:[{
+          data: sorted.map(s=>+(s.p*100).toFixed(2)),
+          backgroundColor: '#84ab8f',
+          borderRadius:4,
+          barThickness:18
+        }]
+      },
+      options:{
+        indexAxis:'y',
+        responsive:true,
+        animation:{duration:450},
+        plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(ctx)=>`P = ${ctx.parsed.x}%`}} },
+        scales:{
+          x:{ grid:{color:'#2b333d'}, ticks:{color:'#9aa5b1', callback:v=>v+'%'}, title:{display:true, text:'next-token probability', color:'#9aa5b1', font:{size:10}} },
+          y:{ grid:{display:false}, ticks:{color:'#e9e6dd', font:{family:'IBM Plex Mono', size:11}} }
+        }
+      }
+    });
+    sample();
+  }
+  function sample(){
+    const key = document.getElementById('f2-persona').value;
+    const p = personas[key];
+    const probs = softmax(p.weights);
+    let r = Math.random(), acc=0, chosen=p.tokens[0];
+    for(let i=0;i<p.tokens.length;i++){ acc+=probs[i]; if(r<=acc){ chosen=p.tokens[i]; break; } }
+    document.getElementById('f2-sample').textContent = `${document.getElementById('f2-prompt').value} ${chosen}`;
+  }
+  document.getElementById('f2-persona').addEventListener('change', render);
+  document.getElementById('f2-resample').addEventListener('click', sample);
+  render();
+})();
+
+/* ============================================================
+   LAB 3 — SEARLE: speech acts
+   ============================================================ */
+(function(){
+  const cases = [
+    {
+      phrase: "Can you pass the salt?",
+      literal: "A yes/no question about the hearer's physical ability to pass the salt.",
+      illocutionary: "A directive — a polite request that the hearer hand over the salt.",
+      perlocutionary: "The hearer passes the salt, rather than answering 'yes' and doing nothing.",
+      intentionality: "Propositional content: a future act of passing salt. Sincerity condition: the speaker wants the salt. Essential condition: counts as an attempt to get the hearer to act, not a genuine inquiry into ability."
+    },
+    {
+      phrase: "It's freezing in here.",
+      literal: "An assertion describing the ambient temperature of the room.",
+      illocutionary: "An indirect directive — commonly a hint to close a window or turn up the heat.",
+      perlocutionary: "The hearer gets up and adjusts the thermostat, or closes a window.",
+      intentionality: "Propositional content: the current temperature is low. Sincerity condition: the speaker believes it and is uncomfortable. Essential condition: in context, counts as a request for a remedy, layered on top of a literal assertion."
+    },
+    {
+      phrase: "I promise to call you tomorrow.",
+      literal: "A statement reporting a commitment to a future act of calling.",
+      illocutionary: "A commissive — the utterance itself creates the obligation; saying it is doing it.",
+      perlocutionary: "The hearer now expects a call and may plan around it.",
+      intentionality: "Propositional content: a future act of calling, attributed to the speaker. Sincerity condition: the speaker genuinely intends to call. Essential condition: counts as undertaking an obligation, not merely predicting one's own behavior."
+    },
+    {
+      phrase: "Watch out!",
+      literal: "An imperative with no explicit object — literally just 'attend visually.'",
+      illocutionary: "A warning — alerting the hearer to imminent danger.",
+      perlocutionary: "The hearer flinches, stops, or steps aside before the danger arrives.",
+      intentionality: "Propositional content: an unspecified but contextually obvious threat is near. Sincerity condition: the speaker believes danger is present. Essential condition: counts as an alert intended to prompt protective action, not a literal instruction to look somewhere specific."
+    }
+  ];
+
+  const container = document.getElementById('f3-cases');
+  cases.forEach((c,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'case-btn';
+    btn.textContent = `“${c.phrase}”`;
+    btn.dataset.idx = i;
+    btn.addEventListener('click', ()=> selectCase(i));
+    container.appendChild(btn);
+  });
+
+  function selectCase(i){
+    document.querySelectorAll('.case-btn').forEach(b=>b.classList.remove('active'));
+    container.children[i].classList.add('active');
+    const c = cases[i];
+    document.getElementById('f3-breakdown').innerHTML = `
+      <div class="breakdown-row">
+        <div class="label">LOCUTIONARY</div>
+        <div class="content">${c.literal}<div class="sub">The bare syntax and semantics of the sentence — what it says, word for word.</div></div>
+      </div>
+      <div class="breakdown-row">
+        <div class="label">ILLOCUTIONARY</div>
+        <div class="content">${c.illocutionary}<div class="sub">The pragmatic force — what the speaker is actually doing in saying it.</div></div>
+      </div>
+      <div class="breakdown-row">
+        <div class="label">PERLOCUTIONARY</div>
+        <div class="content">${c.perlocutionary}<div class="sub">The effect the utterance actually produces in the hearer.</div></div>
+      </div>
+      <div class="breakdown-row">
+        <div class="label">INTENTIONALITY</div>
+        <div class="content">${c.intentionality}</div>
+      </div>
+    `;
+  }
+  selectCase(0);
+})();
+
+/* ============================================================
+   LAB 4 — AGENTIC HARNESS: ReAct terminal simulation
+   ============================================================ */
+(function(){
+  const term = document.getElementById('f4-term');
+  const runBtn = document.getElementById('f4-run');
+  const resetBtn = document.getElementById('f4-reset');
+  const statusEl = document.getElementById('f4-status');
+  const itersEl = document.getElementById('f4-iters');
+  const breakerEl = document.getElementById('f4-breaker');
+  let running = false;
+  let stopped = false;
+
+  function line(cls, tag, text){
+    const div = document.createElement('div');
+    div.className = 'ln ' + cls;
+    div.innerHTML = `<span class="tag">${tag}</span>${text}`;
+    term.appendChild(div);
+    term.scrollTop = term.scrollHeight;
+  }
+  function wait(ms){ return new Promise(res=>setTimeout(res, ms)); }
+
+  function resetTerm(){
+    term.innerHTML = '';
+    statusEl.textContent = 'idle';
+    itersEl.textContent = '0';
+    breakerEl.textContent = 'armed';
+    breakerEl.style.color = '';
+    running = false; stopped = false;
+    runBtn.disabled = false;
+  }
+
+  async function runSafe(){
+    statusEl.textContent = 'running';
+    line('thought','[thought]','Goal: summarize the Q3 sales report and post the summary to #sales-updates.');
+    await wait(600);
+    itersEl.textContent = 1;
+    line('action','[action]','call tool: read_file("Q3_sales_report.pdf")');
+    await wait(700);
+    line('observation','[observation]','File read: 14 pages, revenue +8% QoQ, churn flat, APAC region driving growth.');
+    await wait(700);
+    itersEl.textContent = 2;
+    line('thought','[thought]','I have enough to draft a 3-sentence summary. No irreversible actions needed for this step.');
+    await wait(600);
+    line('action','[action]','call tool: post_message("#sales-updates", summary_text)');
+    await wait(700);
+    line('observation','[observation]','Message posted successfully. Task objective satisfied.');
+    await wait(400);
+    line('success','[done]','Agent terminated normally — goal reached, no gate required (read + low-risk write).');
+    statusEl.textContent = 'completed';
+    running = false; runBtn.disabled = false;
+  }
+
+  async function runUnsafe(){
+    statusEl.textContent = 'running';
+    line('thought','[thought]','Goal: clean up stale rows in the "sessions" table older than 90 days.');
+    await wait(600);
+    itersEl.textContent = 1;
+    line('action','[action]','call tool: query_db("SELECT count(*) FROM sessions WHERE created_at < now() - interval \'90 days\'")');
+    await wait(700);
+    line('observation','[observation]','Result: 218,402 matching rows.');
+    await wait(700);
+    itersEl.textContent = 2;
+    line('thought','[thought]','I will delete these rows to complete the cleanup.');
+    await wait(600);
+    line('action','[action]','proposed action: query_db("DELETE FROM sessions WHERE created_at < now() - interval \'90 days\'")');
+    await wait(500);
+    line('system','[harness]','Action classified as DESTRUCTIVE (irreversible bulk delete, no WHERE-clause dry run detected). Execution held.');
+
+    const gateDiv = document.createElement('div');
+    gateDiv.className = 'gate-box';
+    gateDiv.innerHTML = `<span class="gate-title">⏸ Human-in-the-loop approval required</span>
+      Agent is requesting to run a destructive SQL statement against a production table.
+      <div class="gate-btns">
+        <button class="approve-btn">Approve once</button>
+        <button class="deny-btn">Deny &amp; abort</button>
+      </div>`;
+    term.appendChild(gateDiv);
+    term.scrollTop = term.scrollHeight;
+    statusEl.textContent = 'awaiting approval';
+
+    return new Promise(resolve=>{
+      gateDiv.querySelector('.approve-btn').addEventListener('click', async ()=>{
+        gateDiv.remove();
+        line('system','[harness]','Approval granted by reviewer. Executing with row-count safety cap.');
+        await wait(700);
+        itersEl.textContent = 3;
+        line('observation','[observation]','218,402 rows deleted. Transaction committed.');
+        await wait(500);
+        line('success','[done]','Agent terminated normally — destructive step only ran after explicit human sign-off.');
+        statusEl.textContent = 'completed';
+        running = false; runBtn.disabled = false;
+        resolve();
+      }, {once:true});
+      gateDiv.querySelector('.deny-btn').addEventListener('click', async ()=>{
+        gateDiv.remove();
+        line('error','[harness]','Approval denied. Action discarded, no query was sent to the database.');
+        await wait(300);
+        line('system','[done]','Agent halted safely at the gate — this is the harness working as intended, not a failure.');
+        statusEl.textContent = 'halted by reviewer';
+        running = false; runBtn.disabled = false;
+        resolve();
+      }, {once:true});
+    });
+  }
+
+  async function runLoop(){
+    statusEl.textContent = 'running';
+    line('thought','[thought]','Goal: find the exact root cause of a flaky test before reporting back.');
+    const MAX_ITERS = 5;
+    for(let i=1;i<=MAX_ITERS;i++){
+      if(stopped) return;
+      await wait(550);
+      itersEl.textContent = i;
+      line('thought','[thought]', i<MAX_ITERS
+        ? `Iteration ${i}: current evidence is inconclusive. I should investigate further before answering.`
+        : `Iteration ${i}: still inconclusive, but I am confident one more look will resolve it.`);
+      await wait(450);
+      line('action','[action]', `call tool: rerun_test("flaky_test_suite", attempt=${i})`);
+      await wait(500);
+      line('observation','[observation]', 'Result: test passed once, failed once — non-deterministic, no new signal.');
+    }
+    line('system','[harness]', `Circuit breaker tripped: ${MAX_ITERS} iterations elapsed with no terminating action or new information gained.`);
+    breakerEl.textContent = 'tripped';
+    breakerEl.style.color = 'var(--rose)';
+    await wait(400);
+    line('error','[done]','Agent halted by harness, not by its own judgment — the loop\'s reasoning kept sounding confident, which is exactly why a step limit exists independent of the model\'s self-assessment.');
+    statusEl.textContent = 'halted by circuit breaker';
+    running = false; runBtn.disabled = false;
+  }
+
+  runBtn.addEventListener('click', async ()=>{
+    if(running) return;
+    resetTerm();
+    running = true;
+    runBtn.disabled = true;
+    const task = document.getElementById('f4-task').value;
+    line('system','[harness]', `Session started — scenario: ${task}.`);
+    if(task==='safe') await runSafe();
+    else if(task==='unsafe') await runUnsafe();
+    else await runLoop();
+  });
+
+  resetBtn.addEventListener('click', resetTerm);
+  resetTerm();
+})();
+</script>
+</body>
+</html>

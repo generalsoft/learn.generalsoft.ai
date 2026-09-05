@@ -44,4 +44,10 @@ export const analytics = {
   trackRegistrationComplete: (courseId: string) => {
     trackEvent('registration_completed', { course_id: courseId });
   },
+  trackInterestClick: (courseId: string) => {
+    trackEvent('interest_button_clicked', { course_id: courseId });
+  },
+  trackInterestSubmit: (courseId: string) => {
+    trackEvent('interest_submitted', { course_id: courseId });
+  },
 };

@@ -64,7 +64,82 @@ export const courses: Course[] = [
     },
     registrationStatus: 'Closed',
     duration: '2 Days (10 hours or less)',
-    featured: true
+    featured: true,
+    audienceSummary: 'Non-Technical / Professionals',
+    infoNote: 'No technical or coding background is required to participate in this training.'
+  },
+  {
+    id: 'ai-under-the-hood',
+    slug: 'ai-under-the-hood',
+    title: 'AI Under the Hood',
+    subtitle: 'A technical deep-dive into how modern AI and large language models actually work',
+    shortDescription: 'Go beyond the surface and understand the mechanics of modern AI — from text, vectors, and contextual generation to backpropagation and agentic systems.',
+    longDescription: 'This course takes you inside modern AI systems to understand what actually happens under the hood. You will learn how large language models turn text into vectors and generate output token by token, how neural networks learn through backpropagation and gradient corrections, and how agentic harnesses connect models to tools, memory, and real-world action. It is built for technical professionals and anyone who wants a rigorous, foundational understanding of AI rather than a black-box overview.',
+    audience: [
+      'Software developers and engineers who want to understand what powers the models they use',
+      'Technical leads, architects, and data professionals evaluating AI systems',
+      'IT and security specialists who need to reason about how AI behaves internally',
+      'Technical founders and product builders integrating AI into their products',
+      'Curious learners who want more than a high-level overview of AI'
+    ],
+    audienceSummary: 'Technical Professionals & Builders',
+    learningOutcomes: [
+      'Understand what AI, machine learning, and large language models mean — precisely and practically',
+      'Explain how LLMs represent text as vectors and generate output one token at a time',
+      'Describe how neural networks learn via backpropagation and error correction',
+      'Understand how agentic harnesses connect models to tools, memory, and real-world action',
+      'Reason critically about model capabilities, limitations, and failure modes'
+    ],
+    outline: [
+      {
+        title: 'Module 1: AI Under the Hood — Meaning, Use, and Understanding',
+        items: [
+          'What AI and machine learning actually mean',
+          'The landscape of modern models and where LLMs fit',
+          'What these systems are genuinely good for'
+        ]
+      },
+      {
+        title: 'Module 2: Inside the LLM — Text, Vectors, and Contextual Generation',
+        items: [
+          'Tokens and embeddings: how text becomes numbers',
+          'Attention and context windows',
+          'How models generate text step by step'
+        ]
+      },
+      {
+        title: 'Module 3: How AI Learns — Backpropagation and Neural Corrections',
+        items: [
+          'Neural networks, weights, and activations',
+          'Loss, gradients, and backpropagation',
+          'How models improve through correction'
+        ]
+      },
+      {
+        title: 'Module 4: The Agentic Harness — From Brain in a Jar to Real-World Action',
+        items: [
+          'What agentic really means',
+          'Tools, memory, and planning loops',
+          'Connecting models to real-world systems and actions'
+        ]
+      }
+    ],
+    deliveryMethod: 'Online',
+    dates: 'To be announced',
+    time: 'To be announced',
+    breakTime: '',
+    timezone: 'UAE time (GST / UTC+4)',
+    pricing: {
+      individual: 'To be announced',
+      company: 'To be announced',
+      individualPrice: 0,
+      companyPrice: 0,
+      currency: 'AED'
+    },
+    registrationStatus: 'Upcoming',
+    duration: 'To be announced',
+    featured: true,
+    infoNote: 'Details, dates, and pricing will be announced soon. Submit your interest to be notified first.'
   }
 ];
 
