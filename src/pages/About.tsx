@@ -1,72 +1,100 @@
-import { ShieldCheck, Target, Award, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Target, Building2, School, MapPin, ShieldCheck, Users, Zap } from 'lucide-react';
+import FinalCTA from '../components/FinalCTA';
+import { site } from '../data/site';
 
 export default function About() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
-      {/* Header */}
-      <div className="max-w-3xl">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          About Generalsoft Learning
-        </h1>
-        <p className="mt-4 text-lg text-slate-600 leading-relaxed font-medium">
-          We bridge the gap between complex emerging technologies and everyday business application. Our training is designed for professionals who want to lead in the AI era.
-        </p>
-      </div>
-
-      {/* Grid: Mission and Values */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-slate-900">Our Mission</h2>
-          <p className="text-slate-600 leading-relaxed">
-            Technology is moving faster than ever, creating a massive skills gap for leaders, managers, and executives. Generalsoft Learning was founded to address this challenge by delivering highly approachable, non-technical training that focuses on real-world outcomes rather than code syntax.
-          </p>
-          <p className="text-slate-600 leading-relaxed">
-            Based in RAKEZ, RAK, UAE, we provide professional development workshops that empower teams to adopt tools like generative AI, streamline document analysis, automate reporting, and scale productivity safely.
+    <div>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-16">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Your AI training and readiness partner in the UAE
+          </h1>
+          <p className="mt-4 text-lg text-slate-600 leading-relaxed font-medium">
+            Generalsoft helps UAE organisations and schools prepare their people for AI — through practical training,
+            whole-school and whole-organisation programmes, and AI readiness consulting.
           </p>
         </div>
 
-        <div className="bg-slate-100 rounded-2xl p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-6 border border-slate-200/40">
-          <div className="space-y-2">
-            <div className="w-10 h-10 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
-              <Target className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-slate-900 text-sm">Outcome Focused</h3>
-            <p className="text-xs text-slate-500">Every lesson translates directly into a daily workflow you can deploy immediately.</p>
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-5 text-slate-600 leading-relaxed">
+            <p>
+              AI is changing the workplace and education. Our focus is not on teaching theory, but on helping businesses,
+              teachers and students understand and use AI effectively, responsibly and confidently.
+            </p>
+            <p>
+              Based in {site.location}, we deliver training on-site across Ras Al Khaimah and online across the UAE — for
+              companies, schools and professionals.
+            </p>
           </div>
-
-          <div className="space-y-2">
-            <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
-              <Users className="w-5 h-5" />
+          <div className="bg-slate-50 rounded-2xl border border-slate-200/60 p-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
+                <Target className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 text-sm">Outcome Focused</h3>
+              <p className="text-xs text-slate-500">Every session connects AI to real workflows and outcomes.</p>
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">Non-Technical</h3>
-            <p className="text-xs text-slate-500">Designed from the ground up for business professionals, leaders, and consultants.</p>
-          </div>
-
-          <div className="space-y-2">
-            <div className="w-10 h-10 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5" />
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                <Zap className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 text-sm">Practical</h3>
+              <p className="text-xs text-slate-500">Real-world use rather than AI terminology.</p>
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">Privacy Conscious</h3>
-            <p className="text-xs text-slate-500">We prioritize corporate security guidelines, data boundaries, and safe AI usage.</p>
-          </div>
-
-          <div className="space-y-2">
-            <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
-              <Award className="w-5 h-5" />
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 text-sm">Responsible AI</h3>
+              <p className="text-xs text-slate-500">Privacy, ethics, integrity and appropriate use built in.</p>
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">High Quality</h3>
-            <p className="text-xs text-slate-500">Structured courses, comprehensive worksheets, and dedicated post-course support.</p>
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center">
+                <Users className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 text-sm">Whole Organisation</h3>
+              <p className="text-xs text-slate-500">Leadership, employees, teachers, students and parents.</p>
+            </div>
           </div>
         </div>
-      </div>
-      
-      {/* Instructor Spot or Tagline */}
-      <div className="bg-slate-900 rounded-3xl p-8 sm:p-10 text-white text-center">
-        <h3 className="text-xl sm:text-2xl font-bold mb-3">Learn from Practitioners</h3>
-        <p className="text-xs sm:text-sm text-slate-350 max-w-xl mx-auto leading-relaxed">
-          Our trainers are technology consultants who advise organizations on software architecture, integrations, and AI deployments. You get insights from real-world digital transformations.
-        </p>
-      </div>
+      </section>
+
+      {/* WHO WE SERVE */}
+      <section className="bg-white border-y border-slate-100 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-extrabold text-slate-900 mb-8 text-center">Who we serve</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link to="/business" className="bg-slate-50 rounded-2xl border border-slate-200/60 p-7 hover:shadow-md transition-all">
+              <Building2 className="w-6 h-6 text-primary-600 mb-4" />
+              <h3 className="font-bold text-slate-900">Businesses</h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Corporate teams, managers and professionals looking to work smarter with AI.
+              </p>
+            </Link>
+            <Link to="/schools" className="bg-slate-50 rounded-2xl border border-slate-200/60 p-7 hover:shadow-md transition-all">
+              <School className="w-6 h-6 text-emerald-600 mb-4" />
+              <h3 className="font-bold text-slate-900">Schools</h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Students, teachers, parents and school leadership building AI capability.
+              </p>
+            </Link>
+            <Link to="/rakez" className="bg-slate-50 rounded-2xl border border-slate-200/60 p-7 hover:shadow-md transition-all">
+              <MapPin className="w-6 h-6 text-emerald-600 mb-4" />
+              <h3 className="font-bold text-slate-900">RAKEZ & Ras Al Khaimah</h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Organisations and schools across the RAKEZ ecosystem, trained on-site or online.
+              </p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <FinalCTA
+        heading="Let's make your organisation AI ready."
+        description="Book a conversation and we'll help you find the right starting point."
+      />
     </div>
   );
 }

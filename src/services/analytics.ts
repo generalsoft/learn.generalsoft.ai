@@ -50,4 +50,32 @@ export const analytics = {
   trackInterestSubmit: (courseId: string) => {
     trackEvent('interest_submitted', { course_id: courseId });
   },
+
+  // ---- Lead generation & conversion tracking (business / school / session) ----
+  trackLeadClick: (leadType: string, source?: string) => {
+    trackEvent('lead_cta_clicked', { lead_type: leadType, source: source || undefined });
+  },
+  trackLeadSubmit: (leadType: string) => {
+    // Category-level event plus a dedicated per-type event so Business,
+    // School and Complimentary Session leads can be attributed independently.
+    trackEvent('generate_lead', { lead_type: leadType });
+    trackEvent(`lead_${leadType}`, { lead_type: leadType });
+  },
+  trackCourseEnquiry: (programmeId: string) => {
+    trackEvent('programme_enquiry_clicked', { programme_id: programmeId });
+  },
+
+  // ---- Direct contact interactions (phone / WhatsApp / email / downloads) ----
+  trackPhoneClick: (source?: string) => {
+    trackEvent('phone_clicked', { source: source || undefined });
+  },
+  trackWhatsAppClick: (source?: string) => {
+    trackEvent('whatsapp_clicked', { source: source || undefined });
+  },
+  trackEmailClick: (source?: string) => {
+    trackEvent('email_clicked', { source: source || undefined });
+  },
+  trackBrochureDownload: (source?: string) => {
+    trackEvent('brochure_downloaded', { source: source || undefined });
+  },
 };

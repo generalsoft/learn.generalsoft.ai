@@ -1,139 +1,139 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Globe, ArrowRight, CheckCircle, FolderOpen } from 'lucide-react';
+import { Building2, School, Sparkles, ArrowRight, Clock, MapPin, Check, BookOpen } from 'lucide-react';
+import { programmeCategories } from '../data/programmes';
 import { courses } from '../courses/courseData';
-import { getCourseMaterials } from '../courses/courseMaterials';
 import { analytics } from '../services/analytics';
+import FinalCTA from '../components/FinalCTA';
+
+const categoryIcon = { business: Building2, schools: School, professional: Sparkles };
 
 export default function Courses() {
   useEffect(() => {
-    analytics.trackCourseView('courses_list');
+    analytics.trackCourseView('programmes');
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Header */}
-      <div className="max-w-3xl mb-12">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Available Courses
-        </h1>
-        <p className="mt-4 text-lg text-slate-600 leading-relaxed font-medium">
-          Practical technology training and workshops designed for business professionals. Learn live online with industry experts.
-        </p>
-      </div>
-
-      {/* Courses Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {courses.map((course) => {
-          const hasMaterials = getCourseMaterials(course.slug).length > 0;
-          const isClosed = course.registrationStatus === 'Closed';
-          const isUpcoming = course.registrationStatus === 'Upcoming';
-          const StatusIcon = isUpcoming ? Clock : CheckCircle;
-          const statusStyles = isUpcoming
-            ? 'bg-amber-50 text-amber-700 border-amber-100'
-            : isClosed
-            ? 'bg-slate-50 text-slate-600 border-slate-200'
-            : 'bg-emerald-50 text-emerald-700 border-emerald-100';
-          const ctaLabel = isClosed ? 'Request Course' : isUpcoming ? 'Register Interest' : 'Register Now';
+    <div>
+      {/* HEADER */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-12 md:pt-16">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Programmes</h1>
+          <p className="mt-4 text-lg text-slate-600 leading-relaxed font-medium">
+            AI training grouped by outcome — for businesses, schools and professionals. Most programmes are tailored to your
+            organisation and begin with a conversation.
+          </p>
+        </div>
+      </section>
+      {/* CATEGORIES */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-16">
+        {programmeCategories.map((category) => {
+          const Icon = categoryIcon[category.id];
           return (
-          <div
-            key={course.id}
-            className="bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden"
-          >
-            {/* Header info */}
-            <div className="p-6 sm:p-8 flex-grow space-y-4">
-              <div className="flex items-center justify-between">
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border ${statusStyles}`}>
-                  <StatusIcon className="w-3.5 h-3.5 mr-1" />
-                  Status: {course.registrationStatus}
-                </span>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  {course.duration}
-                </span>
+            <div key={category.id}>
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-900">{category.title}</h2>
+                    <p className="mt-1 text-slate-600 max-w-xl">{category.description}</p>
+                  </div>
+                </div>
+                <Link
+                  to={category.link}
+                  className="mt-4 sm:mt-0 inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700"
+                >
+                  Explore {category.title} <ArrowRight className="w-4 h-4 ml-1" />
+                </Link>
               </div>
 
-              <h2 className="text-2xl font-bold text-slate-900 leading-snug">
-                <Link to={`/courses/${course.slug}`} className="hover:text-primary-600 transition-colors">
-                  {course.title}
-                </Link>
-              </h2>
-              
-              <p className="text-sm font-semibold text-primary-600">
-                {course.subtitle}
-              </p>
-
-              <p className="text-sm text-slate-600 leading-relaxed">
-                {course.shortDescription}
-              </p>
-
-              {/* Specs Grid */}
-              <div className="border-t border-slate-100 pt-4 mt-6 space-y-3.5">
-                <div className="flex items-center text-xs sm:text-sm text-slate-600">
-                  <Calendar className="w-4.5 h-4.5 text-slate-400 mr-2.5 flex-shrink-0" />
-                  <span className="font-semibold text-slate-800 mr-1.5">Date:</span>
-                  <span>{course.dates}</span>
-                </div>
-                
-                <div className="flex items-center text-xs sm:text-sm text-slate-600">
-                  <Clock className="w-4.5 h-4.5 text-slate-400 mr-2.5 flex-shrink-0" />
-                  <span className="font-semibold text-slate-800 mr-1.5">Time:</span>
-                  <span>
-                    {course.time} {course.timezone} {course.breakTime && `(Break: ${course.breakTime})`}
-                  </span>
-                </div>
-
-                <div className="flex items-center text-xs sm:text-sm text-slate-600">
-                  <Globe className="w-4.5 h-4.5 text-slate-400 mr-2.5 flex-shrink-0" />
-                  <span className="font-semibold text-slate-800 mr-1.5">Format:</span>
-                  <span>{course.deliveryMethod}</span>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {category.programmes.map((p) => (
+                  <div key={p.id} className="bg-white rounded-2xl border border-slate-200/60 p-6 flex flex-col">
+                    <h3 className="text-lg font-bold text-slate-900">{p.title}</h3>
+                    <p className="text-sm text-primary-600 font-medium mt-1">{p.tagline}</p>
+                    <p className="text-sm text-slate-600 mt-3 leading-relaxed">
+                      <span className="font-semibold text-slate-700">Who it's for: </span>
+                      {p.whoFor}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {p.learn.map((item) => (
+                        <span key={item} className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-4 text-xs text-slate-500 space-y-1.5">
+                      <p className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" /> {p.duration}
+                      </p>
+                      <p className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400" /> {p.delivery}
+                      </p>
+                      {p.customised && (
+                        <p className="flex items-center gap-1.5 text-emerald-600 font-semibold">
+                          <Check className="w-3.5 h-3.5" /> Customised to your organisation
+                        </p>
+                      )}
+                    </div>
+                    <div className="mt-auto pt-5 flex gap-2">
+                      <Link
+                        to="/contact"
+                        onClick={() => analytics.trackCourseEnquiry(p.id)}
+                        className="flex-1 inline-flex items-center justify-center px-3 py-2.5 text-xs font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+                      >
+                        Request a Programme
+                      </Link>
+                      <Link
+                        to="/contact"
+                        onClick={() => analytics.trackLeadClick('business')}
+                        className="flex-1 inline-flex items-center justify-center px-3 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
+                      >
+                        Book a Consultation
+                      </Link>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Bottom Footer Details */}
-            <div className="bg-slate-50 border-t border-slate-100 px-6 py-5 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block leading-none mb-1">Pricing</span>
-                <div className="text-xs text-slate-700 leading-relaxed">
-                  <p><span className="font-semibold text-slate-900">Individuals:</span> {course.pricing.individual}</p>
-                  <p><span className="font-semibold text-slate-900">Companies:</span> {course.pricing.company}</p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                {hasMaterials && (
-                  <Link
-                    to={`/courses/${course.slug}#coursematerial`}
-                    className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-100 transition-colors rounded-lg focus-ring"
-                  >
-                    <FolderOpen className="w-4 h-4 mr-1.5" />
-                    View Materials
-                  </Link>
-                )}
-                <Link
-                  to={`/courses/${course.slug}`}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors rounded-lg focus-ring"
-                >
-                  View Details
-                </Link>
-                <Link
-                  to={`/courses/${course.slug}`}
-                  onClick={() => {
-                    if (isClosed) analytics.trackCompanyRequestClick(course.id);
-                    else if (isUpcoming) analytics.trackInterestClick(course.id);
-                    else analytics.trackRegisterClick(course.id);
-                  }}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors rounded-lg focus-ring"
-                >
-                  {ctaLabel}
-                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                </Link>
-              </div>
-            </div>
-          </div>
           );
         })}
-      </div>
+      </section>
+      {/* TECHNICAL DEEP-DIVES */}
+      <section className="bg-white border-y border-slate-100 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mb-8">
+            <h2 className="text-2xl font-extrabold text-slate-900">Technical deep-dives</h2>
+            <p className="mt-2 text-slate-600">
+              For professionals and builders who want a rigorous, foundational understanding of how AI works under the hood.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {courses.map((course) => (
+              <Link
+                key={course.id}
+                to={`/courses/${course.slug}`}
+                className="bg-slate-50 rounded-2xl border border-slate-200/60 p-6 hover:shadow-md transition-all group"
+              >
+                <div className="flex items-center gap-2 text-primary-600">
+                  <BookOpen className="w-5 h-5" />
+                  <span className="text-xs font-bold uppercase tracking-wider">{course.duration}</span>
+                </div>
+                <h3 className="mt-3 text-lg font-bold text-slate-900 group-hover:text-primary-600 transition-colors">
+                  {course.title}
+                </h3>
+                <p className="mt-1 text-sm text-slate-600">{course.subtitle}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+      <FinalCTA
+        heading="Not sure which programme fits?"
+        description="Book a consultation and we'll help you choose the right starting point for your organisation or school."
+      />
     </div>
   );
 }

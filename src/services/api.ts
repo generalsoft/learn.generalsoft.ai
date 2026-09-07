@@ -1,4 +1,4 @@
-import { RegistrationFormData, CompanyTrainingRequestData, CourseInterestData, ApiResponse } from '../types';
+import { RegistrationFormData, CompanyTrainingRequestData, CourseInterestData, LeadData, ApiResponse } from '../types';
 import { db } from './firebase';
 import {
   doc,
@@ -17,6 +17,7 @@ const REGISTRATIONS_COLLECTION = 'registrations';
 const MESSAGES_COLLECTION = 'messages';
 const TRAINING_REQUESTS_COLLECTION = 'trainingRequests';
 const COURSE_INTERESTS_COLLECTION = 'courseInterests';
+const LEADS_COLLECTION = 'leads';
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function normalizeEmail(email: string): string {
@@ -415,6 +416,48 @@ export async function resendInterestVerification(
     return {
       success: false,
       message: 'Failed to resend confirmation email. Please try again.',
+    };
+  }
+}
+
+/**
+ * Persists a general lead/enquiry (business, school, complimentary session,
+ * or AI-readiness consultation) to Firestore. The `leadType` field lets the
+ * marketing team attribute enquiries to the correct channel.
+ */
+export async function submitLead(data: LeadData): Promise<ApiResponse> {
+  try {
+    const leadsRef = collection(db, LEADS_COLLECTION);
+    const payload = {
+      leadType: data.leadType,
+      name: data.name.trim(),
+      organisation: data.organisation.trim() || null,
+      jobTitle: data.jobTitle.trim() || null,
+      email: data.email.trim(),
+      emailNormalized: normalizeEmail(data.email),
+      phone: data.phone.trim() || null,
+      studentsCount: data.studentsCount?.trim() || null,
+      ageGrade: data.ageGrade?.trim() || null,
+      preferredDate: data.preferredDate?.trim() || null,
+      message: data.message.trim() || null,
+      createdAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(leadsRef, payload);
+
+    return {
+      success: true,
+      message: 'Request received. Our team will contact you shortly.',
+      data: { id: docRef.id },
+    };
+  } catch (error) {
+    console.error('Firestore lead submission error:', error);
+    const code = (error as { code?: string })?.code;
+    return {
+      success: false,
+      message: code
+        ? `Unable to submit your request (${code}). Please try again later.`
+        : 'Unable to submit your request. Please try again later.',
     };
   }
 }

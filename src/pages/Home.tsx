@@ -1,14 +1,17 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Globe, ArrowRight, ShieldCheck, Sparkles, Zap, Users, Bell } from 'lucide-react';
+import {
+  Sparkles, ArrowRight, Building2, School, Brain, Target, GraduationCap,
+  BookOpen, Users, ListChecks, Compass, Zap, MapPin, ShieldCheck, Layers,
+  Clock,
+} from 'lucide-react';
 import { analytics } from '../services/analytics';
-import { courses } from '../courses/courseData';
+import { resources } from '../data/resources';
+import { site } from '../data/site';
+import FinalCTA from '../components/FinalCTA';
 
 export default function Home() {
-  const upcomingCourses = courses.filter((c) => c.registrationStatus === 'Upcoming');
-
   useEffect(() => {
-    // Track page view
     analytics.trackCourseView('home');
   }, []);
 
@@ -17,236 +20,481 @@ export default function Home() {
       {/* Background visual details */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none -z-10">
         <div className="absolute top-[-10%] left-[5%] w-[40%] h-[60%] rounded-full bg-primary-100/50 blur-[120px]" />
-        <div className="absolute top-[20%] right-[10%] w-[35%] h-[50%] rounded-full bg-indigo-100/40 blur-[100px]" />
+        <div className="absolute top-[20%] right-[10%] w-[35%] h-[50%] rounded-full bg-emerald-100/40 blur-[100px]" />
       </div>
 
-      {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Core Messaging */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center space-x-2 bg-primary-50 text-primary-700 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-primary-600" />
-              <span>Registration Closed</span>
+      {/* 1. HERO */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <div className="inline-flex items-center justify-center flex-wrap gap-x-2.5 gap-y-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <span>UAE</span><span className="text-slate-300">·</span>
+            <span>AI Training</span><span className="text-slate-300">·</span>
+            <span>Businesses</span><span className="text-slate-300">·</span>
+            <span>Schools</span><span className="text-slate-300">·</span>
+            <span>RAKEZ</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
+            AI Training for the People <span className="text-gradient">Building the Future</span>
+          </h1>
+          <p className="text-lg sm:text-xl text-slate-700 font-medium">
+            Practical AI training for UAE businesses, schools and professionals.
+          </p>
+          <p className="text-base text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Help your teams, teachers and students understand and use AI effectively, responsibly and confidently.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Link
+              to="/contact"
+              onClick={() => analytics.trackLeadClick('business')}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 active:bg-primary-800 transition-all rounded-xl shadow-lg shadow-primary-600/25 focus-ring"
+            >
+              Book an AI Consultation
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+            <Link
+              to="/schools"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 active:bg-slate-100 transition-all rounded-xl focus-ring"
+            >
+              Explore AI for Schools
+            </Link>
+          </div>
+          <div className="pt-1">
+            <Link
+              to="/schools/complimentary-session"
+              onClick={() => analytics.trackLeadClick('complimentary_session')}
+              className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700 underline underline-offset-4"
+            >
+              Request a Complimentary AI Futures Session
+            </Link>
+          </div>
+        </div>
+      </section>
+      {/* 2. AUDIENCE PATHS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Business card */}
+          <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-8 flex flex-col">
+            <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center mb-5">
+              <Building2 className="w-6 h-6" />
             </div>
-            
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
-              AI Soup <span className="text-gradient">to Nuts</span>
-            </h1>
-            
-            <p className="text-lg sm:text-xl text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              A practical, non-technical journey through AI — from the basics to real-world use. Designed for business professionals and executives.
+            <h2 className="text-2xl font-bold text-slate-900">AI for Business</h2>
+            <p className="text-primary-600 font-semibold mt-1">Help your organisation work smarter with AI.</p>
+            <p className="text-slate-600 mt-3 leading-relaxed">
+              Practical AI training for teams, managers and professionals.
             </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+            <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-600">
+              <li>AI productivity</li>
+              <li>Generative AI</li>
+              <li>AI for business</li>
+              <li>Prompt engineering</li>
+              <li>AI tools</li>
+              <li>Department-specific AI</li>
+              <li>Executive AI awareness</li>
+              <li>AI strategy</li>
+            </ul>
+            <div className="mt-auto pt-6">
               <Link
-                to="/courses/ai-soup-to-nuts"
-                onClick={() => analytics.trackRegisterClick('ai-soup-to-nuts')}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 active:bg-primary-800 transition-all rounded-xl shadow-lg shadow-primary-600/25 focus-ring"
+                to="/business"
+                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-100 rounded-xl transition-colors"
               >
-                Request for Your Company
+                Explore Business AI Training
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Schools card (visually prominent) */}
+          <div className="bg-gradient-to-tr from-emerald-50 to-white rounded-2xl border-2 border-emerald-200 shadow-md p-8 flex flex-col">
+            <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-5">
+              <School className="w-6 h-6" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900">AI for Schools</h2>
+            <p className="text-emerald-700 font-semibold mt-1">Prepare your students and teachers for the AI-powered future.</p>
+            <p className="text-slate-600 mt-3 leading-relaxed">
+              AI programmes for students, teachers, parents and school leadership.
+            </p>
+            <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-600">
+              <li>AI literacy</li>
+              <li>Future careers</li>
+              <li>Responsible AI</li>
+              <li>Teacher productivity</li>
+              <li>AI readiness</li>
+              <li>Student AI challenges</li>
+            </ul>
+            <div className="mt-auto pt-6">
+              <Link
+                to="/schools"
+                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors"
+              >
+                Explore AI for Schools
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. WHY AI READINESS MATTERS */}
+      <section className="bg-white border-y border-slate-100 py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center mx-auto">
+            <Brain className="w-6 h-6" />
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Why AI readiness matters
+          </h2>
+          <p className="text-xl text-slate-700 font-semibold">AI is changing the workplace and education.</p>
+          <p className="text-slate-600 leading-relaxed max-w-2xl mx-auto">
+            We help UAE organisations and schools prepare their people for it.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Link
+              to="/business"
+              className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors"
+            >
+              Business → AI Training
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+            <Link
+              to="/schools"
+              className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors"
+            >
+              School → AI Ready Schools
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </div>
+        </div>
+      </section>
+      {/* 4. STUDENTS / TEACHERS / PARENTS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            AI programmes for the whole school community
+          </h2>
+          <p className="mt-3 text-slate-600 leading-relaxed">
+            Practical, age-appropriate AI learning for everyone involved in education.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-7 space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">For Students</h3>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              AI literacy, future careers, responsible AI and interactive challenges that prepare students for the world ahead.
+            </p>
+            <Link to="/schools" className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700">
+              Explore student sessions <ArrowRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-7 space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">For Teachers</h3>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              Professional development on lesson planning, resources, assessment, feedback and classroom use of AI.
+            </p>
+            <Link to="/schools" className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700">
+              Explore teacher training <ArrowRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-7 space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <Users className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">For Parents</h3>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              What parents need to know about AI and children — homework, integrity, privacy and how to support learning.
+            </p>
+            <Link to="/schools" className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700">
+              Explore parent sessions <ArrowRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. WHOLE-SCHOOL AI READINESS */}
+      <section className="bg-white border-y border-slate-100 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                <Compass className="w-6 h-6" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                From "What should we do about AI?" to "Here's our AI strategy."
+              </h2>
+              <p className="text-slate-600 leading-relaxed">
+                Generalsoft helps schools assess and improve their AI readiness across the entire community — from leadership
+                to the classroom.
+              </p>
+              <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                {['Leadership', 'Teachers', 'Students', 'Parents', 'Policy', 'Future Skills'].map((item) => (
+                  <span key={item} className="px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">{item}</span>
+                ))}
+              </div>
+            </div>
+            <div className="bg-slate-50 rounded-2xl border border-slate-200/60 p-7">
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center">
+                <ListChecks className="w-5 h-5 text-primary-600 mr-2" />
+                Whole-school AI readiness includes
+              </h3>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-slate-600">
+                <li>AI Readiness Assessment</li>
+                <li>Leadership strategy session</li>
+                <li>Teacher AI training</li>
+                <li>Student workshops</li>
+                <li>Parent awareness</li>
+                <li>Responsible AI guidance</li>
+                <li>AI policy consultation</li>
+                <li>Student AI challenges</li>
+                <li>Follow-up recommendations</li>
+              </ul>
+              <div className="pt-6">
+                <Link
+                  to="/schools/ai-readiness"
+                  onClick={() => analytics.trackLeadClick('ai_readiness')}
+                  className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors"
+                >
+                  Assess Your School's AI Readiness
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* 6. CORPORATE AI TRAINING */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="order-2 lg:order-1 bg-slate-50 rounded-2xl border border-slate-200/60 p-7">
+            <h3 className="font-bold text-slate-900 mb-4 flex items-center">
+              <Zap className="w-5 h-5 text-primary-600 mr-2" />
+              Corporate AI training
+            </h3>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-slate-600">
+              <li>AI productivity</li>
+              <li>Generative AI</li>
+              <li>Prompt engineering</li>
+              <li>AI for marketing</li>
+              <li>AI for HR</li>
+              <li>AI for management</li>
+              <li>Executive AI awareness</li>
+              <li>AI strategy</li>
+            </ul>
+            <div className="pt-6">
+              <Link
+                to="/business"
+                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors"
+              >
+                Explore Business AI Training
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </div>
+          </div>
+          <div className="order-1 lg:order-2 space-y-6">
+            <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Practical AI training for UAE organisations
+            </h2>
+            <p className="text-slate-600 leading-relaxed">
+              We train leadership, managers and teams to use AI productively in their real work — from everyday productivity
+              to department-specific workflows and AI strategy. Programmes are tailored to your organisation and delivered
+              online or onsite.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. RAKEZ / RAS AL KHAIMAH */}
+      <section className="bg-white border-y border-slate-100 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <MapPin className="w-6 h-6" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                AI Training in RAKEZ & Ras Al Khaimah
+              </h2>
+              <p className="text-slate-600 leading-relaxed">
+                Practical AI training for organisations, schools and professionals in the RAKEZ ecosystem.
+              </p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-slate-600">
+                <li>Corporate AI training</li>
+                <li>School AI programmes</li>
+                <li>Teacher training</li>
+                <li>Student workshops</li>
+                <li>Professional development</li>
+                <li>AI readiness consulting</li>
+              </ul>
+              <div className="pt-2">
+                <Link
+                  to="/rakez"
+                  className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors"
+                >
+                  Explore RAKEZ AI Training
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </div>
+            </div>
+            <div className="bg-slate-900 rounded-2xl p-8 text-white">
+              <p className="text-2xl font-bold leading-snug">Based in {site.location}.</p>
+              <p className="mt-4 text-slate-300 text-sm leading-relaxed">
+                We deliver AI training and readiness support on-site across Ras Al Khaimah and online across the UAE —
+                built for the local business and education environment.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* 8. WHY GENERALSOFT */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Why Generalsoft?</h2>
+          <p className="mt-3 text-slate-600 leading-relaxed">
+            A serious AI training partner serving the UAE — practical, responsible and tailored to your people.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-6 space-y-3">
+            <Zap className="w-6 h-6 text-primary-600" />
+            <h3 className="font-bold text-slate-900">Practical, Not Theoretical</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">Training focuses on real-world use rather than AI terminology.</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-6 space-y-3">
+            <MapPin className="w-6 h-6 text-primary-600" />
+            <h3 className="font-bold text-slate-900">Built for the UAE</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">Programmes are designed for UAE organisations and educational environments.</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-6 space-y-3">
+            <Users className="w-6 h-6 text-primary-600" />
+            <h3 className="font-bold text-slate-900">For the Whole Organisation</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">We train leadership, employees, teachers, students and parents.</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-6 space-y-3">
+            <ShieldCheck className="w-6 h-6 text-primary-600" />
+            <h3 className="font-bold text-slate-900">Responsible AI</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">We address privacy, misinformation, academic integrity, ethics and appropriate use.</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-6 space-y-3">
+            <Layers className="w-6 h-6 text-primary-600" />
+            <h3 className="font-bold text-slate-900">Tailored Programmes</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">Training can be adapted to the organisation, department, age group and objectives.</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-6 space-y-3">
+            <Target className="w-6 h-6 text-primary-600" />
+            <h3 className="font-bold text-slate-900">Outcome Focused</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">Every session connects AI to the outcomes and workflows that matter to you.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. SOCIAL PROOF (honest placeholder — no fabricated logos/testimonials) */}
+      <section className="bg-white border-y border-slate-100 py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Bringing AI Training to UAE Organisations
+          </h2>
+          <p className="text-slate-600 leading-relaxed">
+            We work with businesses, schools and professionals across the UAE — including RAKEZ and Ras Al Khaimah.
+            Case studies and programme statistics will be published here as our client work grows.
+          </p>
+          <Link
+            to="/about"
+            className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700"
+          >
+            Learn more about Generalsoft <ArrowRight className="w-4 h-4 ml-1" />
+          </Link>
+        </div>
+      </section>
+      {/* 10. COMPLIMENTARY SCHOOL SESSION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="bg-gradient-to-tr from-emerald-600 to-emerald-700 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden shadow-xl">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.12),transparent_55%)]"></div>
+          <div className="relative z-10 max-w-3xl">
+            <div className="inline-flex items-center space-x-2 bg-white/15 border border-white/20 text-white px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Complimentary AI Futures Session for UAE Schools</span>
+            </div>
+            <h2 className="mt-5 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">
+              Give your students an AI advantage.
+            </h2>
+            <p className="mt-4 text-emerald-50 leading-relaxed">
+              We are offering a limited number of UAE schools a complimentary 45–60 minute interactive session covering:
+            </p>
+            <ul className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-emerald-50">
+              <li>AI and future careers</li>
+              <li>Generative AI</li>
+              <li>Responsible AI use</li>
+              <li>Deepfakes and misinformation</li>
+              <li>Future skills</li>
+              <li>Live AI demonstrations</li>
+            </ul>
+            <div className="mt-6 flex flex-wrap items-center gap-2 text-xs font-semibold">
+              {['45–60 minutes', 'Interactive', 'Practical', 'No obligation'].map((item) => (
+                <span key={item} className="inline-flex items-center gap-1.5 bg-white/15 border border-white/20 rounded-full px-3 py-1.5">
+                  <Clock className="w-3.5 h-3.5" /> {item}
+                </span>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <Link
+                to="/schools/complimentary-session"
+                onClick={() => analytics.trackLeadClick('complimentary_session')}
+                className="inline-flex items-center justify-center px-6 py-3 bg-white text-emerald-700 font-bold hover:bg-emerald-50 rounded-xl transition-colors shadow-md"
+              >
+                Request a Complimentary Session
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
               <Link
-                to="/courses"
-                className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 active:bg-slate-100 transition-all rounded-xl focus-ring"
+                to="/schools/ai-readiness"
+                className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white border border-white/40 hover:bg-white/10 rounded-xl transition-colors"
               >
-                Explore Courses
+                Book an AI Readiness Consultation
               </Link>
-            </div>
-          </div>
-
-          {/* Right Column: Event Details Card */}
-          <div className="lg:col-span-5">
-            <div className="bg-white rounded-2xl shadow-xl shadow-slate-100/80 border border-slate-100 p-6 sm:p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 rounded-full -mr-16 -mt-16 -z-10"></div>
-              
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Last Cohort</span>
-                  <span className="text-2xl font-bold text-slate-800">August 2026</span>
-                </div>
-                <div className="bg-primary-50 text-primary-700 px-3 py-1 rounded-lg text-xs font-bold border border-primary-100">
-                  Featured Course
-                </div>
-              </div>
-
-              {/* Event Details Grid */}
-              <div className="space-y-5">
-                <div className="flex items-start space-x-3.5">
-                  <div className="p-2.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-100">
-                    <Calendar className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Dates</h4>
-                    <p className="text-sm font-semibold text-slate-800">August 28–29, 2026</p>
-                    <p className="text-xs text-slate-500">Friday & Saturday</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3.5">
-                  <div className="p-2.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-100">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Time & Timezone</h4>
-                    <p className="text-sm font-semibold text-slate-800">see registration email</p>
-                    <p className="text-xs text-slate-500">Break: as per email • UAE time (GST / UTC+4)</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3.5">
-                  <div className="p-2.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-100">
-                    <Globe className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Format</h4>
-                    <p className="text-sm font-semibold text-slate-800">Online Live Session</p>
-                    <p className="text-xs text-slate-500">Interactive lectures & hands-on exercises</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-slate-100 my-6"></div>
-
-              {/* Pricing breakdown */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100/50">
-                  <span className="text-xs font-bold text-emerald-800 uppercase block mb-1">Individuals</span>
-                  <span className="text-lg font-extrabold text-emerald-700">FREE</span>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <span className="text-xs font-bold text-slate-500 block mb-1">Companies</span>
-                  <span className="text-base font-extrabold text-slate-800">AED 400</span>
-                  <span className="text-[10px] text-slate-500 block leading-none">per attendee</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Upcoming Course */}
-      {upcomingCourses.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {upcomingCourses.map((course) => (
-            <div key={course.id} className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
-                <div className="lg:col-span-7 p-8 sm:p-12 space-y-5">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-100">
-                    <Bell className="w-3.5 h-3.5 mr-1.5" />
-                    Upcoming Course
-                  </span>
-                  <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                    {course.title}
-                  </h2>
-                  <p className="text-base text-slate-600 leading-relaxed">{course.shortDescription}</p>
-                  <p className="text-sm text-slate-500">
-                    Details, dates, and pricing will be announced soon. Be the first to know.
-                  </p>
-                  <div className="flex flex-wrap gap-4 pt-2">
-                    <Link
-                      to={`/courses/${course.slug}`}
-                      onClick={() => analytics.trackInterestClick(course.id)}
-                      className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-all rounded-xl shadow-lg shadow-primary-600/25 focus-ring"
-                    >
-                      Notify Me
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Link>
-                    <Link
-                      to={`/courses/${course.slug}#coursematerial`}
-                      className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all rounded-xl focus-ring"
-                    >
-                      View Materials
-                    </Link>
-                  </div>
-                </div>
-                <div className="lg:col-span-5 bg-gradient-to-tr from-slate-900 to-indigo-950 p-8 sm:p-12 text-white flex flex-col justify-center space-y-4">
-                  <span className="text-xs font-bold uppercase tracking-widest text-indigo-300">What you'll learn</span>
-                  <ul className="space-y-2.5">
-                    {course.learningOutcomes.slice(0, 4).map((outcome) => (
-                      <li key={outcome} className="flex items-start gap-2.5 text-sm text-slate-200">
-                        <Sparkles className="w-4 h-4 text-primary-400 mt-0.5 flex-shrink-0" />
-                        <span>{outcome}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
+      {/* 11. RESOURCES */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-10">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Resources</h2>
+            <p className="mt-2 text-slate-600">Practical guidance on AI adoption across the UAE.</p>
+          </div>
+          <Link to="/resources" className="mt-4 sm:mt-0 inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700">
+            View all resources <ArrowRight className="w-4 h-4 ml-1" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {resources.slice(0, 3).map((article) => (
+            <Link
+              key={article.slug}
+              to={`/resources/${article.slug}`}
+              className="bg-white rounded-2xl border border-slate-200/60 p-6 hover:shadow-md transition-all group"
+            >
+              <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">{article.category}</span>
+              <h3 className="mt-2 font-bold text-slate-900 leading-snug group-hover:text-primary-600 transition-colors">
+                {article.title}
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">{article.excerpt}</p>
+              <span className="mt-4 inline-flex items-center text-sm font-semibold text-primary-600">
+                Read article <ArrowRight className="w-4 h-4 ml-1" />
+              </span>
+            </Link>
           ))}
-        </section>
-      )}
-
-      {/* Core Principles Section */}
-      <section className="bg-slate-100/60 border-y border-slate-200/50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-              Why Learn with Generalsoft?
-            </h2>
-            <p className="mt-4 text-slate-600 leading-relaxed font-medium">
-              We move past the coding syntax and mathematical jargon to focus on practical, ready-to-use workflows that directly translate to everyday business operations.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-                <Zap className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Practical & Practical Workflows</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Step-by-step guidance on how to write prompts, analyze heavy documents, compile research notes, and automate tasks in minutes.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <Users className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Tailored for Business</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Perfect for managers, executives, and leaders. We address return-on-investment, department integrations, and strategic scaling of technology.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Trustworthy & Secure</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Crucial guidance on corporate guidelines, privacy boundaries, data leakage risks, and security considerations when utilizing LLMs.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* CTA Highlight Banner */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <div className="bg-gradient-to-tr from-slate-900 to-indigo-950 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden shadow-xl">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.15),transparent_60%)]"></div>
-          <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Ready to harness AI for your business?
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Registration for the public cohort is now closed. Bring AI Soup to Nuts to your team with online or onsite corporate training tailored to your company.
-            </p>
-            <div className="pt-2">
-              <Link
-                to="/courses/ai-soup-to-nuts"
-                className="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-950 font-bold hover:bg-slate-100 rounded-xl transition-all shadow-md focus-ring"
-              >
-                Request for Your Company
-                <ArrowRight className="w-4 h-4 ml-2 text-slate-950" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 12. FINAL CTA */}
+      <FinalCTA />
     </div>
   );
 }

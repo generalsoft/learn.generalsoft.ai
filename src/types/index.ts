@@ -114,3 +114,33 @@ export interface CourseInterest {
   createdAt: string;
   verifiedAt: string | null;
 }
+
+/**
+ * High-level lead categories used to attribute enquiries to the correct
+ * marketing channel. Mirrors the conversion events in services/analytics.ts.
+ */
+export type LeadType =
+  | 'business'
+  | 'school'
+  | 'complimentary_session'
+  | 'ai_readiness'
+  | 'general';
+
+export interface LeadData {
+  leadType: LeadType;
+  name: string;
+  /** Company name, school name, or organisation name depending on leadType. */
+  organisation: string;
+  jobTitle: string;
+  email: string;
+  phone: string;
+  /** Complimentary school session only. */
+  studentsCount?: string;
+  /** Complimentary school session only. */
+  ageGrade?: string;
+  /** Complimentary school session only. */
+  preferredDate?: string;
+  message: string;
+  /** Bot protection honeypot (should remain blank). */
+  website?: string;
+}

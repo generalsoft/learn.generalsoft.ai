@@ -1,10 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import FloatingContact from './components/FloatingContact';
 import Home from './pages/Home';
+import Business from './pages/Business';
+import Schools from './pages/Schools';
+import ComplimentarySession from './pages/ComplimentarySession';
+import AIReadiness from './pages/AIReadiness';
+import Rakez from './pages/Rakez';
 import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
 import VerifyRegistration from './pages/VerifyRegistration';
+import Resources from './pages/Resources';
+import ResourceArticle from './pages/ResourceArticle';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
@@ -19,9 +27,16 @@ export default function App() {
         <main className="flex-grow pt-16">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/business" element={<Business />} />
+            <Route path="/schools" element={<Schools />} />
+            <Route path="/schools/complimentary-session" element={<ComplimentarySession />} />
+            <Route path="/schools/ai-readiness" element={<AIReadiness />} />
+            <Route path="/rakez" element={<Rakez />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:slug" element={<CourseDetail />} />
             <Route path="/verify" element={<VerifyRegistration />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/resources/:slug" element={<ResourceArticle />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
@@ -29,6 +44,7 @@ export default function App() {
           </Routes>
         </main>
         <Footer />
+        <FloatingContact />
       </div>
     </Router>
   );
