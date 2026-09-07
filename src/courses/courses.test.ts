@@ -3,14 +3,19 @@ import { courses, getCourseBySlug, getCourseById } from './courseData.js';
 import { getCourseMaterials, classifyMaterial } from './courseMaterials.js';
 
 describe('Course Catalog and Configuration', () => {
+  it('lists AI Under the Hood before AI Soup to Nuts', () => {
+    expect(courses[0].id).toBe('ai-under-the-hood');
+    expect(courses[1].id).toBe('ai-soup-to-nuts');
+  });
+
   it('should contain the AI Soup to Nuts course', () => {
     expect(courses.length).toBeGreaterThan(0);
-    const aiCourse = courses[0];
-    expect(aiCourse.id).toBe('ai-soup-to-nuts');
-    expect(aiCourse.slug).toBe('ai-soup-to-nuts');
-    expect(aiCourse.pricing.individualPrice).toBe(0);
-    expect(aiCourse.pricing.companyPrice).toBe(400);
-    expect(aiCourse.registrationStatus).toBe('Closed');
+    const aiCourse = getCourseBySlug('ai-soup-to-nuts');
+    expect(aiCourse?.id).toBe('ai-soup-to-nuts');
+    expect(aiCourse?.slug).toBe('ai-soup-to-nuts');
+    expect(aiCourse?.pricing.individualPrice).toBe(0);
+    expect(aiCourse?.pricing.companyPrice).toBe(400);
+    expect(aiCourse?.registrationStatus).toBe('Closed');
   });
 
   it('should load correctly by slug and ID helpers', () => {

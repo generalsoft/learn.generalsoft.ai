@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { verifyEmailToken, resendVerificationEmail } from '../services/api';
 import { analytics } from '../services/analytics';
-import { courses } from '../courses/courseData';
+import { getCourseBySlug } from '../courses/courseData';
 import { setCookie, REGISTRATION_COOKIE } from '../services/cookies';
 import { isValidEmail } from '../services/validation';
 
@@ -29,7 +29,7 @@ export default function VerifyRegistration() {
   const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   // Let's assume the course is AI Soup to Nuts for version 1 confirmation details
-  const course = courses[0];
+  const course = getCourseBySlug('ai-soup-to-nuts')!;
 
   useEffect(() => {
     // Preferred path: the Cloud Function already verified the record and

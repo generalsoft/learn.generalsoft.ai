@@ -126,52 +126,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Core Principles Section */}
-      <section className="bg-slate-100/60 border-y border-slate-200/50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-              Why Learn with Generalsoft?
-            </h2>
-            <p className="mt-4 text-slate-600 leading-relaxed font-medium">
-              We move past the coding syntax and mathematical jargon to focus on practical, ready-to-use workflows that directly translate to everyday business operations.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-                <Zap className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Practical & Practical Workflows</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Step-by-step guidance on how to write prompts, analyze heavy documents, compile research notes, and automate tasks in minutes.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <Users className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Tailored for Business</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Perfect for managers, executives, and leaders. We address return-on-investment, department integrations, and strategic scaling of technology.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Trustworthy & Secure</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Crucial guidance on corporate guidelines, privacy boundaries, data leakage risks, and security considerations when utilizing LLMs.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Upcoming Course */}
       {upcomingCourses.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -223,6 +177,52 @@ export default function Home() {
           ))}
         </section>
       )}
+
+      {/* Core Principles Section */}
+      <section className="bg-slate-100/60 border-y border-slate-200/50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+              Why Learn with Generalsoft?
+            </h2>
+            <p className="mt-4 text-slate-600 leading-relaxed font-medium">
+              We move past the coding syntax and mathematical jargon to focus on practical, ready-to-use workflows that directly translate to everyday business operations.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                <Zap className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">Practical & Practical Workflows</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Step-by-step guidance on how to write prompts, analyze heavy documents, compile research notes, and automate tasks in minutes.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <Users className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">Tailored for Business</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Perfect for managers, executives, and leaders. We address return-on-investment, department integrations, and strategic scaling of technology.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/40 space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">Trustworthy & Secure</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Crucial guidance on corporate guidelines, privacy boundaries, data leakage risks, and security considerations when utilizing LLMs.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* CTA Highlight Banner */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">

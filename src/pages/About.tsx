@@ -21,7 +21,7 @@ export default function About() {
             Technology is moving faster than ever, creating a massive skills gap for leaders, managers, and executives. Generalsoft Learning was founded to address this challenge by delivering highly approachable, non-technical training that focuses on real-world outcomes rather than code syntax.
           </p>
           <p className="text-slate-600 leading-relaxed">
-            Based in Dubai, UAE, we provide professional development workshops that empower teams to adopt tools like generative AI, streamline document analysis, automate reporting, and scale productivity safely.
+            Based in RAKEZ, RAK, UAE, we provide professional development workshops that empower teams to adopt tools like generative AI, streamline document analysis, automate reporting, and scale productivity safely.
           </p>
         </div>
 

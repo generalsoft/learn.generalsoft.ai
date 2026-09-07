@@ -17,7 +17,7 @@ export default function Footer() {
               <span className="font-bold text-lg tracking-tight">Generalsoft</span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Professional, practical training in AI and modern technologies designed for business professionals and executives in Dubai and the UAE.
+              Professional, practical training in AI and modern technologies designed for business professionals and executives in RAKEZ, RAK, UAE.
             </p>
           </div>
 
@@ -26,13 +26,13 @@ export default function Footer() {
             <h3 className="text-white font-semibold text-sm tracking-wider uppercase mb-4">Courses</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/courses/ai-soup-to-nuts" className="hover:text-white transition-colors">
-                  AI Soup to Nuts
+                <Link to="/courses/ai-under-the-hood" className="hover:text-white transition-colors">
+                  AI Under the Hood
                 </Link>
               </li>
               <li>
-                <Link to="/courses/ai-under-the-hood" className="hover:text-white transition-colors">
-                  AI Under the Hood
+                <Link to="/courses/ai-soup-to-nuts" className="hover:text-white transition-colors">
+                  AI Soup to Nuts
                 </Link>
               </li>
               <li>
