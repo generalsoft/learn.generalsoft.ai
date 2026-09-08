@@ -43,6 +43,9 @@ export default function Footer() {
                 <Link to="/courses" className="hover:text-white transition-colors">All Programmes</Link>
               </li>
               <li>
+                <Link to="/curriculum" className="hover:text-white transition-colors">UAE AI Curriculum Framework</Link>
+              </li>
+              <li>
                 <Link to="/rakez" className="hover:text-white transition-colors">RAKEZ & Ras Al Khaimah</Link>
               </li>
             </ul>

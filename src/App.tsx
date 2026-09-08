@@ -5,6 +5,7 @@ import FloatingContact from './components/FloatingContact';
 import Home from './pages/Home';
 import Business from './pages/Business';
 import Schools from './pages/Schools';
+import Curriculum from './pages/Curriculum';
 import ComplimentarySession from './pages/ComplimentarySession';
 import AIReadiness from './pages/AIReadiness';
 import Rakez from './pages/Rakez';
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="/schools" element={<Schools />} />
             <Route path="/schools/complimentary-session" element={<ComplimentarySession />} />
             <Route path="/schools/ai-readiness" element={<AIReadiness />} />
+            <Route path="/curriculum" element={<Curriculum />} />
             <Route path="/rakez" element={<Rakez />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:slug" element={<CourseDetail />} />

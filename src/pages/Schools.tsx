@@ -171,6 +171,49 @@ export default function Schools() {
           </div>
         </div>
       </section>
+      {/* UAE AI CURRICULUM FRAMEWORK */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="bg-gradient-to-tr from-primary-600 to-indigo-700 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden shadow-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 space-y-5">
+              <div className="inline-flex items-center space-x-2 bg-white/15 border border-white/20 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider">
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Aligned to the UAE AI Curriculum</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                UAE AI Curriculum Framework — Student Learning Outcomes
+              </h2>
+              <p className="text-white/90 leading-relaxed">
+                Our school programmes map directly to the UAE Ministry of Education's official AI curriculum framework,
+                covering Kindergarten through Grade 12 across three domains and seven strands.
+              </p>
+              <Link
+                to="/curriculum"
+                onClick={() => analytics.trackLeadClick('school')}
+                className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-primary-700 bg-white hover:bg-primary-50 rounded-xl transition-all"
+              >
+                Explore the Curriculum Framework
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </div>
+            <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
+              {[
+                { icon: Sparkles, title: 'AI Foundations', sub: 'Core principles & data' },
+                { icon: ShieldCheck, title: 'Responsible & Ethical AI', sub: 'Fairness, privacy & policy' },
+                { icon: GraduationCap, title: 'Applications & Innovation', sub: 'Projects & real-world AI' },
+              ].map((item) => (
+                <div key={item.title} className="bg-white/10 border border-white/15 rounded-2xl p-4 flex items-start gap-3">
+                  <item.icon className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-white text-sm">{item.title}</p>
+                    <p className="text-white/70 text-xs mt-0.5">{item.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
       {/* WHOLE-SCHOOL AI READINESS */}
       <section className="bg-white border-y border-slate-100 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
