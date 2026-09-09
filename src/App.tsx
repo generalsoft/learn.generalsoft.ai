@@ -18,6 +18,8 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import Faculty from './pages/Faculty';
+import FacultyDetail from './pages/FacultyDetail';
 
 export default function App() {
   return (
@@ -39,6 +41,8 @@ export default function App() {
             <Route path="/verify" element={<VerifyRegistration />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/resources/:slug" element={<ResourceArticle />} />
+            <Route path="/faculty" element={<Faculty />} />
+            <Route path="/faculty/:slug" element={<FacultyDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />

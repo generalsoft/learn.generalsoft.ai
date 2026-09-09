@@ -102,6 +102,9 @@ export default function Footer() {
                 <Link to="/about" className="hover:text-white transition-colors">About Generalsoft</Link>
               </li>
               <li>
+                <Link to="/faculty" className="hover:text-white transition-colors">Faculty</Link>
+              </li>
+              <li>
                 <Link to="/resources" className="hover:text-white transition-colors">Resources</Link>
               </li>
               <li>

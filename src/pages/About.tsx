@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Target, Building2, School, MapPin, ShieldCheck, Users, Zap } from 'lucide-react';
+import { Target, Building2, School, MapPin, ShieldCheck, Users, Zap, ArrowRight } from 'lucide-react';
 import FinalCTA from '../components/FinalCTA';
+import FacultyAvatar from '../components/FacultyAvatar';
+import { faculty } from '../data/faculty';
 import { site } from '../data/site';
 
 export default function About() {
@@ -87,6 +89,39 @@ export default function About() {
                 Organisations and schools across the RAKEZ ecosystem, trained on-site or online.
               </p>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* MEET OUR FACULTY */}
+      <section className="bg-white border-y border-slate-100 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+            <div className="max-w-2xl">
+              <h2 className="text-2xl font-extrabold text-slate-900">Meet our faculty</h2>
+              <p className="mt-2 text-slate-600">
+                Learn directly from experienced practitioners who pair real-world delivery with deep technical understanding.
+              </p>
+            </div>
+            <Link to="/faculty" className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700">
+              View all faculty <ArrowRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {faculty.filter((member) => member.featured).map((member) => (
+              <Link
+                key={member.slug}
+                to={`/faculty/${member.slug}`}
+                className="bg-slate-50 rounded-2xl border border-slate-200/60 p-6 hover:shadow-md transition-all group"
+              >
+                <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100">
+                  <FacultyAvatar name={member.name} photo={member.photo} className="w-full h-full" initialsClassName="text-lg" />
+                </div>
+                <h3 className="mt-4 font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{member.name}</h3>
+                <p className="text-sm font-medium text-primary-600">{member.title}</p>
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">{member.education}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

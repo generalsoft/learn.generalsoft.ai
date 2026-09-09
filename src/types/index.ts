@@ -144,3 +144,29 @@ export interface LeadData {
   /** Bot protection honeypot (should remain blank). */
   website?: string;
 }
+
+/**
+ * A faculty member / instructor profile shown on the site.
+ * Fields without content (publications, awards, etc.) can be omitted and the
+ * corresponding sections will be hidden on the profile page.
+ */
+export interface Faculty {
+  id: string;
+  slug: string;
+  name: string;
+  /** Role or academic title, e.g. "Adjunct Faculty". */
+  title: string;
+  /** Optional department or team label. */
+  department?: string;
+  /** URL of the portrait photo. Falls back to initials if it fails to load. */
+  photo?: string;
+  /** Highest qualification / degree line shown under the name. */
+  education: string;
+  researchInterests: string[];
+  bio: string[];
+  publications?: string[];
+  awards?: string[];
+  affiliations?: string[];
+  email?: string;
+  featured?: boolean;
+}
