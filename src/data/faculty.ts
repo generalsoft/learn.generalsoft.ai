@@ -14,7 +14,7 @@ export const faculty: Faculty[] = [
     name: 'Abid Nasim',
     title: 'Adjunct Faculty',
     education: 'MBA - Lahore University of Management Sciences (LUMS), Pakistan',
-    photo: '/public/an-office.jpg',
+    photo: '/an-office.jpg',
     researchInterests: [
       'Natural Language Processing in Artificial Intelligence solutions — particularly building an eco-system for the Urdu language that fills the current gaps in the Urdu eco-system.',
       'OCR, voice synthesis, voice recognition, IoT, AR, VR, 3D Printing and Cloud — converging these technologies to design new products.',
