@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { courses, getCourseBySlug, getCourseById } from './courseData.js';
 import { getCourseMaterials, classifyMaterial } from './courseMaterials.js';
+import {
+  REGISTRATION_FORM_ANCHOR,
+  REGISTRATION_FORM_BASE_PATH,
+  getRegistrationFormPath,
+  getRegistrationFormUrl,
+} from './registrationLinks.js';
+import { site } from '../data/site.js';
 
 describe('Course Catalog and Configuration', () => {
   it('lists AI Under the Hood before AI Soup to Nuts', () => {
@@ -115,5 +122,44 @@ describe('AI Without Fear (open for registration)', () => {
       expect(material.url).toBeTruthy();
       expect(material.ext).toBe('pdf');
     }
+  });
+});
+
+describe('Permanent registration links (emailed to participants)', () => {
+  it('builds the short, absolute AI Without Fear registration link', () => {
+    expect(getRegistrationFormPath('ai-without-fear')).toBe('/register/ai-without-fear');
+    expect(REGISTRATION_FORM_BASE_PATH).toBe('/register');
+    expect(getRegistrationFormPath('ai-without-fear')).toBe(
+      `${REGISTRATION_FORM_BASE_PATH}/ai-without-fear`
+    );
+    expect(getRegistrationFormUrl('ai-without-fear')).toBe(`${site.domain}/register/ai-without-fear`);
+    expect(getRegistrationFormUrl('ai-without-fear')).toBe(
+      'https://learn.generalsoft.ai/register/ai-without-fear'
+    );
+  });
+
+  it('keeps the course-page anchor and the emailed fragment in sync', () => {
+    expect(REGISTRATION_FORM_ANCHOR).toBe('register');
+    expect(`/courses/ai-without-fear#${REGISTRATION_FORM_ANCHOR}`).toBe(
+      '/courses/ai-without-fear#register'
+    );
+  });
+
+  it('offers a resolvable link for every open course', () => {
+    const openCourses = courses.filter((course) => course.registrationStatus === 'Open');
+    expect(openCourses.length).toBeGreaterThan(0);
+    expect(openCourses.map((course) => course.slug)).toContain('ai-without-fear');
+
+    for (const course of openCourses) {
+      // The alias redirects to /courses/<slug>, so the slug must resolve.
+      expect(getCourseBySlug(course.slug)?.id).toBe(course.id);
+      expect(getRegistrationFormUrl(course.slug)).toBe(`${site.domain}/register/${course.slug}`);
+    }
+  });
+
+  it('never leaks participant data into the permanent link', () => {
+    // Registration links are shareable, so they must contain only the slug.
+    expect(getRegistrationFormPath('ai-without-fear')).not.toContain('@');
+    expect(getRegistrationFormPath('ai-without-fear')).not.toContain('?');
   });
 });

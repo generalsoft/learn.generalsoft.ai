@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 
 import {
   Calendar, Clock, Globe, Check, Info, AlertCircle, ArrowRight,
@@ -8,6 +8,7 @@ import {
   X, ExternalLink
 } from 'lucide-react';
 import { getCourseBySlug } from '../courses/courseData';
+import { REGISTRATION_FORM_ANCHOR } from '../courses/registrationLinks';
 import { getCourseMaterials } from '../courses/courseMaterials';
 import type { CourseMaterial } from '../courses/courseMaterials';
 import { registerParticipant, resendVerificationEmail, getRegistrationById } from '../services/api';
@@ -68,6 +69,7 @@ export default function CourseDetail() {
   const materials = course ? getCourseMaterials(course.slug) : [];
   const formRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const [viewingMaterial, setViewingMaterial] = useState<CourseMaterial | null>(null);
 
   // States
@@ -97,24 +99,17 @@ export default function CourseDetail() {
     }
   }, [course]);
 
+  // Scroll to an anchor fragment after render — e.g. the registration link we
+  // email out (/register/<slug> → /courses/<slug>#register) or a materials link
+  // (/courses/ai-soup-to-nuts#coursematerial). React Router does not do this
+  // automatically, and the browser's initial auto-scroll can fire before the
+  // target element is mounted, hence the `course` dependency.
   useEffect(() => {
     if (!course) return;
     if (!location.hash) return;
 
     const target = document.getElementById(location.hash.slice(1));
 
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [course, location.hash]);
-
-  // Scroll to an anchor fragment (e.g. /courses/ai-soup-to-nuts#coursematerial)
-  // after render. React Router does not do this automatically, and the browser's
-  // initial auto-scroll can fire before the element is mounted.
-  useEffect(() => {
-    if (!course) return;
-    if (!location.hash) return;
-    const target = document.getElementById(location.hash.slice(1));
     if (target) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -180,6 +175,11 @@ export default function CourseDetail() {
 
   const handleScrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Mirror the anchor in the address bar so the visitor can copy/forward the
+    // exact same link (`/courses/<slug>#register`) they arrived from an email.
+    if (location.hash !== `#${REGISTRATION_FORM_ANCHOR}`) {
+      navigate(`${location.pathname}${location.search}#${REGISTRATION_FORM_ANCHOR}`, { replace: true });
+    }
     if (course.registrationStatus === 'Closed') {
       analytics.trackCompanyRequestClick(course.id);
     } else if (course.registrationStatus === 'Upcoming') {
@@ -509,7 +509,7 @@ export default function CourseDetail() {
           </div>
 
           {/* Right Column: Registration Form Container */}
-          <div className="lg:col-span-5" ref={formRef}>
+          <div id={REGISTRATION_FORM_ANCHOR} className="lg:col-span-5 scroll-mt-24" ref={formRef}>
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-lg p-6 sm:p-8 sticky top-24">
 
               {course.registrationStatus === 'Closed' ? (

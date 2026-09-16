@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingContact from './components/FloatingContact';
@@ -20,6 +20,21 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Faculty from './pages/Faculty';
 import FacultyDetail from './pages/FacultyDetail';
+import { REGISTRATION_FORM_ANCHOR, REGISTRATION_FORM_BASE_PATH } from './courses/registrationLinks';
+
+/**
+ * Permanent, email-friendly alias for a course registration form.
+ *
+ * Outreach emails point at `${REGISTRATION_FORM_BASE_PATH}/<slug>` (see
+ * `registrationLinks.ts`). This forwards to the course page's registration form
+ * anchor so the link keeps working even if the course page layout changes.
+ */
+function RegisterFormRedirect() {
+  const { slug = '' } = useParams<{ slug: string }>();
+
+  return <Navigate to={`/courses/${slug}#${REGISTRATION_FORM_ANCHOR}`} replace />;
+}
+
 
 export default function App() {
   return (
@@ -38,6 +53,7 @@ export default function App() {
             <Route path="/rakez" element={<Rakez />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:slug" element={<CourseDetail />} />
+            <Route path={`${REGISTRATION_FORM_BASE_PATH}/:slug`} element={<RegisterFormRedirect />} />
             <Route path="/verify" element={<VerifyRegistration />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/resources/:slug" element={<ResourceArticle />} />

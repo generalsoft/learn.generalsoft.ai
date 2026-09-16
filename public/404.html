@@ -7,9 +7,13 @@
       // Single Page Apps for GitHub Pages SPA routing fallback redirect handler
       var pathSegmentsToKeep = 0; // 0 for custom domains
       var l = window.location;
+      // NOTE: the separator is '/?/' and not '/?' — index.html only restores the
+      // requested path when window.location.search[1] === '/'. Without that
+      // leading slash a shared/emailed deep link (e.g. /register/ai-without-fear)
+      // is left in the query string and the visitor lands on the home page.
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?' +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
         l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
         (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
         l.hash
