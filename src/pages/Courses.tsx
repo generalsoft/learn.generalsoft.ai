@@ -101,13 +101,13 @@ export default function Courses() {
           );
         })}
       </section>
-      {/* TECHNICAL DEEP-DIVES */}
+      {/* COURSES & WORKSHOPS */}
       <section className="bg-white border-y border-slate-100 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mb-8">
-            <h2 className="text-2xl font-extrabold text-slate-900">Technical deep-dives</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900">Courses & workshops</h2>
             <p className="mt-2 text-slate-600">
-              For professionals and builders who want a rigorous, foundational understanding of how AI works under the hood.
+              Open sessions you can register for today, plus technical deep-dives for professionals and builders who want a rigorous, foundational understanding of how AI works under the hood.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

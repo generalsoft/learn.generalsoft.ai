@@ -82,3 +82,38 @@ describe('AI Under the Hood (upcoming) course', () => {
     }
   });
 });
+
+describe('AI Without Fear (open for registration)', () => {
+  it('is registered as an open two-hour session on Fridays and Saturdays', () => {
+    const course = getCourseBySlug('ai-without-fear');
+    expect(course).toBeDefined();
+    expect(course?.id).toBe('ai-without-fear');
+    expect(course?.registrationStatus).toBe('Open');
+    expect(course?.duration).toBe('2 Hours (Single Session)');
+    expect(course?.dates).toBe('Every Friday & Saturday');
+    expect(course?.time).toBe('4:00 PM – 6:00 PM');
+    expect(course?.deliveryMethod).toBe('Online');
+  });
+
+  it('exposes pricing the registration form can price against', () => {
+    const course = getCourseBySlug('ai-without-fear');
+    expect(course?.pricing.individualPrice).toBe(0);
+    expect(course?.pricing.companyPrice).toBe(400);
+    expect(course?.pricing.currency).toBe('AED');
+  });
+
+  it('is resolvable by both slug and ID', () => {
+    expect(getCourseBySlug('ai-without-fear')?.id).toBe('ai-without-fear');
+    expect(getCourseById('ai-without-fear')?.slug).toBe('ai-without-fear');
+  });
+
+  it('auto-discovers the uploaded workshop materials', () => {
+    const materials = getCourseMaterials('ai-without-fear');
+    expect(materials.length).toBeGreaterThanOrEqual(3);
+    for (const material of materials) {
+      expect(material.slug).toBe('ai-without-fear');
+      expect(material.url).toBeTruthy();
+      expect(material.ext).toBe('pdf');
+    }
+  });
+});

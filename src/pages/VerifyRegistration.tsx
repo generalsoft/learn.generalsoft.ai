@@ -4,13 +4,19 @@ import {
   CheckCircle2, AlertTriangle, AlertCircle, Loader2, ArrowRight,
   Calendar, Clock, Globe, ShieldAlert, Sparkles
 } from 'lucide-react';
-import { verifyEmailToken, resendVerificationEmail } from '../services/api';
+import { verifyEmailToken, resendVerificationEmail, getRegistrationById } from '../services/api';
 import { analytics } from '../services/analytics';
-import { getCourseBySlug } from '../courses/courseData';
+import { getCourseById } from '../courses/courseData';
 import { setCookie, REGISTRATION_COOKIE } from '../services/cookies';
 import { isValidEmail } from '../services/validation';
 
 type VerificationState = 'loading' | 'confirmed' | 'expired' | 'invalid' | 'error';
+
+/**
+ * Fallback course used when a verification link does not identify a course
+ * (e.g. links generated before the site hosted more than one course).
+ */
+const DEFAULT_COURSE_ID = 'ai-soup-to-nuts';
 
 export default function VerifyRegistration() {
   const [searchParams] = useSearchParams();
@@ -28,8 +34,13 @@ export default function VerifyRegistration() {
   const [resendEmail, setResendEmail] = useState('');
   const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  // Let's assume the course is AI Soup to Nuts for version 1 confirmation details
-  const course = getCourseBySlug('ai-soup-to-nuts')!;
+  // The /verify route serves every course, so the confirmation details shown
+  // here must be resolved for the course the participant actually registered
+  // for. Resolution order: an explicit `course` param, the verified
+  // registration record, then the original default course.
+  const courseParam = searchParams.get('course');
+  const [courseId, setCourseId] = useState<string>(courseParam || DEFAULT_COURSE_ID);
+  const course = getCourseById(courseId) ?? getCourseById(DEFAULT_COURSE_ID)!;
 
   useEffect(() => {
     // Preferred path: the Cloud Function already verified the record and
@@ -41,8 +52,7 @@ export default function VerifyRegistration() {
           setCookie(REGISTRATION_COOKIE, rid);
         }
         setState('confirmed');
-        analytics.trackEmailVerified(course.id);
-        analytics.trackRegistrationComplete(course.id);
+        trackVerifiedRegistration(rid);
       } else {
         applyRedirectError();
       }
@@ -63,8 +73,11 @@ export default function VerifyRegistration() {
 
         if (response.success) {
           setState('confirmed');
-          analytics.trackEmailVerified(course.id);
-          analytics.trackRegistrationComplete(course.id);
+          if (response.data?.courseId) {
+            setCourseId(response.data.courseId);
+          }
+          analytics.trackEmailVerified(response.data?.courseId || course.id);
+          analytics.trackRegistrationComplete(response.data?.courseId || course.id);
 
           // Remember the registration document id so the course page can
           // recognize this verified user on subsequent visits.
@@ -78,6 +91,9 @@ export default function VerifyRegistration() {
             setState('expired');
           } else if (msg.includes('already verified') || msg.includes('already confirmed')) {
             setState('confirmed');
+            if (response.data?.courseId) {
+              setCourseId(response.data.courseId);
+            }
           } else {
             setState('error');
             setErrorMsg(response.message);
@@ -92,7 +108,23 @@ export default function VerifyRegistration() {
     performVerification();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [redirectState, rid, token, course.id]);
+  }, [redirectState, rid, token]);
+
+  /**
+   * Resolve which course a verified registration belongs to (the emailed link
+   * is shared by every course) and report the conversion against that course.
+   */
+  async function trackVerifiedRegistration(registrationId: string | null) {
+    const registration = registrationId ? await getRegistrationById(registrationId) : null;
+    const verifiedCourseId = registration?.courseId || course.id;
+
+    if (registration?.courseId) {
+      setCourseId(registration.courseId);
+    }
+
+    analytics.trackEmailVerified(verifiedCourseId);
+    analytics.trackRegistrationComplete(verifiedCourseId);
+  }
 
   function applyRedirectError() {
     const msg = (redirectMessage || '').toLowerCase();
@@ -256,7 +288,7 @@ export default function VerifyRegistration() {
             )}
 
             <div className="border-t border-slate-100 pt-6">
-              <Link to="/courses/ai-soup-to-nuts" className="text-sm font-semibold text-primary-600 hover:underline">
+              <Link to={`/courses/${course.slug}`} className="text-sm font-semibold text-primary-600 hover:underline">
                 Return to Course Page
               </Link>
             </div>
@@ -281,7 +313,7 @@ export default function VerifyRegistration() {
               <Link to="/" className="text-slate-500 hover:text-slate-900 font-medium">
                 Home Page
               </Link>
-              <Link to="/courses/ai-soup-to-nuts" className="text-primary-600 hover:underline font-semibold">
+              <Link to={`/courses/${course.slug}`} className="text-primary-600 hover:underline font-semibold">
                 Register Anew
               </Link>
             </div>

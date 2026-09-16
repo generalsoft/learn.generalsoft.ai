@@ -121,7 +121,7 @@ export async function verifyEmailToken(token: string): Promise<ApiResponse> {
       return {
         success: true,
         message: 'This registration has already been confirmed.',
-        data: { id: registrationId },
+        data: { id: registrationId, courseId: registration.courseId ?? '' },
       };
     }
 
@@ -143,7 +143,7 @@ export async function verifyEmailToken(token: string): Promise<ApiResponse> {
     return {
       success: true,
       message: 'Registration confirmed.',
-      data: { id: registrationId },
+      data: { id: registrationId, courseId: registration.courseId ?? '' },
     };
   } catch (error) {
     console.error('Firestore verification error:', error);

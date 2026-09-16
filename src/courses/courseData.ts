@@ -140,6 +140,93 @@ export const courses: Course[] = [
     featured: true,
     audienceSummary: 'Non-Technical / Professionals',
     infoNote: 'No technical or coding background is required to participate in this training.'
+  },
+  {
+    id: 'ai-without-fear',
+    slug: 'ai-without-fear',
+    title: 'AI Without Fear',
+    subtitle: 'Understanding AI without hype, panic or blind trust',
+    shortDescription: 'A two-hour, discussion-led session that replaces AI anxiety with clear thinking — what AI actually is, what it can and cannot be trusted with, and how to judge the extreme claims around it.',
+    longDescription: 'AI Without Fear is a two-hour, discussion-led workshop for anyone who feels anxious, sceptical or simply confused about artificial intelligence. There is no hype and no doom. Instead you will look at what AI actually is, why a fluent answer is not the same as a true one, where the real risks sit, and how to separate a demonstrated capability from a speculative claim. Two short labs — a hallucination hunt and an ethics scenario discussion — turn the conversation into practice, and you leave with your own AI constitution: practical rules for when to trust AI, when to verify it, and when to refuse it access.',
+    audience: [
+      'Professionals and managers who feel unsure about what AI means for their work',
+      'Parents, teachers and students worried about AI and education',
+      'Leaders and decision-makers who have to set the rules for AI use',
+      'Sceptics who want evidence rather than hype or panic',
+      'Anyone who wants a calm, practical way to think about AI — no coding or technical background required'
+    ],
+    audienceSummary: 'Non-Technical / Everyone',
+    learningOutcomes: [
+      'Separate AI fact from AI fiction, and fluency from truth',
+      'Explain in plain language how models, applications, agents and autonomous systems differ',
+      'Ask what level of trust is appropriate for a task, instead of only what AI can do',
+      'Evaluate extreme AI claims using evidence, assumptions and incentives',
+      'Recognise the four categories of AI risk and the five ethical questions behind them',
+      'Walk away with your own AI constitution: when to use AI, when to verify it and when to refuse it access'
+    ],
+    outline: [
+      {
+        title: 'What We Fear, and What AI Actually Is',
+        items: [
+          'Fear inventory: the fears and hopes people bring to AI, and what evidence would reduce the uncertainty',
+          'Stop saying "AI": models, applications, agents, autonomous systems and their real-world consequences',
+          'The AI loop: data, model, output, human or system action, and feedback',
+          'Why AI sounds intelligent: fluency is not truth, and confidence is not knowledge'
+        ]
+      },
+      {
+        title: 'Capability, Reliability and the Hallucination Problem',
+        items: [
+          'Capability is not reliability: asking what level of trust is appropriate for this task',
+          'Plausible is not true: incorrect facts, invented citations, fabricated quotations and false explanations',
+          'AI lab — trust, test, verify: 8 minutes hunting hallucinations, 4 minutes changing the prompt, 2 minutes sharing observations',
+          'Capability vs reliability: brainstorming, learning, work decisions and high-stakes decisions'
+        ]
+      },
+      {
+        title: 'Who Controls AI? Ethics, Power and Risk',
+        items: [
+          'The chain of control: data, compute, models, companies, applications, institutions and society',
+          'Five ethical questions: consent, fairness, accountability, transparency and power',
+          'Four categories of AI risk: individual, institutional, societal and catastrophic',
+          'Ethics lab — what would responsible look like? Hiring AI, AI companions, workplace automation, synthetic media and creative work'
+        ]
+      },
+      {
+        title: 'Possibility is Not Probability: Judging Extreme Claims',
+        items: [
+          'Sorting the observed, the demonstrated, the predicted and the speculated',
+          'The AI claim detector: who is claiming, what exactly, what evidence, what assumptions, what incentives, and what would change your mind',
+          'Case study: AI agents and cybersecurity — what an incident demonstrates and what it does not',
+          'You are not a passenger: how technology, institutions, jobs, laws, culture and people adapt'
+        ]
+      },
+      {
+        title: 'Your AI Constitution',
+        items: [
+          'The four commitments: what I will use AI for, when I will verify AI output, what I will never give AI unrestricted access to, and what I will ask when I hear an extreme claim',
+          'Working through the participant workbook and your pre-workshop questionnaire responses',
+          'Repeating question 6 from the questionnaire to notice what has changed in your thinking',
+          'Taking your constitution back to your team as your own rules of use'
+        ]
+      }
+    ],
+    deliveryMethod: 'Online',
+    dates: 'Every Friday & Saturday',
+    time: '4:00 PM – 6:00 PM',
+    breakTime: '10 minute break',
+    timezone: 'UAE time (GST / UTC+4)',
+    pricing: {
+      individual: 'Free for individuals',
+      company: 'AED 400 per attendee for companies',
+      individualPrice: 0,
+      companyPrice: 400,
+      currency: 'AED'
+    },
+    registrationStatus: 'Open',
+    duration: '2 Hours (Single Session)',
+    featured: true,
+    infoNote: 'No technical or coding background is required. This is a discussion-led session — bring your questions and your scepticism.'
   }
 ];
 
