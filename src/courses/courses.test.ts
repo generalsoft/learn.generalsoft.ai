@@ -90,7 +90,7 @@ describe('AI Without Fear (open for registration)', () => {
     expect(course?.id).toBe('ai-without-fear');
     expect(course?.registrationStatus).toBe('Open');
     expect(course?.duration).toBe('2 Hours (Single Session)');
-    expect(course?.dates).toBe('Every Friday & Saturday');
+    expect(course?.dates).toBe('Friday Sep 18 & Saturday Sep 19');
     expect(course?.time).toBe('4:00 PM – 6:00 PM');
     expect(course?.deliveryMethod).toBe('Online');
   });

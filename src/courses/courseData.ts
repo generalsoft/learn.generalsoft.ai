@@ -212,7 +212,7 @@ export const courses: Course[] = [
       }
     ],
     deliveryMethod: 'Online',
-    dates: 'Every Friday & Saturday',
+    dates: 'Friday Sep 18 & Saturday Sep 19',
     time: '4:00 PM – 6:00 PM',
     breakTime: '10 minute break',
     timezone: 'UAE time (GST / UTC+4)',
