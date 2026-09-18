@@ -223,7 +223,10 @@ export const courses: Course[] = [
       companyPrice: 400,
       currency: 'AED'
     },
-    registrationStatus: 'Open',
+    // Registration for the Sep 18 & 19 sessions has closed. Closed courses no
+    // longer render the public registration form; they render the
+    // "Request This Course" form instead (see pages/CourseDetail.tsx).
+    registrationStatus: 'Closed',
     duration: '2 Hours (Single Session)',
     featured: true,
     infoNote: 'No technical or coding background is required. This is a discussion-led session — bring your questions and your scepticism.'

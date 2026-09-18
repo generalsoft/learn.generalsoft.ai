@@ -90,12 +90,14 @@ describe('AI Under the Hood (upcoming) course', () => {
   });
 });
 
-describe('AI Without Fear (open for registration)', () => {
-  it('is registered as an open two-hour session on Fridays and Saturdays', () => {
+describe('AI Without Fear (registration closed, request form enabled)', () => {
+  it('is registered as a closed two-hour session that accepts course requests', () => {
     const course = getCourseBySlug('ai-without-fear');
     expect(course).toBeDefined();
     expect(course?.id).toBe('ai-without-fear');
-    expect(course?.registrationStatus).toBe('Open');
+    // Closed courses render the "Request This Course" form instead of the
+    // public registration form (see pages/CourseDetail.tsx).
+    expect(course?.registrationStatus).toBe('Closed');
     expect(course?.duration).toBe('2 Hours (Single Session)');
     expect(course?.dates).toBe('Friday Sep 18 & Saturday Sep 19');
     expect(course?.time).toBe('4:00 PM – 6:00 PM');
@@ -145,15 +147,30 @@ describe('Permanent registration links (emailed to participants)', () => {
     );
   });
 
-  it('offers a resolvable link for every open course', () => {
-    const openCourses = courses.filter((course) => course.registrationStatus === 'Open');
-    expect(openCourses.length).toBeGreaterThan(0);
-    expect(openCourses.map((course) => course.slug)).toContain('ai-without-fear');
+  it('offers a resolvable link for every published course', () => {
+    // Permanent links keep working after registration closes: the alias lands on
+    // /courses/<slug>, where a closed course now shows its request form.
+    expect(courses.length).toBeGreaterThan(0);
 
-    for (const course of openCourses) {
+    for (const course of courses) {
       // The alias redirects to /courses/<slug>, so the slug must resolve.
       expect(getCourseBySlug(course.slug)?.id).toBe(course.id);
       expect(getRegistrationFormUrl(course.slug)).toBe(`${site.domain}/register/${course.slug}`);
+    }
+
+    expect(getRegistrationFormUrl('ai-without-fear')).toBe(
+      'https://learn.generalsoft.ai/register/ai-without-fear'
+    );
+  });
+
+  it('keeps a request path open for every closed course', () => {
+    const closedCourses = courses.filter((course) => course.registrationStatus === 'Closed');
+    expect(closedCourses.map((course) => course.slug)).toContain('ai-without-fear');
+
+    for (const course of closedCourses) {
+      // Closed courses are reached through the same permanent link, which now
+      // opens the "Request This Course" form on the course page.
+      expect(getCourseBySlug(course.slug)?.id).toBe(course.id);
     }
   });
 
