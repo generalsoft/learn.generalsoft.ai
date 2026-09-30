@@ -171,6 +171,9 @@
     .test-result.correct { background: #1f6d4a40; border: 1px solid #3a9d6e; color: #6ee7a2; }
     .test-result.wrong { background: #6d2e3a40; border: 1px solid #a5454a; color: #ff8d8d; }
     .small { font-size: 12px; color: #9eabc7; }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    .sample-item.ok { border-color: #3a9d6e; }
+    .sample-item.bad { border-color: #a5454a; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -196,7 +199,8 @@
         <button id="labelZero" class="primary">📌 Label as 0</button>
         <button id="labelOne" class="primary">📌 Label as 1</button>
         <button id="clearDraw">🗑️ Clear</button>
-        <button id="batchAdd">📥 Add +8 variants</button>
+        <button id="batchZero">📥 0 + 8 variants</button>
+        <button id="batchOne">📥 1 + 8 variants</button>
         <button id="toggleMode" class="success">🎯 Switch to Test</button>
       </div>
       <div class="status" id="statusMsg">Draw a digit, then click "Label as 0" or "Label as 1" to add it.</div>
@@ -218,17 +222,26 @@
           <div class="conf" id="testConfidence">draw something to test</div>
         </div>
         <div id="testResult" class="test-result" style="display: none;"></div>
-        <div style="display: flex; gap: 8px; justify-content: center; margin: 8px 0;">
-          <button id="clearTestResult">Clear result</button>
-          <button id="submitTest" class="primary">✅ Submit as correct</button>
+        <div class="small" style="text-align:center; margin: 6px 0 4px;">What digit did you actually draw?</div>
+        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 0 0 8px;">
+          <button id="gradeZero" class="primary">It was a 0</button>
+          <button id="gradeOne" class="primary">It was a 1</button>
+          <button id="clearTestResult">Next drawing</button>
         </div>
+        <div class="metrics">
+          <div class="metric"><b id="testCount">0</b><span>tested</span></div>
+          <div class="metric"><b id="testCorrect">0</b><span>correct</span></div>
+          <div class="metric"><b id="testAcc">—</b><span>test accuracy</span></div>
+        </div>
+        <div class="sample-grid" id="testHistory"></div>
+        <button id="resetTest" style="margin-top: 6px;">Reset test score</button>
       </div>
 
       <div id="trainPanel">
         <div class="metrics">
           <div class="metric"><b id="epochDisplay">0</b><span>epochs</span></div>
           <div class="metric"><b id="lossDisplay">—</b><span>loss</span></div>
-          <div class="metric"><b id="accDisplay">—</b><span>accuracy</span></div>
+          <div class="metric"><b id="accDisplay">—</b><span>train accuracy</span></div>
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0;">
           <button id="trainBtn" class="primary">▶ Train</button>
@@ -281,14 +294,14 @@ let lr = 0.3;
 let W1 = [], b1 = [], W2 = [], b2 = 0;
 let isTestMode = false;
 let lastTestResult = null;
+let graded = false;
+let testStats = { n: 0, ok: 0 };
+let testHist = [];
 
 // ---------- DRAWING ----------
 function initDraw() {
   ctx.fillStyle = '#0a0f1e';
   ctx.fillRect(0, 0, 280, 280);
-  ctx.strokeStyle = '#9eabc7';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(0, 0, 280, 280);
 }
 initDraw();
 
@@ -313,6 +326,7 @@ function getCoords(e) {
 
 function startDraw(e) {
   e.preventDefault();
+  if (graded) clearForNext();
   isDrawing = true;
   const pos = getCoords(e);
   lastX = pos.x; 
@@ -355,48 +369,30 @@ drawCanvas.addEventListener('touchmove', doDraw, { passive: false });
 drawCanvas.addEventListener('touchend', stopDraw, { passive: false });
 
 // ---------- PREDICTION UPDATE ----------
+function hasBothClasses() { return dataset.some(d => d.label === 0) && dataset.some(d => d.label === 1); }
+function isTrained() { return epoch > 0 && hasBothClasses(); }
+
 function updateAllPredictions() {
-  // Get fresh pixels from the canvas
   const pixels = getPixels(drawCanvas);
-  const hasInkFlag = hasInk(pixels);
-  
-  // Update live prediction (always visible)
-  if (dataset.length > 0 && hasInkFlag) {
-    const p = predict(pixels);
-    document.getElementById('livePred').textContent = `${p.toFixed(3)} → ${p > 0.5 ? '1' : '0'}`;
-  } else {
-    document.getElementById('livePred').textContent = hasInkFlag ? '— (train first)' : '—';
-  }
-  
-  // Update test prediction if in test mode
-  if (isTestMode) {
-    const testPredEl = document.getElementById('testPrediction');
-    const testConfEl = document.getElementById('testConfidence');
-    const testResultEl = document.getElementById('testResult');
-    
-    if (dataset.length === 0) {
-      testPredEl.textContent = '⚠️';
-      testConfEl.textContent = 'train the AI first!';
-      testResultEl.style.display = 'none';
-      return;
-    }
-    
-    if (!hasInkFlag) {
-      testPredEl.textContent = '—';
-      testConfEl.textContent = 'draw something to test';
-      testResultEl.style.display = 'none';
-      return;
-    }
-    
-    const p = predict(pixels);
-    const pred = p > 0.5 ? 1 : 0;
-    const conf = p > 0.5 ? p : 1 - p;
-    
-    testPredEl.textContent = pred;
-    testConfEl.textContent = `confidence: ${(conf*100).toFixed(1)}%`;
-    lastTestResult = { prediction: pred, confidence: conf };
-    testResultEl.style.display = 'none';
-  }
+  const inked = hasInk(pixels);
+  const liveEl = document.getElementById('livePred');
+  if (!inked) liveEl.textContent = '—';
+  else if (!isTrained()) liveEl.textContent = '— (train first)';
+  else { const p = predict(pixels); liveEl.textContent = `${p.toFixed(3)} → ${p > 0.5 ? '1' : '0'}`; }
+
+  if (!isTestMode || graded) return;
+  const predEl = document.getElementById('testPrediction');
+  const confEl = document.getElementById('testConfidence');
+  lastTestResult = null;
+  document.getElementById('testResult').style.display = 'none';
+  if (!isTrained()) { predEl.textContent = '⚠️'; confEl.textContent = 'train the AI first (needs 0s and 1s, then press Train)'; return; }
+  if (!inked) { predEl.textContent = '—'; confEl.textContent = 'draw something to test'; return; }
+  const p = predict(pixels);
+  const pred = p > 0.5 ? 1 : 0;
+  const conf = p > 0.5 ? p : 1 - p;
+  predEl.textContent = pred;
+  confEl.textContent = `confidence: ${(conf * 100).toFixed(1)}%`;
+  lastTestResult = { prediction: pred, confidence: conf, pixels };
 }
 
 // ---------- NEURAL NET ----------
@@ -462,29 +458,33 @@ function trainOne() {
 function predict(pixels) { return forward(pixels).p; }
 
 // ---------- IMAGE PROCESSING ----------
+// Ink = how much brighter a pixel is than the dark canvas background (#0a0f1e).
+// Blank canvas -> all zeros; white strokes -> values near 1.
+const BG_LUM = 0.299 * 10 + 0.587 * 15 + 0.114 * 30;
 function getPixels(canvas) {
-  const w = 28, h = 28;
-  const temp = document.createElement('canvas');
-  temp.width = w; temp.height = h;
-  const tctx = temp.getContext('2d');
-  tctx.drawImage(canvas, 0, 0, w, h);
-  const data = tctx.getImageData(0, 0, w, h).data;
-  const pixels = new Float32Array(w * h);
-  for (let i = 0; i < w*h; i++) {
-    const idx = i * 4;
-    const r = data[idx], g = data[idx+1], b = data[idx+2];
-    pixels[i] = Math.min(1, Math.max(0, 1 - (0.299*r + 0.587*g + 0.114*b) / 255));
+  const W = canvas.width, H = canvas.height, N = 28, cell = W / N;
+  const data = canvas.getContext('2d').getImageData(0, 0, W, H).data;
+  const pixels = new Float32Array(N * N);
+  for (let gy = 0; gy < N; gy++) {
+    for (let gx = 0; gx < N; gx++) {
+      let sum = 0, cnt = 0;
+      for (let y = Math.floor(gy * cell); y < Math.floor((gy + 1) * cell); y++) {
+        for (let x = Math.floor(gx * cell); x < Math.floor((gx + 1) * cell); x++) {
+          const i = (y * W + x) * 4;
+          sum += 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+          cnt++;
+        }
+      }
+      pixels[gy * N + gx] = Math.min(1, Math.max(0, (sum / cnt - BG_LUM) / (255 - BG_LUM)));
+    }
   }
   return pixels;
 }
 
-function hasInk(pixels) { 
+function hasInk(pixels) {
   let sum = 0;
-  for (let i = 0; i < pixels.length; i++) {
-    sum += pixels[i];
-    if (sum > 1) return true;
-  }
-  return sum > 0.5;
+  for (let i = 0; i < pixels.length; i++) sum += pixels[i];
+  return sum > 2;
 }
 
 // ---------- DATASET ----------
@@ -542,8 +542,7 @@ function addVariants(label) {
 
 function clearDataset() {
   dataset = [];
-  losses = [];
-  epoch = 0;
+  initWeights();
   renderGallery();
   updateCounts();
   updateAllPredictions();
@@ -583,7 +582,7 @@ function renderGallery() {
 
 // ---------- TRAINING ----------
 function trainEpochs(n) {
-  if (dataset.length < 2) {
+  if (!hasBothClasses()) {
     document.getElementById('trainStatus').textContent = '⚠️ Need samples of both 0 and 1.';
     return;
   }
@@ -686,6 +685,7 @@ function toggleTestMode() {
   const testPanel = document.getElementById('testPanel');
   const trainPanel = document.getElementById('trainPanel');
   const btn = document.getElementById('toggleMode');
+  ['labelZero', 'labelOne', 'batchZero', 'batchOne'].forEach(id => document.getElementById(id).disabled = isTestMode);
   
   if (isTestMode) {
     badge.textContent = '🎯 TEST';
@@ -706,29 +706,62 @@ function toggleTestMode() {
   updateAllPredictions();
 }
 
-function submitTestResult() {
-  if (!lastTestResult) { 
-    alert('Draw something first or wait for the AI to predict!'); 
-    return; 
+function thumb(pixels) {
+  const c = document.createElement('canvas');
+  c.width = 28; c.height = 28;
+  const ct = c.getContext('2d');
+  const img = ct.createImageData(28, 28);
+  for (let j = 0; j < 784; j++) {
+    const v = Math.round(pixels[j] * 255);
+    img.data[j*4] = v; img.data[j*4+1] = v; img.data[j*4+2] = v; img.data[j*4+3] = 255;
   }
-  const answer = prompt(`AI predicted: ${lastTestResult.prediction}\nWhat is the correct digit? (0 or 1)`, '');
-  if (answer === null) return;
-  const correct = parseInt(answer);
-  if (correct !== 0 && correct !== 1) { 
-    alert('Please enter 0 or 1.'); 
-    return; 
-  }
-  const isCorrect = correct === lastTestResult.prediction;
-  const resultDiv = document.getElementById('testResult');
-  resultDiv.style.display = 'block';
-  resultDiv.className = `test-result ${isCorrect ? 'correct' : 'wrong'}`;
-  resultDiv.textContent = isCorrect ? '✅ Correct! The AI got it right!' : `❌ Wrong. AI said ${lastTestResult.prediction}, correct was ${correct}.`;
+  ct.putImageData(img, 0, 0);
+  return c;
 }
 
-function clearTestResult() {
-  document.getElementById('testResult').style.display = 'none';
-  lastTestResult = null;
+function renderTestStats() {
+  document.getElementById('testCount').textContent = testStats.n;
+  document.getElementById('testCorrect').textContent = testStats.ok;
+  document.getElementById('testAcc').textContent = testStats.n ? Math.round(testStats.ok / testStats.n * 100) + '%' : '—';
+  const g = document.getElementById('testHistory');
+  g.innerHTML = '';
+  testHist.slice(-20).forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'sample-item ' + (t.ok ? 'ok' : 'bad');
+    div.appendChild(thumb(t.pixels));
+    const l = document.createElement('span');
+    l.textContent = `AI ${t.pred} ${t.ok ? '✓' : '✗ (was ' + t.actual + ')'}`;
+    div.appendChild(l);
+    g.appendChild(div);
+  });
 }
+
+function resetTestStats() { testStats = { n: 0, ok: 0 }; testHist = []; renderTestStats(); }
+
+function clearForNext() {
+  initDraw();
+  graded = false;
+  lastTestResult = null;
+  document.getElementById('testResult').style.display = 'none';
+}
+
+function gradeTest(actual) {
+  const status = document.getElementById('statusMsg');
+  if (graded) { status.textContent = 'Already graded. Press "Next drawing" or just start drawing.'; return; }
+  if (!lastTestResult) { status.textContent = '⚠️ Draw a digit first (and train the AI if you haven\'t).'; return; }
+  const ok = actual === lastTestResult.prediction;
+  testStats.n++;
+  if (ok) testStats.ok++;
+  testHist.push({ pixels: lastTestResult.pixels, pred: lastTestResult.prediction, actual, ok });
+  graded = true;
+  const r = document.getElementById('testResult');
+  r.style.display = 'block';
+  r.className = 'test-result ' + (ok ? 'correct' : 'wrong');
+  r.textContent = ok ? '✅ Correct! The AI got it right.' : `❌ Wrong. AI said ${lastTestResult.prediction}, it was ${actual}.`;
+  renderTestStats();
+}
+
+function clearTestResult() { clearForNext(); updateAllPredictions(); }
 
 // ---------- EVENT BINDING ----------
 document.getElementById('labelZero').onclick = () => addCurrent(0);
@@ -737,12 +770,12 @@ document.getElementById('clearDraw').onclick = () => {
   initDraw(); 
   updateAllPredictions();
 };
-document.getElementById('batchAdd').onclick = () => {
-  const label = prompt('Label for current + variants (0 or 1):', '0');
-  if (label === '0' || label === '1') addVariants(parseInt(label));
-};
+document.getElementById('batchZero').onclick = () => addVariants(0);
+document.getElementById('batchOne').onclick = () => addVariants(1);
 document.getElementById('toggleMode').onclick = toggleTestMode;
-document.getElementById('submitTest').onclick = submitTestResult;
+document.getElementById('gradeZero').onclick = () => gradeTest(0);
+document.getElementById('gradeOne').onclick = () => gradeTest(1);
+document.getElementById('resetTest').onclick = resetTestStats;
 document.getElementById('clearTestResult').onclick = clearTestResult;
 
 document.getElementById('trainBtn').onclick = () => trainEpochs(50);
@@ -752,6 +785,8 @@ document.getElementById('step100Btn').onclick = () => trainEpochs(100);
 document.getElementById('resetAll').onclick = () => {
   clearDataset();
   initWeights();
+  resetTestStats();
+  clearForNext();
   document.getElementById('testResult').style.display = 'none';
   updateUI();
   renderDecision();
