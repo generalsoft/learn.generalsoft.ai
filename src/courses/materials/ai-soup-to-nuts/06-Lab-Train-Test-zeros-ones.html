@@ -182,7 +182,7 @@
   <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
     <div>
       <h1>✍️ Handwriting demo — 0 vs 1</h1>
-      <div class="sub">Draw a digit, label it to train, then switch to Test Mode to see AI predictions.</div>
+      <div class="sub">Train it with labels, test it on fresh drawings, or let it learn from 👍/👎 rewards (reinforcement).</div>
     </div>
     <button id="resetAll" class="danger">↺ Reset all</button>
   </div>
@@ -201,7 +201,9 @@
         <button id="clearDraw">🗑️ Clear</button>
         <button id="batchZero">📥 0 + 8 variants</button>
         <button id="batchOne">📥 1 + 8 variants</button>
-        <button id="toggleMode" class="success">🎯 Switch to Test</button>
+        <button id="modeTrain" class="success">📚 Train</button>
+        <button id="modeTest">🎯 Test</button>
+        <button id="modeRL">🕹️ Reinforce</button>
       </div>
       <div class="status" id="statusMsg">Draw a digit, then click "Label as 0" or "Label as 1" to add it.</div>
       <div class="flex-row">
@@ -213,7 +215,7 @@
 
     <!-- RIGHT: training & test -->
     <div class="card">
-      <div class="title">2. Train &amp; test</div>
+      <div class="title">2. Train, test &amp; reinforce</div>
       
       <div id="testPanel" style="display: none;">
         <div class="prediction-box">
@@ -235,6 +237,32 @@
         </div>
         <div class="sample-grid" id="testHistory"></div>
         <button id="resetTest" style="margin-top: 6px;">Reset test score</button>
+      </div>
+
+      <div id="rlPanel" style="display: none;">
+        <div class="prediction-box">
+          <div class="label">🤖 AI guesses (sampled from its own probabilities):</div>
+          <div class="big" id="rlAction">—</div>
+          <div class="conf" id="rlProb">draw a digit, then press Guess</div>
+        </div>
+        <div id="rlResult" class="test-result" style="display: none;"></div>
+        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 8px 0;">
+          <button id="rlGuessBtn" class="primary">🎲 Guess</button>
+          <button id="rewardGood" class="success">👍 Good (+1)</button>
+          <button id="rewardBad" class="danger">👎 Bad (−1)</button>
+          <button id="rlNext">Next drawing</button>
+        </div>
+        <div class="metrics">
+          <div class="metric"><b id="rlStepsDisplay">0</b><span>RL steps</span></div>
+          <div class="metric"><b id="rlAvgDisplay">—</b><span>avg reward (last 20)</span></div>
+          <div class="metric"><b id="rlSuccDisplay">—</b><span>success (last 20)</span></div>
+        </div>
+        <canvas id="rewardCanvas" width="400" height="120" style="width:100%; background:#0a0f1e; border-radius:10px; border:1px solid #263653;"></canvas>
+        <div class="flex-row" style="margin-top: 8px;">
+          <button id="auto50">🤖 Auto-play ×50</button>
+          <button id="auto200">🤖 Auto-play ×200</button>
+        </div>
+        <div class="small" style="margin-top: 6px;">The AI is never told the right answer, only a reward. Auto-play uses your labelled samples as the environment: it gives +1/−1 automatically. Step size = learning rate × 0.15.</div>
       </div>
 
       <div id="trainPanel">
@@ -297,6 +325,11 @@ let lastTestResult = null;
 let graded = false;
 let testStats = { n: 0, ok: 0 };
 let testHist = [];
+let isRLMode = false;
+let rlPending = null;
+let rlSteps = 0;
+let rlRewards = [];
+const RL_SCALE = 0.15;
 
 // ---------- DRAWING ----------
 function initDraw() {
@@ -370,7 +403,7 @@ drawCanvas.addEventListener('touchend', stopDraw, { passive: false });
 
 // ---------- PREDICTION UPDATE ----------
 function hasBothClasses() { return dataset.some(d => d.label === 0) && dataset.some(d => d.label === 1); }
-function isTrained() { return epoch > 0 && hasBothClasses(); }
+function isTrained() { return epoch > 0 || rlSteps > 0; }
 
 function updateAllPredictions() {
   const pixels = getPixels(drawCanvas);
@@ -406,6 +439,9 @@ function initWeights() {
   b2 = (Math.random()*2-1)*0.3;
   epoch = 0;
   losses = [];
+  rlSteps = 0;
+  rlRewards = [];
+  renderRLStats();
 }
 
 function forward(pixels) {
@@ -679,31 +715,135 @@ function renderLoss() {
 }
 
 // ---------- TEST MODE ----------
-function toggleTestMode() {
-  isTestMode = !isTestMode;
+function setMode(m) {
+  isTestMode = m === 'test';
+  isRLMode = m === 'rl';
+  graded = false;
+  rlPending = null;
   const badge = document.getElementById('modeBadge');
-  const testPanel = document.getElementById('testPanel');
-  const trainPanel = document.getElementById('trainPanel');
-  const btn = document.getElementById('toggleMode');
-  ['labelZero', 'labelOne', 'batchZero', 'batchOne'].forEach(id => document.getElementById(id).disabled = isTestMode);
-  
-  if (isTestMode) {
-    badge.textContent = '🎯 TEST';
-    badge.classList.add('test');
-    testPanel.style.display = 'block';
-    trainPanel.style.display = 'none';
-    btn.textContent = '📚 Switch to Train';
-    document.getElementById('statusMsg').textContent = '🎯 Test Mode: Draw a digit and see the AI predict!';
-  } else {
-    badge.textContent = '📚 TRAIN';
-    badge.classList.remove('test');
-    testPanel.style.display = 'none';
-    trainPanel.style.display = 'block';
-    btn.textContent = '🎯 Switch to Test';
-    document.getElementById('statusMsg').textContent = '📚 Train Mode: Draw and label digits.';
-    document.getElementById('testResult').style.display = 'none';
-  }
+  badge.textContent = { train: '📚 TRAIN', test: '🎯 TEST', rl: '🕹️ REINFORCE' }[m];
+  badge.classList.toggle('test', m !== 'train');
+  document.getElementById('trainPanel').style.display = m === 'train' ? 'block' : 'none';
+  document.getElementById('testPanel').style.display = m === 'test' ? 'block' : 'none';
+  document.getElementById('rlPanel').style.display = m === 'rl' ? 'block' : 'none';
+  ['labelZero', 'labelOne', 'batchZero', 'batchOne'].forEach(id => document.getElementById(id).disabled = m !== 'train');
+  [['modeTrain', 'train'], ['modeTest', 'test'], ['modeRL', 'rl']].forEach(([id, k]) => document.getElementById(id).classList.toggle('success', k === m));
+  document.getElementById('statusMsg').textContent = {
+    train: '📚 Train Mode: draw and label digits.',
+    test: '🎯 Test Mode: draw a digit and see the AI predict!',
+    rl: '🕹️ Reinforce Mode: draw a digit, press Guess, then give 👍 or 👎.'
+  }[m];
   updateAllPredictions();
+  if (m === 'rl') renderRLStats();
+}
+
+// ---------- REINFORCEMENT LEARNING (REINFORCE / policy gradient) ----------
+// Policy: P(guess = 1) = p. Reward +1 / -1. Loss = -reward * log P(action).
+// Gradient wrt the output logit = reward * (p - action).
+function reinforce(pixels, action, reward) {
+  const f = forward(pixels);
+  const step = lr * RL_SCALE;
+  const d2 = reward * (f.p - action);
+  for (let j = 0; j < hiddenSize; j++) {
+    const d1 = d2 * W2[j] * (1 - f.a[j] * f.a[j]);
+    W2[j] -= step * d2 * f.a[j];
+    b1[j] -= step * d1;
+    for (let i = 0; i < 784; i++) W1[j][i] -= step * d1 * pixels[i];
+  }
+  b2 -= step * d2;
+  rlSteps++;
+}
+
+function recordReward(r) {
+  rlRewards.push(r);
+  if (rlRewards.length > 400) rlRewards.shift();
+}
+
+function renderRLStats() {
+  const last = rlRewards.slice(-20);
+  const avg = last.length ? last.reduce((a, b) => a + b, 0) / last.length : null;
+  document.getElementById('rlStepsDisplay').textContent = rlSteps;
+  document.getElementById('rlAvgDisplay').textContent = avg === null ? '—' : avg.toFixed(2);
+  document.getElementById('rlSuccDisplay').textContent = last.length ? Math.round(last.filter(r => r > 0).length / last.length * 100) + '%' : '—';
+  const c = document.getElementById('rewardCanvas');
+  const x = c.getContext('2d');
+  const w = c.width, h = c.height, pad = 12;
+  x.fillStyle = '#0a0f1e';
+  x.fillRect(0, 0, w, h);
+  const yOf = v => pad + (1 - (v + 1) / 2) * (h - 2 * pad);
+  x.strokeStyle = '#263653';
+  x.lineWidth = 1;
+  x.beginPath(); x.moveTo(pad, yOf(0)); x.lineTo(w - pad, yOf(0)); x.stroke();
+  x.fillStyle = '#9eabc7';
+  x.font = '11px system-ui';
+  x.textAlign = 'left';
+  if (rlRewards.length < 2) {
+    x.textAlign = 'center';
+    x.fillText('average reward over time (+1 / -1)', w / 2, h / 2 - 8);
+    return;
+  }
+  x.fillText('+1', 2, yOf(1) + 4);
+  x.fillText('-1', 2, yOf(-1));
+  x.beginPath();
+  for (let i = 0; i < rlRewards.length; i++) {
+    const win = rlRewards.slice(Math.max(0, i - 19), i + 1);
+    const v = win.reduce((a, b) => a + b, 0) / win.length;
+    const px = pad + (i / (rlRewards.length - 1)) * (w - 2 * pad);
+    i === 0 ? x.moveTo(px, yOf(v)) : x.lineTo(px, yOf(v));
+  }
+  x.strokeStyle = '#ffb347';
+  x.lineWidth = 2;
+  x.stroke();
+}
+
+function rlGuess() {
+  const status = document.getElementById('statusMsg');
+  if (graded) { status.textContent = 'Already rewarded. Press "Next drawing" or start drawing.'; return; }
+  const pixels = getPixels(drawCanvas);
+  if (!hasInk(pixels)) { status.textContent = '⚠️ Draw a digit first!'; return; }
+  const p = predict(pixels);
+  const action = Math.random() < p ? 1 : 0;
+  rlPending = { pixels, action, p };
+  document.getElementById('rlAction').textContent = action;
+  document.getElementById('rlProb').textContent = `P(1) = ${(p * 100).toFixed(0)}% → it chose ${action}`;
+  document.getElementById('rlResult').style.display = 'none';
+}
+
+function rlReward(r) {
+  const status = document.getElementById('statusMsg');
+  if (graded) { status.textContent = 'Already rewarded. Press "Next drawing" or start drawing.'; return; }
+  if (!rlPending) { status.textContent = '⚠️ Press Guess first, then give your feedback.'; return; }
+  const { pixels, action, p } = rlPending;
+  reinforce(pixels, action, r);
+  recordReward(r);
+  graded = true;
+  const pNew = predict(pixels);
+  const box = document.getElementById('rlResult');
+  box.style.display = 'block';
+  box.className = 'test-result ' + (r > 0 ? 'correct' : 'wrong');
+  box.textContent = `${r > 0 ? '👍 +1: repeat that guess' : '👎 −1: avoid that guess'} · P(1): ${(p * 100).toFixed(0)}% → ${(pNew * 100).toFixed(0)}%`;
+  renderRLStats();
+  updateUI();
+  renderDecision();
+}
+
+function rlAutoPlay(n) {
+  if (!hasBothClasses()) {
+    document.getElementById('statusMsg').textContent = '⚠️ Auto-play needs labelled 0s and 1s (add them in Train mode first).';
+    return;
+  }
+  for (let i = 0; i < n; i++) {
+    const d = dataset[Math.floor(Math.random() * dataset.length)];
+    const p = predict(d.pixels);
+    const action = Math.random() < p ? 1 : 0;
+    const r = action === d.label ? 1 : -1;
+    reinforce(d.pixels, action, r);
+    recordReward(r);
+  }
+  renderRLStats();
+  updateUI();
+  renderDecision();
+  document.getElementById('statusMsg').textContent = `🤖 Auto-played ${n} rounds using only +1/−1 rewards.`;
 }
 
 function thumb(pixels) {
@@ -742,7 +882,11 @@ function clearForNext() {
   initDraw();
   graded = false;
   lastTestResult = null;
+  rlPending = null;
   document.getElementById('testResult').style.display = 'none';
+  document.getElementById('rlResult').style.display = 'none';
+  document.getElementById('rlAction').textContent = '—';
+  document.getElementById('rlProb').textContent = 'draw a digit, then press Guess';
 }
 
 function gradeTest(actual) {
@@ -772,7 +916,15 @@ document.getElementById('clearDraw').onclick = () => {
 };
 document.getElementById('batchZero').onclick = () => addVariants(0);
 document.getElementById('batchOne').onclick = () => addVariants(1);
-document.getElementById('toggleMode').onclick = toggleTestMode;
+document.getElementById('modeTrain').onclick = () => setMode('train');
+document.getElementById('modeTest').onclick = () => setMode('test');
+document.getElementById('modeRL').onclick = () => setMode('rl');
+document.getElementById('rlGuessBtn').onclick = rlGuess;
+document.getElementById('rewardGood').onclick = () => rlReward(1);
+document.getElementById('rewardBad').onclick = () => rlReward(-1);
+document.getElementById('rlNext').onclick = () => { clearForNext(); updateAllPredictions(); };
+document.getElementById('auto50').onclick = () => rlAutoPlay(50);
+document.getElementById('auto200').onclick = () => rlAutoPlay(200);
 document.getElementById('gradeZero').onclick = () => gradeTest(0);
 document.getElementById('gradeOne').onclick = () => gradeTest(1);
 document.getElementById('resetTest').onclick = resetTestStats;
