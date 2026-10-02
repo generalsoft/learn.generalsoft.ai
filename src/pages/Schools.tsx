@@ -44,6 +44,13 @@ export default function Schools() {
               >
                 Book an AI Readiness Consultation
               </Link>
+              <Link
+                to="/quote"
+                onClick={() => analytics.trackLeadClick('school', 'schools_hero_quote')}
+                className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
+              >
+                Request an AI Training Quote
+              </Link>
             </div>
           </div>
           <div className="lg:col-span-5">

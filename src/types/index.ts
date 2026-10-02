@@ -63,6 +63,58 @@ export interface CompanyTrainingRequestData {
   website?: string;
 }
 
+/**
+ * Organisation categories offered on the AI training quote request page
+ * (`/quote`). Mirrors the radio group on that page.
+ */
+export type QuoteOrganisationType = 'company' | 'rakez' | 'school' | 'other';
+
+/** UI language a quote request was submitted in (the page is bilingual). */
+export type QuoteLanguage = 'en' | 'ar';
+
+/** One preferred delivery slot a prospect asked for. */
+export interface QuotePreferredSlot {
+  /** ISO calendar date (`YYYY-MM-DD`). */
+  date: string;
+  /** 24-hour start time (`HH:MM`). */
+  start: string;
+  /** 24-hour end time (`HH:MM`). */
+  end: string;
+}
+
+/**
+ * Everything collected by the AI training quote request page. Values are stored
+ * in Firestore as-is (English option labels) so the sales team can filter and
+ * report on them without a translation lookup.
+ */
+export interface TrainingQuoteRequestData {
+  organisationType: QuoteOrganisationType;
+  organisation: string;
+  /** RAKEZ licence number — only collected when organisationType is 'rakez'. */
+  licence?: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  /** Selected topics plus any custom topic the visitor typed. */
+  topics: string[];
+  learners: number;
+  level: string;
+  audience: string;
+  delivery: string;
+  location?: string;
+  preferredSlots: QuotePreferredSlot[];
+  startTime: string;
+  endTime: string;
+  sessionLength: string;
+  notes?: string;
+  /** Language the request was submitted in. */
+  language: QuoteLanguage;
+  /** Human-readable reference shown to the prospect, e.g. GS-260930-K7QP. */
+  reference: string;
+  /** Bot protection honeypot (should remain blank). */
+  website?: string;
+}
+
 export interface Registration {
   id: string;
   courseId: string;

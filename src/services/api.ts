@@ -1,4 +1,11 @@
-import { RegistrationFormData, CompanyTrainingRequestData, CourseInterestData, LeadData, ApiResponse } from '../types';
+import {
+  RegistrationFormData,
+  CompanyTrainingRequestData,
+  CourseInterestData,
+  LeadData,
+  TrainingQuoteRequestData,
+  ApiResponse,
+} from '../types';
 import { db } from './firebase';
 import {
   doc,
@@ -18,6 +25,7 @@ const MESSAGES_COLLECTION = 'messages';
 const TRAINING_REQUESTS_COLLECTION = 'trainingRequests';
 const COURSE_INTERESTS_COLLECTION = 'courseInterests';
 const LEADS_COLLECTION = 'leads';
+const QUOTE_REQUESTS_COLLECTION = 'quoteRequests';
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function normalizeEmail(email: string): string {
@@ -265,6 +273,62 @@ export async function submitCompanyTrainingRequest(
       message: code
         ? `Unable to submit your request (${code}). Please try again later.`
         : 'Unable to submit your request. Please try again later.',
+    };
+  }
+}
+
+/**
+ * Persists an AI training quote request submitted through the `/quote` page.
+ *
+ * The visitor-facing `reference` is generated on the client, stored on the
+ * document and echoed back on the confirmation screen so the sales team and the
+ * prospect can quote the same number.
+ */
+export async function submitTrainingQuoteRequest(
+  data: TrainingQuoteRequestData
+): Promise<ApiResponse> {
+  try {
+    const requestsRef = collection(db, QUOTE_REQUESTS_COLLECTION);
+    const payload = {
+      reference: data.reference,
+      status: 'new',
+      language: data.language,
+      organisationType: data.organisationType,
+      organisation: data.organisation.trim(),
+      licence: data.licence?.trim() || null,
+      contactName: data.contactName.trim(),
+      email: data.email.trim(),
+      emailNormalized: normalizeEmail(data.email),
+      phone: data.phone?.trim() || null,
+      topics: data.topics,
+      learners: data.learners,
+      level: data.level,
+      audience: data.audience,
+      delivery: data.delivery,
+      location: data.location?.trim() || null,
+      preferredSlots: data.preferredSlots,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      sessionLength: data.sessionLength,
+      notes: data.notes?.trim() || null,
+      createdAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(requestsRef, payload);
+
+    return {
+      success: true,
+      message: 'Quote request received. Our team will contact you shortly.',
+      data: { id: docRef.id, reference: data.reference },
+    };
+  } catch (error) {
+    console.error('Firestore quote request error:', error);
+    const code = (error as { code?: string })?.code;
+    return {
+      success: false,
+      message: code
+        ? `Unable to submit your quote request (${code}). Please try again later.`
+        : 'Unable to submit your quote request. Please try again later.',
     };
   }
 }

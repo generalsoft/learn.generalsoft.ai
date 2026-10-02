@@ -40,6 +40,14 @@ export default function Business() {
               >
                 Explore Programmes
               </a>
+              <Link
+                to="/quote"
+                onClick={() => analytics.trackLeadClick('business', 'business_hero_quote')}
+                className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-primary-700 hover:text-primary-800 transition-colors"
+              >
+                Request an AI Training Quote
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
             </div>
           </div>
           <div className="lg:col-span-5">

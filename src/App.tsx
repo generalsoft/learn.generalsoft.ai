@@ -9,6 +9,7 @@ import Curriculum from './pages/Curriculum';
 import ComplimentarySession from './pages/ComplimentarySession';
 import AIReadiness from './pages/AIReadiness';
 import Rakez from './pages/Rakez';
+import QuoteRequest from './pages/QuoteRequest';
 import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
 import VerifyRegistration from './pages/VerifyRegistration';
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/schools/ai-readiness" element={<AIReadiness />} />
             <Route path="/curriculum" element={<Curriculum />} />
             <Route path="/rakez" element={<Rakez />} />
+            <Route path="/quote" element={<QuoteRequest />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:slug" element={<CourseDetail />} />
             <Route path={`${REGISTRATION_FORM_BASE_PATH}/:slug`} element={<RegisterFormRedirect />} />

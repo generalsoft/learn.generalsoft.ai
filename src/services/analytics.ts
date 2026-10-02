@@ -65,6 +65,18 @@ export const analytics = {
     trackEvent('programme_enquiry_clicked', { programme_id: programmeId });
   },
 
+  // ---- AI training quote request page (/quote) ----
+  trackQuoteFormView: () => {
+    trackEvent('quote_form_viewed');
+  },
+  trackQuoteRequestSubmit: (organisationType: string, learners: number, topics: number) => {
+    trackEvent('quote_request_submitted', {
+      organisation_type: organisationType,
+      learners,
+      topic_count: topics,
+    });
+  },
+
   // ---- Direct contact interactions (phone / WhatsApp / email / downloads) ----
   trackPhoneClick: (source?: string) => {
     trackEvent('phone_clicked', { source: source || undefined });
