@@ -1,14 +1,25 @@
-import { Phone, MessageCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Phone, MessageCircle, Sparkles } from 'lucide-react';
 import { site } from '../data/site';
 import { analytics } from '../services/analytics';
+import { getQuoteRequestPath } from '../services/quoteRequest';
 
 /**
- * Always-visible floating contact actions. Keeps phone and WhatsApp one tap
- * away on mobile, which is critical for WhatsApp / LinkedIn inbound traffic.
+ * Always-visible floating actions. The primary action is the quote request —
+ * the only request funnel on the site — followed by WhatsApp and phone for
+ * visitors who would rather talk first.
  */
 export default function FloatingContact() {
   return (
-    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center gap-3">
+    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3">
+      <Link
+        to={getQuoteRequestPath()}
+        onClick={() => analytics.trackQuoteRequestClick('floating_button')}
+        className="inline-flex items-center gap-2 rounded-full bg-primary-600 pl-4 pr-5 py-3 text-sm font-bold text-white shadow-xl shadow-primary-600/40 ring-2 ring-primary-400/40 hover:bg-primary-700 transition-colors"
+      >
+        <Sparkles className="h-4 w-4" />
+        Get a Quote
+      </Link>
       <a
         href={site.whatsappUrl}
         target="_blank"

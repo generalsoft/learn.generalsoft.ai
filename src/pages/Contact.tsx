@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, MessageCircle, ArrowRight } from 'lucide-react';
-import LeadForm from '../components/LeadForm';
+import { Mail, Phone, MapPin, MessageCircle, ArrowRight, Sparkles } from 'lucide-react';
+import QuoteRequestCTA from '../components/QuoteRequestCTA';
 import { site } from '../data/site';
 import { analytics } from '../services/analytics';
 
@@ -10,10 +10,11 @@ export default function Contact() {
       {/* Header */}
       <div className="max-w-3xl mb-12">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Let's make your organisation AI ready.
+          Talk to us — or get a quote in two minutes.
         </h1>
         <p className="mt-4 text-lg text-slate-600 leading-relaxed font-medium">
-          Book an AI consultation or get in touch — we'll help you find the right starting point for your business or school.
+          Every training request goes through one short quote form. Tell us what you'd like taught, to whom and when, and
+          we'll reply with a tailored quote. Prefer to talk first? Reach us directly below.
         </p>
       </div>
 
@@ -76,35 +77,47 @@ export default function Contact() {
             </div>
           </div>
 
-          <div className="bg-slate-50 rounded-2xl border border-slate-200/50 p-6 space-y-3">
-            <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wider">For schools</h3>
+          <div className="bg-primary-50 rounded-2xl border border-primary-100 p-6 space-y-3">
+            <h3 className="inline-flex items-center gap-2 font-bold text-primary-800 text-sm uppercase tracking-wider">
+              <Sparkles className="w-4 h-4" /> One form for every request
+            </h3>
+            <p className="text-sm text-primary-900/80 leading-relaxed">
+              Consultations, complimentary school sessions, AI readiness and course requests all go through the AI training
+              quote form, so nothing gets lost.
+            </p>
             <Link
-              to="/schools/complimentary-session"
-              onClick={() => analytics.trackLeadClick('complimentary_session')}
-              className="flex items-center justify-between text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+              to="/quote"
+              onClick={() => analytics.trackQuoteRequestClick('contact_info_panel')}
+              className="flex items-center justify-between text-sm font-bold text-primary-800 hover:text-primary-900"
             >
-              Request a Complimentary AI Futures Session <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/schools/ai-readiness"
-              onClick={() => analytics.trackLeadClick('ai_readiness')}
-              className="flex items-center justify-between text-sm font-semibold text-primary-700 hover:text-primary-800"
-            >
-              Book an AI Readiness Consultation <ArrowRight className="w-4 h-4" />
+              Request an AI training quote <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
 
-        {/* Right: Form */}
+        {/* Right: the single highlighted request funnel */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-2xl border border-slate-200/50 p-6 sm:p-8">
-            <LeadForm
-              variant="general"
-              heading="Book an AI Consultation"
-              description="Tell us about your organisation and goals, and a member of our team will be in touch."
-              ctaLabel="Send Enquiry"
-            />
-          </div>
+          <QuoteRequestCTA
+            source="contact_page"
+            heading="Request your AI training quote"
+            description="Pick your topics, tell us who is attending and when, and we'll reply with a tailored quote — usually within one business day."
+          />
+          <p className="mt-4 text-xs text-slate-500 leading-relaxed">
+            Prefer to talk it through first? Call{' '}
+            <a href={`tel:${site.phoneTel}`} className="font-semibold text-primary-600 hover:underline">
+              {site.phoneDisplay}
+            </a>{' '}
+            or{' '}
+            <a
+              href={site.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-emerald-600 hover:underline"
+            >
+              WhatsApp us
+            </a>{' '}
+            — we're happy to scope your programme before you submit anything.
+          </p>
         </div>
       </div>
     </div>

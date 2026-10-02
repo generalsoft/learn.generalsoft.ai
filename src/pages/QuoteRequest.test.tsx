@@ -30,9 +30,9 @@ afterAll(() => {
   console.error = originalConsoleError;
 });
 
-const render = (): string =>
+const render = (entry = '/quote'): string =>
   renderToStaticMarkup(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[entry]}>
       <QuoteRequest />
     </MemoryRouter>
   );
@@ -118,5 +118,19 @@ describe('QuoteRequest page', () => {
     const html = render();
     expect(html).toContain('Not set');
     expect(html).toContain('None chosen yet');
+  });
+
+  it('selects the chip when a call to action hands over a known topic', () => {
+    const html = render('/quote?topic=Prompt%20engineering');
+    expect(html).toContain('name="topic" class="sr-only" checked="" value="Prompt engineering"');
+    expect(html).toContain('Prompt engineering');
+  });
+
+  it('prefills the custom topic field when the handed-over topic is not a chip', () => {
+    const html = render('/quote?topic=AI%20for%20our%20customer%20support%20team');
+    expect(html).toContain('value="AI for our customer support team"');
+    // The summary proves the prefilled topic counts as a selection.
+    expect(html).toContain('AI for our customer support team');
+    expect(html).not.toContain('None chosen yet');
   });
 });

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { GraduationCap, Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
+import { GraduationCap, Mail, Phone, MapPin, MessageCircle, Sparkles } from 'lucide-react';
 import { site } from '../data/site';
 import { analytics } from '../services/analytics';
 
@@ -40,10 +40,17 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/courses" className="hover:text-white transition-colors">All Programmes</Link>
+                <Link
+                  to="/quote"
+                  onClick={() => analytics.trackQuoteRequestClick('footer')}
+                  className="inline-flex items-center gap-2 font-bold text-white hover:text-primary-200 transition-colors"
+                >
+                  <Sparkles className="w-4 h-4 text-primary-400" />
+                  Request an AI Training Quote
+                </Link>
               </li>
               <li>
-                <Link to="/quote" className="hover:text-white transition-colors">Request an AI Training Quote</Link>
+                <Link to="/courses" className="hover:text-white transition-colors">All Programmes</Link>
               </li>
               <li>
                 <Link to="/curriculum" className="hover:text-white transition-colors">UAE AI Curriculum Framework</Link>

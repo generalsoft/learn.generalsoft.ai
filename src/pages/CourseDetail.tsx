@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 
 import {
-  Calendar, Clock, Globe, Check, Info, AlertCircle, ArrowRight,
+  Calendar, Clock, Globe, Check, Info, AlertCircle, ArrowRight, Sparkles,
   BookOpen, Users, Compass, Loader2, MailCheck,
   FolderOpen, FileText, Download, Image as ImageIcon, Video, Archive, FileSpreadsheet,
   X, ExternalLink
@@ -16,8 +16,8 @@ import { analytics } from '../services/analytics';
 import { RegistrationFormData } from '../types';
 import { setCookie, getCookie, REGISTRATION_COOKIE } from '../services/cookies';
 import { isValidEmail } from '../services/validation';
-import CompanyTrainingRequestForm from '../components/CompanyTrainingRequestForm';
-import CourseInterestForm from '../components/CourseInterestForm';
+import { getQuoteRequestPath } from '../services/quoteRequest';
+import QuoteRequestCTA from '../components/QuoteRequestCTA';
 
 /** Maps a file extension to a lucide icon, badge colors, and a short label. */
 function materialPresentation(ext: string): { icon: typeof FileText; badgeClass: string; label: string } {
@@ -180,12 +180,14 @@ export default function CourseDetail() {
     if (location.hash !== `#${REGISTRATION_FORM_ANCHOR}`) {
       navigate(`${location.pathname}${location.search}#${REGISTRATION_FORM_ANCHOR}`, { replace: true });
     }
-    if (course.registrationStatus === 'Closed') {
-      analytics.trackCompanyRequestClick(course.id);
-    } else if (course.registrationStatus === 'Upcoming') {
-      analytics.trackInterestClick(course.id);
-    } else {
+    if (course.registrationStatus === 'Open') {
       analytics.trackRegisterClick(course.id);
+    } else {
+      // Closed / upcoming courses are requested through the single quote funnel.
+      analytics.trackQuoteRequestClick(
+        course.registrationStatus === 'Closed' ? 'course_closed' : 'course_upcoming',
+        course.title
+      );
     }
   };
 
@@ -280,12 +282,7 @@ export default function CourseDetail() {
     }
   };
 
-  const ctaLabel =
-    course.registrationStatus === 'Closed'
-      ? 'Request for Your Company'
-      : course.registrationStatus === 'Upcoming'
-      ? 'Notify Me'
-      : 'Register Now';
+  const ctaLabel = course.registrationStatus === 'Open' ? 'Register Now' : 'Request a Quote';
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -323,12 +320,27 @@ export default function CourseDetail() {
                 </span>
               </div>
               <div className="pt-2">
-                <button
-                  onClick={handleScrollToForm}
-                  className="px-6 py-3.5 bg-primary-600 hover:bg-primary-500 text-white font-bold transition-all rounded-xl shadow-lg shadow-primary-600/20 focus-ring"
-                >
-                  {ctaLabel}
-                </button>
+                {course.registrationStatus === 'Open' ? (
+                  <button
+                    onClick={handleScrollToForm}
+                    className="px-6 py-3.5 bg-primary-600 hover:bg-primary-500 text-white font-bold transition-all rounded-xl shadow-lg shadow-primary-600/20 focus-ring"
+                  >
+                    {ctaLabel}
+                  </button>
+                ) : (
+                  <Link
+                    to={getQuoteRequestPath(course.title)}
+                    onClick={() => analytics.trackQuoteRequestClick(
+                      course.registrationStatus === 'Closed' ? 'course_closed' : 'course_upcoming',
+                      course.title
+                    )}
+                    className="inline-flex items-center px-7 py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold transition-all rounded-xl shadow-lg shadow-primary-600/20 ring-2 ring-primary-400/40 focus-ring"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    {ctaLabel}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -508,14 +520,28 @@ export default function CourseDetail() {
 
           </div>
 
-          {/* Right Column: Registration Form Container */}
+          {/* Right Column: registration for open courses / quote request otherwise */}
           <div id={REGISTRATION_FORM_ANCHOR} className="lg:col-span-5 scroll-mt-24" ref={formRef}>
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-lg p-6 sm:p-8 sticky top-24">
 
-              {course.registrationStatus === 'Closed' ? (
-                <CompanyTrainingRequestForm course={course} />
-              ) : course.registrationStatus === 'Upcoming' ? (
-                <CourseInterestForm course={course} />
+              {course.registrationStatus !== 'Open' ? (
+                <QuoteRequestCTA
+                  source={
+                    course.registrationStatus === 'Closed' ? 'course_closed' : 'course_upcoming'
+                  }
+                  heading={
+                    course.registrationStatus === 'Closed'
+                      ? 'Request This Programme'
+                      : 'Request This Programme for Your Team'
+                  }
+                  topic={course.title}
+                  ctaLabel="Request a Quote"
+                  description={
+                    course.registrationStatus === 'Closed'
+                      ? 'This cohort is closed, but we run it as a private programme. Request a quote and we will confirm availability and pricing by email.'
+                      : 'This course is coming soon. Tell us who is attending and when, and we will quote a private or early-access cohort.'
+                  }
+                />
               ) : (
                 <>
                   {/* Form header based on status */}

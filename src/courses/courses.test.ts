@@ -90,13 +90,13 @@ describe('AI Under the Hood (upcoming) course', () => {
   });
 });
 
-describe('AI Without Fear (registration closed, request form enabled)', () => {
-  it('is registered as a closed two-hour session that accepts course requests', () => {
+describe('AI Without Fear (registration closed, quote request offered)', () => {
+  it('is registered as a closed two-hour session that accepts quote requests', () => {
     const course = getCourseBySlug('ai-without-fear');
     expect(course).toBeDefined();
     expect(course?.id).toBe('ai-without-fear');
-    // Closed courses render the "Request This Course" form instead of the
-    // public registration form (see pages/CourseDetail.tsx).
+    // Closed courses show the quote request CTA (prefilled with the course
+    // title) instead of the public registration form (see pages/CourseDetail.tsx).
     expect(course?.registrationStatus).toBe('Closed');
     expect(course?.duration).toBe('2 Hours (Single Session)');
     expect(course?.dates).toBe('Friday Sep 18 & Saturday Sep 19');
@@ -169,7 +169,7 @@ describe('Permanent registration links (emailed to participants)', () => {
 
     for (const course of closedCourses) {
       // Closed courses are reached through the same permanent link, which now
-      // opens the "Request This Course" form on the course page.
+      // opens the quote request CTA on the course page.
       expect(getCourseBySlug(course.slug)?.id).toBe(course.id);
     }
   });

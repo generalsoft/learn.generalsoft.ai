@@ -26,12 +26,6 @@ export const analytics = {
   trackRegisterClick: (courseId: string) => {
     trackEvent('register_button_clicked', { course_id: courseId });
   },
-  trackCompanyRequestClick: (courseId: string) => {
-    trackEvent('company_training_request_clicked', { course_id: courseId });
-  },
-  trackCompanyRequestSubmit: (courseId: string, deliveryMethod: 'online' | 'onsite') => {
-    trackEvent('company_training_request_submitted', { course_id: courseId, delivery_method: deliveryMethod });
-  },
   trackRegistrationStart: (courseId: string) => {
     trackEvent('registration_started', { course_id: courseId });
   },
@@ -44,28 +38,19 @@ export const analytics = {
   trackRegistrationComplete: (courseId: string) => {
     trackEvent('registration_completed', { course_id: courseId });
   },
-  trackInterestClick: (courseId: string) => {
-    trackEvent('interest_button_clicked', { course_id: courseId });
-  },
-  trackInterestSubmit: (courseId: string) => {
-    trackEvent('interest_submitted', { course_id: courseId });
-  },
 
-  // ---- Lead generation & conversion tracking (business / school / session) ----
-  trackLeadClick: (leadType: string, source?: string) => {
-    trackEvent('lead_cta_clicked', { lead_type: leadType, source: source || undefined });
+  // ---- AI training quote request (the single request funnel at /quote) ----
+  /**
+   * Fired by every call to action that sends a visitor to the quote form.
+   * `source` identifies the placement (navbar, hero, course page, …) and
+   * `topic` is the programme the copy promised, when one applied.
+   */
+  trackQuoteRequestClick: (source: string, topic?: string) => {
+    trackEvent('quote_request_clicked', {
+      source,
+      topic: topic || undefined,
+    });
   },
-  trackLeadSubmit: (leadType: string) => {
-    // Category-level event plus a dedicated per-type event so Business,
-    // School and Complimentary Session leads can be attributed independently.
-    trackEvent('generate_lead', { lead_type: leadType });
-    trackEvent(`lead_${leadType}`, { lead_type: leadType });
-  },
-  trackCourseEnquiry: (programmeId: string) => {
-    trackEvent('programme_enquiry_clicked', { programme_id: programmeId });
-  },
-
-  // ---- AI training quote request page (/quote) ----
   trackQuoteFormView: () => {
     trackEvent('quote_form_viewed');
   },

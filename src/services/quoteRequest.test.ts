@@ -4,6 +4,8 @@ import {
   buildPreferredSlots,
   formatPreferredSlot,
   generateQuoteReference,
+  getQuoteRequestPath,
+  readPrefilledTopic,
   toIsoDate,
   validateQuoteRequest,
 } from './quoteRequest';
@@ -112,5 +114,40 @@ describe('validateQuoteRequest', () => {
 describe('MAX_PREFERRED_DATES', () => {
   it('matches the "up to 5 preferred dates" promise on the page', () => {
     expect(MAX_PREFERRED_DATES).toBe(5);
+  });
+});
+
+describe('getQuoteRequestPath', () => {
+  it('points at the quote form and encodes any promised topic', () => {
+    expect(getQuoteRequestPath()).toBe('/quote');
+    expect(getQuoteRequestPath('   ')).toBe('/quote');
+    expect(getQuoteRequestPath('AI fundamentals')).toBe('/quote?topic=AI%20fundamentals');
+    expect(getQuoteRequestPath('Prompt engineering & ChatGPT')).toBe(
+      '/quote?topic=Prompt%20engineering%20%26%20ChatGPT'
+    );
+  });
+});
+
+describe('readPrefilledTopic', () => {
+  it('reads the topic handed over by a call to action', () => {
+    expect(readPrefilledTopic('topic=AI%20for%20Teachers')).toBe('AI for Teachers');
+    expect(readPrefilledTopic('?topic=Prompt+engineering')).toBe('Prompt engineering');
+  });
+
+  it('returns an empty string when no topic was passed', () => {
+    expect(readPrefilledTopic('')).toBe('');
+    expect(readPrefilledTopic('utm_source=newsletter')).toBe('');
+    expect(readPrefilledTopic('topic=%20%20')).toBe('');
+  });
+
+  it('caps the prefilled topic so a huge URL cannot bloat the form', () => {
+    const long = 'a'.repeat(500);
+    expect(readPrefilledTopic(`topic=${long}`)).toHaveLength(120);
+  });
+
+  it('round-trips a topic through the path builder', () => {
+    expect(readPrefilledTopic(getQuoteRequestPath('AI for Teachers').split('?')[1])).toBe(
+      'AI for Teachers'
+    );
   });
 });

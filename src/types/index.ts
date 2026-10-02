@@ -50,19 +50,6 @@ export interface RegistrationFormData {
   website?: string;
 }
 
-export interface CompanyTrainingRequestData {
-  companyName: string;
-  contactName: string;
-  email: string;
-  phone?: string;
-  country?: string;
-  deliveryMethod: 'online' | 'onsite';
-  employeeCount: number;
-  message?: string;
-  // Bot protection honeypot (should remain blank)
-  website?: string;
-}
-
 /**
  * Organisation categories offered on the AI training quote request page
  * (`/quote`). Mirrors the radio group on that page.
@@ -139,62 +126,6 @@ export interface ApiResponse<T = any> {
   success: boolean;
   message: string;
   data?: T;
-}
-
-export interface CourseInterestData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  marketingConsent: boolean;
-  // Bot protection honeypot (should remain blank)
-  website?: string;
-}
-
-export interface CourseInterest {
-  id: string;
-  courseId: string;
-  courseTitle: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  emailNormalized: string;
-  status: 'pending' | 'confirmed';
-  token?: string | null;
-  tokenCreatedAt?: string | null;
-  emailSentAt?: string | null;
-  marketingConsent: boolean;
-  createdAt: string;
-  verifiedAt: string | null;
-}
-
-/**
- * High-level lead categories used to attribute enquiries to the correct
- * marketing channel. Mirrors the conversion events in services/analytics.ts.
- */
-export type LeadType =
-  | 'business'
-  | 'school'
-  | 'complimentary_session'
-  | 'ai_readiness'
-  | 'general';
-
-export interface LeadData {
-  leadType: LeadType;
-  name: string;
-  /** Company name, school name, or organisation name depending on leadType. */
-  organisation: string;
-  jobTitle: string;
-  email: string;
-  phone: string;
-  /** Complimentary school session only. */
-  studentsCount?: string;
-  /** Complimentary school session only. */
-  ageGrade?: string;
-  /** Complimentary school session only. */
-  preferredDate?: string;
-  message: string;
-  /** Bot protection honeypot (should remain blank). */
-  website?: string;
 }
 
 /**

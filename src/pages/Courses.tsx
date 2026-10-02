@@ -4,6 +4,7 @@ import { Building2, School, Sparkles, ArrowRight, Clock, MapPin, Check, BookOpen
 import { programmeCategories } from '../data/programmes';
 import { courses } from '../courses/courseData';
 import { analytics } from '../services/analytics';
+import { getQuoteRequestPath } from '../services/quoteRequest';
 import FinalCTA from '../components/FinalCTA';
 
 const categoryIcon = { business: Building2, schools: School, professional: Sparkles };
@@ -78,20 +79,13 @@ export default function Courses() {
                         </p>
                       )}
                     </div>
-                    <div className="mt-auto pt-5 flex gap-2">
+                    <div className="mt-auto pt-5">
                       <Link
-                        to="/contact"
-                        onClick={() => analytics.trackCourseEnquiry(p.id)}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-2.5 text-xs font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+                        to={getQuoteRequestPath(p.title)}
+                        onClick={() => analytics.trackQuoteRequestClick('programme_card', p.title)}
+                        className="w-full inline-flex items-center justify-center px-3 py-2.5 text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-all shadow-md shadow-primary-600/20 ring-1 ring-primary-500/30 focus-ring"
                       >
                         Request a Programme
-                      </Link>
-                      <Link
-                        to="/contact"
-                        onClick={() => analytics.trackLeadClick('business')}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
-                      >
-                        Book a Consultation
                       </Link>
                     </div>
                   </div>

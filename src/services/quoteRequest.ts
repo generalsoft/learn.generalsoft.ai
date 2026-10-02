@@ -67,6 +67,29 @@ export function formatPreferredSlot(slot: QuotePreferredSlot, locale = 'en-GB'):
   return `${day}, ${slot.start}–${slot.end}`;
 }
 
+/** Query parameter the quote page reads to prefill the "Something else?" topic. */
+export const QUOTE_TOPIC_PARAM = 'topic';
+
+/**
+ * Builds the quote request URL. Call to actions that promise a specific
+ * programme (a course page, a programme card, a curriculum offer) pass its
+ * title so the form opens with that topic already filled in.
+ */
+export function getQuoteRequestPath(topic?: string): string {
+  const trimmed = topic?.trim();
+  return trimmed ? `/quote?${QUOTE_TOPIC_PARAM}=${encodeURIComponent(trimmed)}` : '/quote';
+}
+
+/** Maximum characters of a prefilled topic that will be accepted from the URL. */
+export const MAX_PREFILLED_TOPIC_LENGTH = 120;
+
+/** Reads and sanitises a topic passed through the URL (e.g. from a course page). */
+export function readPrefilledTopic(search: string): string {
+  return (new URLSearchParams(search).get(QUOTE_TOPIC_PARAM) ?? '')
+    .trim()
+    .slice(0, MAX_PREFILLED_TOPIC_LENGTH);
+}
+
 /** Errors keyed by the form field they belong to (empty object means valid). */
 export interface QuoteFieldErrors {
   organisation?: string;

@@ -4,7 +4,8 @@ import {
   ArrowRight, Clock, ShieldCheck,
 } from 'lucide-react';
 import { analytics } from '../services/analytics';
-import LeadForm from '../components/LeadForm';
+import { getQuoteRequestPath } from '../services/quoteRequest';
+import QuoteRequestCTA from '../components/QuoteRequestCTA';
 import FinalCTA from '../components/FinalCTA';
 
 export default function Schools() {
@@ -30,26 +31,19 @@ export default function Schools() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
-                to="/schools/complimentary-session"
-                onClick={() => analytics.trackLeadClick('complimentary_session')}
-                className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-600/25 transition-all"
+                to={getQuoteRequestPath()}
+                onClick={() => analytics.trackQuoteRequestClick('schools_hero')}
+                className="inline-flex items-center justify-center px-7 py-4 text-base font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-xl shadow-xl shadow-primary-600/30 ring-2 ring-primary-500/30 transition-all focus-ring"
               >
-                Request a Complimentary AI Futures Session
+                <Sparkles className="w-4 h-4 mr-2" />
+                Request an AI Training Quote
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
               <Link
-                to="/schools/ai-readiness"
-                onClick={() => analytics.trackLeadClick('ai_readiness')}
+                to="/schools/complimentary-session"
                 className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all"
               >
-                Book an AI Readiness Consultation
-              </Link>
-              <Link
-                to="/quote"
-                onClick={() => analytics.trackLeadClick('school', 'schools_hero_quote')}
-                className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
-              >
-                Request an AI Training Quote
+                Request a Complimentary AI Futures Session
               </Link>
             </div>
           </div>
@@ -90,10 +84,11 @@ export default function Schools() {
               <h2 className="text-2xl font-extrabold text-slate-900">AI Futures: The World of Tomorrow</h2>
               <p className="text-slate-600 leading-relaxed">Interactive sessions that prepare students for the AI-powered world.</p>
               <Link
-                to="/schools/complimentary-session"
-                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors"
+                to={getQuoteRequestPath('AI Futures: The World of Tomorrow')}
+                onClick={() => analytics.trackQuoteRequestClick('schools_students', 'AI Futures: The World of Tomorrow')}
+                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors focus-ring"
               >
-                Book a Student Session
+                Request a Student Session
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </div>
@@ -123,10 +118,13 @@ export default function Schools() {
               <h2 className="text-2xl font-extrabold text-slate-900">AI for Teachers: Work Smarter, Teach Better</h2>
               <p className="text-slate-600 leading-relaxed">Practical professional development for busy teachers.</p>
               <Link
-                to="/contact"
-                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors"
+                to={getQuoteRequestPath('AI for Teachers: Work Smarter, Teach Better')}
+                onClick={() =>
+                  analytics.trackQuoteRequestClick('schools_teachers', 'AI for Teachers')
+                }
+                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors focus-ring"
               >
-                Book Teacher Training
+                Request Teacher Training
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </div>
@@ -156,8 +154,11 @@ export default function Schools() {
               <h2 className="text-2xl font-extrabold text-slate-900">Your Child & AI: What Parents Need to Know</h2>
               <p className="text-slate-600 leading-relaxed">Clear, practical guidance for parents and guardians.</p>
               <Link
-                to="/contact"
-                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors"
+                to={getQuoteRequestPath('Your Child & AI: What Parents Need to Know')}
+                onClick={() =>
+                  analytics.trackQuoteRequestClick('schools_parents', 'Parent session')
+                }
+                className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors focus-ring"
               >
                 Request a Parent Session
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -196,7 +197,6 @@ export default function Schools() {
               </p>
               <Link
                 to="/curriculum"
-                onClick={() => analytics.trackLeadClick('school')}
                 className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-primary-700 bg-white hover:bg-primary-50 rounded-xl transition-all"
               >
                 Explore the Curriculum Framework
@@ -244,10 +244,9 @@ export default function Schools() {
               <div className="pt-2">
                 <Link
                   to="/schools/ai-readiness"
-                  onClick={() => analytics.trackLeadClick('ai_readiness')}
                   className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors"
                 >
-                  Assess Your School's AI Readiness
+                  See How We Assess School AI Readiness
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </div>
@@ -312,13 +311,12 @@ export default function Schools() {
             </div>
           </div>
           <div className="lg:col-span-6">
-            <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-7">
-              <LeadForm
-                variant="school_session"
-                heading="Request a Complimentary AI Futures Session"
-                description="Tell us a little about your school and we'll be in touch to arrange a session."
-              />
-            </div>
+            <QuoteRequestCTA
+              source="schools_complimentary_section"
+              heading="Request a Complimentary AI Futures Session"
+              topic="Complimentary AI Futures Session"
+              description="Tell us a little about your school in the quote form — add “Complimentary AI Futures Session” as the topic (already filled in for you) and we'll be in touch to arrange a time."
+            />
           </div>
         </div>
       </section>

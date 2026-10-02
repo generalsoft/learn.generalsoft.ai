@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { analytics } from '../services/analytics';
+import { getQuoteRequestPath } from '../services/quoteRequest';
 
 interface FinalCTAProps {
   heading?: string;
@@ -26,25 +27,25 @@ export default function FinalCTA({ heading, description }: FinalCTAProps) {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
-              to="/contact"
-              onClick={() => analytics.trackLeadClick('business')}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-white text-slate-950 font-bold hover:bg-slate-100 rounded-xl transition-all shadow-md"
+              to={getQuoteRequestPath()}
+              onClick={() => analytics.trackQuoteRequestClick('final_cta')}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 bg-white text-slate-950 font-bold hover:bg-slate-100 rounded-xl transition-all shadow-lg ring-2 ring-white/30"
             >
-              Book an AI Consultation
+              <Sparkles className="w-4 h-4 mr-2" />
+              Request a Quote
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
             <Link
-              to="/schools"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-primary-600 text-white font-semibold hover:bg-primary-500 rounded-xl transition-all border border-primary-500/40"
+              to="/business"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-slate-100 hover:text-white border border-white/30 hover:border-white/60 rounded-xl transition-colors"
             >
-              Explore AI for Schools
+              Explore AI for Business
             </Link>
             <Link
-              to="/schools/complimentary-session"
-              onClick={() => analytics.trackLeadClick('complimentary_session')}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-slate-200 hover:text-white rounded-xl transition-colors"
+              to="/schools"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-slate-100 hover:text-white border border-white/30 hover:border-white/60 rounded-xl transition-colors"
             >
-              Request a Complimentary School Session
+              Explore AI for Schools
             </Link>
           </div>
         </div>

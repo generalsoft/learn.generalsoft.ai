@@ -6,6 +6,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { analytics } from '../services/analytics';
+import { getQuoteRequestPath } from '../services/quoteRequest';
 import { resources } from '../data/resources';
 import { site } from '../data/site';
 import FinalCTA from '../components/FinalCTA';
@@ -44,11 +45,12 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
-              to="/contact"
-              onClick={() => analytics.trackLeadClick('business')}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 active:bg-primary-800 transition-all rounded-xl shadow-lg shadow-primary-600/25 focus-ring"
+              to={getQuoteRequestPath()}
+              onClick={() => analytics.trackQuoteRequestClick('home_hero')}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-4 text-base font-bold text-white bg-primary-600 hover:bg-primary-700 active:bg-primary-800 transition-all rounded-xl shadow-xl shadow-primary-600/30 ring-2 ring-primary-500/30 focus-ring"
             >
-              Book an AI Consultation
+              <Sparkles className="w-4 h-4 mr-2" />
+              Request an AI Training Quote
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
             <Link
@@ -60,8 +62,10 @@ export default function Home() {
           </div>
           <div className="pt-1">
             <Link
-              to="/schools/complimentary-session"
-              onClick={() => analytics.trackLeadClick('complimentary_session')}
+              to={getQuoteRequestPath('Complimentary AI Futures Session')}
+              onClick={() =>
+                analytics.trackQuoteRequestClick('home_hero', 'Complimentary AI Futures Session')
+              }
               className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700 underline underline-offset-4"
             >
               Request a Complimentary AI Futures Session
@@ -255,10 +259,9 @@ export default function Home() {
               <div className="pt-6">
                 <Link
                   to="/schools/ai-readiness"
-                  onClick={() => analytics.trackLeadClick('ai_readiness')}
                   className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors"
                 >
-                  Assess Your School's AI Readiness
+                  See How We Assess School AI Readiness
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </div>
@@ -444,8 +447,10 @@ export default function Home() {
             </div>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link
-                to="/schools/complimentary-session"
-                onClick={() => analytics.trackLeadClick('complimentary_session')}
+                to={getQuoteRequestPath('Complimentary AI Futures Session')}
+                onClick={() =>
+                  analytics.trackQuoteRequestClick('home_schools_section', 'Complimentary AI Futures Session')
+                }
                 className="inline-flex items-center justify-center px-6 py-3 bg-white text-emerald-700 font-bold hover:bg-emerald-50 rounded-xl transition-colors shadow-md"
               >
                 Request a Complimentary Session
@@ -455,7 +460,7 @@ export default function Home() {
                 to="/schools/ai-readiness"
                 className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white border border-white/40 hover:bg-white/10 rounded-xl transition-colors"
               >
-                Book an AI Readiness Consultation
+                See How We Assess School AI Readiness
               </Link>
             </div>
           </div>

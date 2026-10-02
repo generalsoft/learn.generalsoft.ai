@@ -1,5 +1,5 @@
 import { Compass, CheckCircle2 } from 'lucide-react';
-import LeadForm from '../components/LeadForm';
+import QuoteRequestCTA from '../components/QuoteRequestCTA';
 import FinalCTA from '../components/FinalCTA';
 
 export default function AIReadiness() {
@@ -48,13 +48,12 @@ export default function AIReadiness() {
             </p>
           </div>
           <div className="lg:col-span-7">
-            <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-7 sm:p-8">
-              <LeadForm
-                variant="ai_readiness"
-                heading="Request My AI Readiness Consultation"
-                description="Tell us a little about your school and we'll arrange a complimentary consultation."
-              />
-            </div>
+            <QuoteRequestCTA
+              source="ai_readiness_page"
+              heading="Request My AI Readiness Consultation"
+              topic="AI readiness consultation for our school"
+              description="Tell us about your school in the quote form and we'll arrange a complimentary AI readiness consultation for your leadership team."
+            />
           </div>
         </div>
       </section>

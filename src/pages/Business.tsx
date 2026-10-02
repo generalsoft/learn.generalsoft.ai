@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Building2, ArrowRight, Check, Zap, Users, ShieldCheck, Layers, MapPin } from 'lucide-react';
+import { Building2, ArrowRight, Check, Zap, Users, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
 import { programmeCategories } from '../data/programmes';
 import { analytics } from '../services/analytics';
-import LeadForm from '../components/LeadForm';
+import { getQuoteRequestPath } from '../services/quoteRequest';
+import QuoteRequestCTA from '../components/QuoteRequestCTA';
 import FinalCTA from '../components/FinalCTA';
 
 export default function Business() {
@@ -27,11 +28,12 @@ export default function Business() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
-                to="/contact"
-                onClick={() => analytics.trackLeadClick('business')}
-                className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl shadow-lg shadow-primary-600/25 transition-all"
+                to={getQuoteRequestPath()}
+                onClick={() => analytics.trackQuoteRequestClick('business_hero')}
+                className="inline-flex items-center justify-center px-7 py-4 text-base font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-xl shadow-xl shadow-primary-600/30 ring-2 ring-primary-500/30 transition-all focus-ring"
               >
-                Book an AI Consultation
+                <Sparkles className="w-4 h-4 mr-2" />
+                Request an AI Training Quote
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
               <a
@@ -40,14 +42,6 @@ export default function Business() {
               >
                 Explore Programmes
               </a>
-              <Link
-                to="/quote"
-                onClick={() => analytics.trackLeadClick('business', 'business_hero_quote')}
-                className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-primary-700 hover:text-primary-800 transition-colors"
-              >
-                Request an AI Training Quote
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
             </div>
           </div>
           <div className="lg:col-span-5">
@@ -92,9 +86,9 @@ export default function Business() {
               </div>
               <div className="mt-auto pt-5">
                 <Link
-                  to="/contact"
-                  onClick={() => analytics.trackCourseEnquiry(p.id)}
-                  className="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+                  to={getQuoteRequestPath(p.title)}
+                  onClick={() => analytics.trackQuoteRequestClick('business_programme_card', p.title)}
+                  className="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors focus-ring"
                 >
                   Request a Programme
                 </Link>
@@ -136,18 +130,18 @@ export default function Business() {
         </div>
       </section>
 
-      {/* CONSULTATION FORM */}
+      {/* QUOTE REQUEST (the single request funnel for the whole site) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-5 space-y-6">
             <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-              <Layers className="w-6 h-6" />
+              <Sparkles className="w-6 h-6" />
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Book an AI consultation
+              Get a tailored quote for your team
             </h2>
             <p className="text-slate-600 leading-relaxed">
-              Tell us about your organisation and goals, and we'll recommend a practical starting point — whether it's a
+              Tell us about your organisation and goals and we'll recommend a practical starting point — whether it's a
               leadership briefing, team workshop or a full AI readiness programme.
             </p>
             <ul className="space-y-2.5 text-sm text-slate-600">
@@ -159,13 +153,11 @@ export default function Business() {
             </ul>
           </div>
           <div className="lg:col-span-7">
-            <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-7 sm:p-8">
-              <LeadForm
-                variant="business"
-                heading="Book an AI Consultation"
-                description="Complete the form and our team will contact you to arrange a consultation."
-              />
-            </div>
+            <QuoteRequestCTA
+              source="business_page"
+              heading="Request your AI training quote"
+              description="Pick your topics, tell us who is attending and when, and we'll reply with a tailored quote — usually within one business day."
+            />
           </div>
         </div>
       </section>

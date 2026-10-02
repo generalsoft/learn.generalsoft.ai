@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, GraduationCap } from 'lucide-react';
+import { Menu, X, GraduationCap, Sparkles } from 'lucide-react';
 import { analytics } from '../services/analytics';
 
 const navLinks = [
@@ -79,12 +79,14 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
+            {/* Highlighted primary CTA: the only request funnel on the site. */}
             <Link
-              to="/contact"
-              onClick={() => analytics.trackLeadClick('business')}
-              className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors shadow-sm hover:shadow shadow-primary-500/10 rounded-lg focus-ring"
+              to="/quote"
+              onClick={() => analytics.trackQuoteRequestClick('navbar')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition-all shadow-lg shadow-primary-600/30 ring-2 ring-primary-500/30 rounded-lg focus-ring"
             >
-              Book an AI Consultation
+              <Sparkles className="w-4 h-4" />
+              Request a Quote
             </Link>
           </div>
 
@@ -124,11 +126,12 @@ export default function Navbar() {
           ))}
           <div className="pt-4 border-t border-slate-100">
             <Link
-              to="/contact"
-              onClick={() => analytics.trackLeadClick('business')}
-              className="block w-full text-center px-4 py-3 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors shadow-sm rounded-lg"
+              to="/quote"
+              onClick={() => analytics.trackQuoteRequestClick('navbar_mobile')}
+              className="flex items-center justify-center gap-2 w-full text-center px-4 py-3 text-base font-bold text-white bg-primary-600 hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/25 rounded-lg ring-2 ring-primary-500/30"
             >
-              Book an AI Consultation
+              <Sparkles className="w-4 h-4" />
+              Request a Quote
             </Link>
           </div>
         </div>

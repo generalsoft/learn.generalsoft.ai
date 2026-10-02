@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   AlertCircle,
   CalendarDays,
@@ -26,6 +26,7 @@ import {
   buildPreferredSlots,
   formatPreferredSlot,
   generateQuoteReference,
+  readPrefilledTopic,
   startOfToday,
   toIsoDate,
   validateQuoteRequest,
@@ -110,7 +111,21 @@ const invalidFieldIds: Record<'organisation' | 'contactName' | 'email', string> 
 
 export default function QuoteRequest() {
   const [language, setLanguage] = useState<QuoteLanguage>(preferredLanguage);
-  const [form, setForm] = useState<QuoteFormState>(emptyForm);
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState<QuoteFormState>(() => {
+    // CTAs elsewhere on the site (course pages, programme cards) prefill the
+    // topic they promised, either as a chip or as a free-text topic.
+    const prefilled = readPrefilledTopic(searchParams.toString());
+    const matchedTopic = QUOTE_TOPICS.find(
+      (topic) => topic.toLowerCase() === prefilled.toLowerCase()
+    );
+
+    return {
+      ...emptyForm,
+      topics: matchedTopic ? [matchedTopic] : [],
+      customTopic: matchedTopic ? '' : prefilled,
+    };
+  });
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();

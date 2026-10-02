@@ -1,5 +1,5 @@
 import { Sparkles, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import LeadForm from '../components/LeadForm';
+import QuoteRequestCTA from '../components/QuoteRequestCTA';
 import FinalCTA from '../components/FinalCTA';
 
 export default function ComplimentarySession() {
@@ -56,13 +56,12 @@ export default function ComplimentarySession() {
             </div>
           </div>
           <div className="lg:col-span-7">
-            <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-7 sm:p-8">
-              <LeadForm
-                variant="school_session"
-                heading="Request a Complimentary AI Futures Session"
-                description="Complete the short form below and our team will contact you to arrange a suitable time."
-              />
-            </div>
+            <QuoteRequestCTA
+              source="complimentary_session_page"
+              heading="Request a Complimentary AI Futures Session"
+              topic="Complimentary AI Futures Session"
+              description="Use the quote form to tell us about your school and preferred dates. We'll confirm a complimentary session slot by email."
+            />
           </div>
         </div>
       </section>

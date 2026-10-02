@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { curriculum, curriculumDomains, getGrade } from '../data/curriculum';
 import { analytics } from '../services/analytics';
+import { getQuoteRequestPath } from '../services/quoteRequest';
 import FinalCTA from '../components/FinalCTA';
 
 const domainMeta: Record<string, { icon: typeof Cpu; accent: string; chip: string; dot: string }> = {
@@ -59,9 +60,11 @@ export default function Curriculum() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
-                to="/schools/complimentary-session"
-                onClick={() => analytics.trackLeadClick('complimentary_session')}
-                className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl shadow-lg shadow-primary-600/25 transition-all"
+                to={getQuoteRequestPath('UAE AI Curriculum Framework for our school')}
+                onClick={() =>
+                  analytics.trackQuoteRequestClick('curriculum_hero', 'UAE AI Curriculum Framework')
+                }
+                className="inline-flex items-center justify-center px-7 py-4 text-base font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-xl shadow-xl shadow-primary-600/30 ring-2 ring-primary-500/30 transition-all focus-ring"
               >
                 Bring this framework to your school
                 <ArrowRight className="w-4 h-4 ml-2" />

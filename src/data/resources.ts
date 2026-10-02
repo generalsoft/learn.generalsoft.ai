@@ -1,7 +1,10 @@
 /**
  * Resources / blog articles focused on UAE AI adoption. Each article ends with
- * a relevant call-to-action so the resources section supports lead generation.
+ * a relevant call-to-action so the resources section supports the single
+ * request funnel: the AI training quote form at `/quote`.
  */
+
+import { getQuoteRequestPath } from '../services/quoteRequest';
 
 export interface ResourceSection {
   heading?: string;
@@ -117,7 +120,7 @@ export const resources: ResourceArticle[] = [
       title: "Turn the checklist into a plan",
       text: "Request a complimentary AI readiness consultation for your school leadership team.",
       label: "Request My AI Readiness Consultation",
-      to: "/schools/ai-readiness",
+      to: getQuoteRequestPath('AI readiness consultation for our school'),
     },
   },
   {
@@ -162,8 +165,8 @@ export const resources: ResourceArticle[] = [
     cta: {
       title: "Give your teachers back their time",
       text: "Book practical, classroom-focused AI training for your teaching team.",
-      label: "Book Teacher Training",
-      to: "/schools",
+      label: "Request Teacher Training",
+      to: getQuoteRequestPath('AI for Teachers'),
     },
   },
   {
@@ -206,7 +209,7 @@ export const resources: ResourceArticle[] = [
       title: "Understand AI so you can guide your child",
       text: "Request a parent awareness session at your child's school.",
       label: "Request a Parent Session",
-      to: "/schools",
+      to: getQuoteRequestPath('Parent session on AI and children'),
     },
   },
   {
@@ -290,9 +293,9 @@ export const resources: ResourceArticle[] = [
     ],
     cta: {
       title: "Start with a conversation",
-      text: "Book a consultation to map the right AI training for your organisation.",
-      label: "Book an AI Consultation",
-      to: "/contact",
+      text: "Tell us who is attending and when, and we will reply with a tailored quote for your organisation.",
+      label: "Request an AI Training Quote",
+      to: getQuoteRequestPath(),
     },
   },
   {
@@ -376,9 +379,9 @@ export const resources: ResourceArticle[] = [
     ],
     cta: {
       title: "Build your AI-ready workforce",
-      text: "Book a consultation to design an AI training programme around your organisation.",
-      label: "Book an AI Consultation",
-      to: "/contact",
+      text: "Tell us who is attending and when, and we will reply with a tailored quote for your organisation.",
+      label: "Request an AI Training Quote",
+      to: getQuoteRequestPath(),
     },
   },
 ];

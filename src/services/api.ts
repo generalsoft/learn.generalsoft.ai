@@ -1,11 +1,4 @@
-import {
-  RegistrationFormData,
-  CompanyTrainingRequestData,
-  CourseInterestData,
-  LeadData,
-  TrainingQuoteRequestData,
-  ApiResponse,
-} from '../types';
+import { RegistrationFormData, TrainingQuoteRequestData, ApiResponse } from '../types';
 import { db } from './firebase';
 import {
   doc,
@@ -20,11 +13,15 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 
+/**
+ * Firestore collections written by this client.
+ *
+ * `registrations` covers course enrolment (the verified-seat flow) and
+ * `quoteRequests` is the single request funnel for the whole site — every
+ * "request / enquiry / consultation" call to action now funnels into the
+ * AI training quote form at `/quote`.
+ */
 const REGISTRATIONS_COLLECTION = 'registrations';
-const MESSAGES_COLLECTION = 'messages';
-const TRAINING_REQUESTS_COLLECTION = 'trainingRequests';
-const COURSE_INTERESTS_COLLECTION = 'courseInterests';
-const LEADS_COLLECTION = 'leads';
 const QUOTE_REQUESTS_COLLECTION = 'quoteRequests';
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -200,83 +197,6 @@ export async function getRegistrationById(
   }
 }
 
-export interface ContactMessage {
-  name: string;
-  email: string;
-  message: string;
-}
-
-export async function sendMessage(
-  data: ContactMessage
-): Promise<ApiResponse> {
-  try {
-    const messagesRef = collection(db, MESSAGES_COLLECTION);
-    const payload = {
-      name: data.name.trim(),
-      email: data.email.trim(),
-      emailNormalized: normalizeEmail(data.email),
-      message: data.message.trim(),
-      createdAt: serverTimestamp(),
-    };
-
-    const docRef = await addDoc(messagesRef, payload);
-
-    return {
-      success: true,
-      message: 'Message sent successfully.',
-      data: { id: docRef.id },
-    };
-  } catch (error) {
-    console.error('Firestore send message error:', error);
-    const code = (error as { code?: string })?.code;
-    return {
-      success: false,
-      message: code
-        ? `Unable to send your message (${code}). Please try again later.`
-        : 'Unable to send your message. Please try again later.',
-    };
-  }
-}
-
-export async function submitCompanyTrainingRequest(
-  courseId: string,
-  formData: CompanyTrainingRequestData
-): Promise<ApiResponse> {
-  try {
-    const requestsRef = collection(db, TRAINING_REQUESTS_COLLECTION);
-    const payload = {
-      courseId,
-      companyName: formData.companyName.trim(),
-      contactName: formData.contactName.trim(),
-      email: formData.email.trim(),
-      emailNormalized: normalizeEmail(formData.email),
-      phone: formData.phone?.trim() || null,
-      country: formData.country?.trim() || null,
-      deliveryMethod: formData.deliveryMethod,
-      employeeCount: formData.employeeCount,
-      message: formData.message?.trim() || null,
-      createdAt: serverTimestamp(),
-    };
-
-    const docRef = await addDoc(requestsRef, payload);
-
-    return {
-      success: true,
-      message: 'Training request received. Our team will contact you shortly.',
-      data: { id: docRef.id },
-    };
-  } catch (error) {
-    console.error('Firestore training request error:', error);
-    const code = (error as { code?: string })?.code;
-    return {
-      success: false,
-      message: code
-        ? `Unable to submit your request (${code}). Please try again later.`
-        : 'Unable to submit your request. Please try again later.',
-    };
-  }
-}
-
 /**
  * Persists an AI training quote request submitted through the `/quote` page.
  *
@@ -375,153 +295,3 @@ export async function resendVerificationEmail(
   }
 }
 
-function interestDocId(courseId: string, email: string): string {
-  return `${courseId}__${normalizeEmail(email)}`;
-}
-
-export async function submitCourseInterest(
-  courseId: string,
-  courseTitle: string,
-  formData: CourseInterestData
-): Promise<ApiResponse> {
-  const emailNormalized = normalizeEmail(formData.email);
-  const interestRef = doc(db, COURSE_INTERESTS_COLLECTION, interestDocId(courseId, emailNormalized));
-
-  try {
-    const existingSnap = await getDoc(interestRef);
-
-    // Duplication handling: one interest record per email per course.
-    if (existingSnap.exists()) {
-      const existing = existingSnap.data();
-      if (existing.status === 'confirmed') {
-        return {
-          success: true,
-          message: 'You are already on the interest list for this course.',
-          data: { id: existingSnap.id, status: 'confirmed' },
-        };
-      }
-      return {
-        success: true,
-        message: 'You are already on the interest list. Please check your inbox to confirm your email.',
-        data: { id: existingSnap.id, status: 'pending' },
-      };
-    }
-
-    const payload = {
-      courseId,
-      courseTitle: courseTitle.trim(),
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      email: formData.email.trim(),
-      emailNormalized,
-      marketingConsent: formData.marketingConsent,
-      status: 'pending',
-      token: generateToken(),
-      tokenCreatedAt: serverTimestamp(),
-      emailSentAt: null,
-      createdAt: serverTimestamp(),
-      verifiedAt: null,
-    };
-
-    await setDoc(interestRef, payload);
-
-    return {
-      success: true,
-      message: 'Thanks! Check your email to confirm your interest.',
-      data: { id: interestRef.id, status: 'created' },
-    };
-  } catch (error) {
-    console.error('Firestore course interest error:', error);
-    const code = (error as { code?: string })?.code;
-    return {
-      success: false,
-      message: code
-        ? `Unable to record your interest (${code}). Please try again later.`
-        : 'Unable to record your interest. Please try again later.',
-    };
-  }
-}
-
-export async function resendInterestVerification(
-  email: string,
-  courseId: string
-): Promise<ApiResponse> {
-  const interestRef = doc(db, COURSE_INTERESTS_COLLECTION, interestDocId(courseId, email));
-
-  try {
-    const existingSnap = await getDoc(interestRef);
-
-    if (!existingSnap.exists()) {
-      return {
-        success: false,
-        message: 'No interest record found for this email.',
-      };
-    }
-
-    const existing = existingSnap.data();
-    if (existing.status === 'confirmed') {
-      return {
-        success: true,
-        message: 'Your interest is already confirmed.',
-      };
-    }
-
-    await updateDoc(interestRef, {
-      token: generateToken(),
-      tokenCreatedAt: serverTimestamp(),
-    });
-
-    return {
-      success: true,
-      message: 'A new confirmation link has been sent.',
-    };
-  } catch (error) {
-    console.error('Firestore interest resend error:', error);
-    return {
-      success: false,
-      message: 'Failed to resend confirmation email. Please try again.',
-    };
-  }
-}
-
-/**
- * Persists a general lead/enquiry (business, school, complimentary session,
- * or AI-readiness consultation) to Firestore. The `leadType` field lets the
- * marketing team attribute enquiries to the correct channel.
- */
-export async function submitLead(data: LeadData): Promise<ApiResponse> {
-  try {
-    const leadsRef = collection(db, LEADS_COLLECTION);
-    const payload = {
-      leadType: data.leadType,
-      name: data.name.trim(),
-      organisation: data.organisation.trim() || null,
-      jobTitle: data.jobTitle.trim() || null,
-      email: data.email.trim(),
-      emailNormalized: normalizeEmail(data.email),
-      phone: data.phone.trim() || null,
-      studentsCount: data.studentsCount?.trim() || null,
-      ageGrade: data.ageGrade?.trim() || null,
-      preferredDate: data.preferredDate?.trim() || null,
-      message: data.message.trim() || null,
-      createdAt: serverTimestamp(),
-    };
-
-    const docRef = await addDoc(leadsRef, payload);
-
-    return {
-      success: true,
-      message: 'Request received. Our team will contact you shortly.',
-      data: { id: docRef.id },
-    };
-  } catch (error) {
-    console.error('Firestore lead submission error:', error);
-    const code = (error as { code?: string })?.code;
-    return {
-      success: false,
-      message: code
-        ? `Unable to submit your request (${code}). Please try again later.`
-        : 'Unable to submit your request. Please try again later.',
-    };
-  }
-}
